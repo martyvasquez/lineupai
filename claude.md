@@ -1,7 +1,7 @@
 # LineupAI - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (98% Complete)
-**Last Updated:** January 22, 2026 (v0.97.0)
+**Last Updated:** January 22, 2026 (v0.98.0)
 
 ---
 
@@ -621,13 +621,20 @@ MVP is complete when:
 - GameChanger CSV import with player matching
 - AI prompt builder ready (needs API key to test)
 
-**Recent Changes (January 22, 2026 - v0.97.0):**
+**Recent Changes (January 22, 2026 - v0.98.0):**
+- **UI Simplification:**
+  - Removed unused team fields: League Name, Team Description
+  - Removed team-level Innings Per Game (now only at game level)
+  - Removed game Location/Field input
+  - Simplified TeamContext for AI prompts (only name and age_group)
+  - Cleaner team dialog with just Name and Age Group
+  - Cleaner game dialog focused on essential fields
+
+**Previous Changes (v0.97.0):**
 - **Multi-Team Support (Major Feature):**
   - New URL structure: `/dashboard/[teamId]/roster`, `/dashboard/[teamId]/games`, etc.
   - Team switcher dropdown in header to switch between teams
   - Team management page (create, edit, delete teams)
-  - Team description field for AI context
-  - AI prompts now include team name, age group, and description
 - **Authentication Flow:**
   - Forgot password page with email reset
   - Reset password page after clicking email link
@@ -643,4 +650,4 @@ MVP is complete when:
 ---
 
 **Last Updated:** January 22, 2026
-**Version:** 0.97.0 (Multi-Team Support)
+**Version:** 0.98.0 (UI Simplification)

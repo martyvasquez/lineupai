@@ -25,7 +25,6 @@ import {
   ArrowLeft,
   Calendar,
   Clock,
-  MapPin,
   Users,
   Sparkles,
   AlertCircle,
@@ -64,6 +63,7 @@ interface GameDetailClientProps {
   gameRoster: GameRoster[]
   existingLineup: Lineup | null
   ruleGroups: RuleGroup[]
+  teamId: string
 }
 
 export function GameDetailClient({
@@ -72,6 +72,7 @@ export function GameDetailClient({
   gameRoster: initialGameRoster,
   existingLineup: initialLineup,
   ruleGroups,
+  teamId,
 }: GameDetailClientProps) {
   const [gameRoster, setGameRoster] = useState<GameRoster[]>(initialGameRoster)
   const [lineup, setLineup] = useState<Lineup | null>(initialLineup)
@@ -549,7 +550,7 @@ export function GameDetailClient({
       {/* Header - Compact when lineup complete */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
-          <Link href="/dashboard/games">
+          <Link href={`/dashboard/${teamId}/games`}>
             <ArrowLeft className="h-5 w-5" />
           </Link>
         </Button>
@@ -601,12 +602,6 @@ export function GameDetailClient({
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <span>{formatTime(game.game_time)}</span>
-                </div>
-              )}
-              {game.location && (
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span>{game.location}</span>
                 </div>
               )}
               <div className="flex items-center gap-2 text-sm">
@@ -706,7 +701,7 @@ export function GameDetailClient({
                           Create a rule group first to define how the AI should generate lineups.
                         </p>
                         <Button variant="outline" size="sm" className="mt-2" asChild>
-                          <Link href="/dashboard/rules">Create Rule Group</Link>
+                          <Link href={`/dashboard/${teamId}/rules`}>Create Rule Group</Link>
                         </Button>
                       </div>
                     </div>
@@ -767,9 +762,9 @@ export function GameDetailClient({
                           <div className="space-y-2">
                             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">AI Recommended Order</p>
                             <div className="space-y-1.5">
-                              {recommendedBattingOrder.map((entry) => (
+                              {recommendedBattingOrder.map((entry, index) => (
                                 <div
-                                  key={entry.player_id}
+                                  key={entry.player_id || `order-${index}`}
                                   className="flex items-start gap-2 text-sm"
                                 >
                                   <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-xs font-medium flex-shrink-0 mt-0.5">

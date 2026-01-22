@@ -13,8 +13,6 @@ type Player = Database['public']['Tables']['players']['Row']
 export interface TeamContext {
   name: string
   age_group: string | null
-  league_name: string | null
-  description: string | null
 }
 type PlayerRatings = Database['public']['Tables']['player_ratings']['Row']
 type PositionEligibility = Database['public']['Tables']['position_eligibility']['Row']
@@ -131,6 +129,7 @@ export function transformPlayerData(playerData: PlayerData): PlayerForLineup {
       k_rate: battingStats?.k_rate ?? 0,
       bb_rate: battingStats?.bb_rate ?? 0,
       sb: battingStats?.sb ?? 0,
+      cs: battingStats?.cs ?? 0,
       fpct: fieldingStats?.fpct ?? 0,
       errors: fieldingStats?.e ?? 0,
       tc: fieldingStats?.tc ?? 0,
@@ -180,6 +179,30 @@ GameChanger Stats:
   return text
 }
 
+// Build simplified player text for batting order prompt
+function buildBattingPlayerText(player: PlayerForLineup): string {
+  let text = `---
+Name: ${player.name}
+ID: ${player.id}
+Subjective Ratings: Plate Discipline: ${player.ratings.plate_discipline ?? 3}, Contact Ability: ${player.ratings.contact_ability ?? 3}, Power: ${player.ratings.batting_power ?? 3}, Run Speed: ${player.ratings.run_speed ?? 3}`
+
+  // Add GameChanger stats if available
+  if (player.stats && player.stats.pa > 0) {
+    // Calculate SB% (stolen base percentage)
+    const sbAttempts = player.stats.sb + player.stats.cs
+    const sbPct = sbAttempts > 0 ? (player.stats.sb / sbAttempts * 100).toFixed(0) : 'N/A'
+    text += `
+GameChanger Stats: AVG: ${player.stats.avg.toFixed(3)}, OBP: ${player.stats.obp.toFixed(3)}, SLG: ${player.stats.slg.toFixed(3)}, K%: ${(player.stats.k_rate * 100).toFixed(1)}%, BB%: ${(player.stats.bb_rate * 100).toFixed(1)}%, SB: ${player.stats.sb}, SB%: ${sbPct}%`
+  }
+
+  // Add coach notes if available
+  const notes = player.restrictions
+  text += `
+Coach Notes: ${notes || 'none'}`
+
+  return text
+}
+
 // Build the prompt for batting order generation (Phase 1)
 export function buildBattingOrderPrompt(
   innings: number,
@@ -188,71 +211,50 @@ export function buildBattingOrderPrompt(
   rules: TeamRule[],
   preferences: GamePreference[],
   teamContext?: TeamContext | null,
-  additionalNotes?: string | null
+  additionalNotes?: string | null,
+  scoutingReport?: string | null
 ): string {
   const availablePlayers = players.filter(p => p.available)
 
-  // Build team context section
-  let teamContextText = ''
-  if (teamContext) {
-    teamContextText = `
-TEAM CONTEXT:
-- Team: ${teamContext.name}
-- Age Group: ${teamContext.age_group || 'Not specified'}
-- League: ${teamContext.league_name || 'Not specified'}
-- Description: ${teamContext.description || 'Not specified'}
-`
-  }
+  // Get age group for persona
+  const ageGroup = teamContext?.age_group || 'youth'
 
   // Build players section
-  const playersText = availablePlayers.map(buildPlayerText).join('\n')
+  const playersText = availablePlayers.map(buildBattingPlayerText).join('\n')
 
-  // Build rules section
+  // Build rules section - these are the rules coaches define
   const activeRules = rules.filter(r => r.active)
   const rulesText = activeRules.length > 0
     ? activeRules.map((r, i) => `${i + 1}. ${r.rule_text}`).join('\n')
-    : '1. No specific rules defined - use standard youth baseball best practices'
+    : '(No rules defined - use your expertise as a youth baseball coach)'
 
-  // Build preferences section
-  const prefsText = preferences.length > 0
-    ? preferences.map(p => `- ${p.preference_text}`).join('\n')
-    : '- Optimize for player development and fair playing time'
+  // Build scouting report section
+  const scoutingReportSection = scoutingReport
+    ? `
 
-  // Build the full prompt
-  const ruleGroupInfo = ruleGroupName
-    ? `- Rule Group: ${ruleGroupName}`
-    : '- Rule Group: None selected (using default best practices)'
+Scouting Report: ${scoutingReport}`
+    : `
 
-  // Build additional notes section if provided
+Scouting Report: None provided`
+
+  // Build additional notes section
   const additionalNotesSection = additionalNotes
     ? `
 
-ADDITIONAL NOTES FROM COACH (IMPORTANT - FOLLOW THESE INSTRUCTIONS):
-${additionalNotes}`
+Notes for AI: ${additionalNotes}`
     : ''
 
-  return `BATTING ORDER GENERATION
-${teamContextText}
+  return `You are the highest rated youth baseball coach for ${ageGroup} players.
 
-GAME SETUP:
-- Innings: ${innings}
-- Players Available: ${availablePlayers.length}
-${ruleGroupInfo}
+You will be coming up with the batting order.
 
-PLAYERS:
-${playersText}
-
-TEAM RULES (MANDATORY):
+Here are the rules listed in order of priority that you must follow:
 ${rulesText}
 
-GAME PREFERENCES (OPTIMIZE FOR):
-${prefsText}${additionalNotesSection}
-
-Generate ONLY the batting order. Consider:
-- Put your best on-base players at the top (1-2 spots)
-- Strong hitters in the 3-4-5 spots
-- Speed at the top and bottom of the order
-- Consider matchups against likely pitching
+Here are the available players:
+${playersText}
+${scoutingReportSection}
+${additionalNotesSection}
 
 Return JSON only:
 
@@ -262,6 +264,60 @@ Return JSON only:
   ],
   "rationale": "Brief overall explanation of the batting order strategy"
 }`
+}
+
+// Build simplified player text for defensive prompt
+function buildDefensivePlayerText(player: PlayerForLineup): string {
+  const positionStrengthsText = player.position_strengths.length > 0
+    ? player.position_strengths.join(' > ')
+    : 'Not specified'
+
+  // Build subjective ratings - base fielding ratings for all players
+  const baseRatings = [
+    `Speed: ${player.ratings.run_speed ?? 3}`,
+    `Baseball IQ: ${player.ratings.baseball_iq ?? 3}`,
+    `Attention: ${player.ratings.attention ?? 3}`,
+    `Fielding Hands: ${player.ratings.fielding_hands ?? 3}`,
+    `Throw Accuracy: ${player.ratings.fielding_throw_accuracy ?? 3}`,
+    `Arm Strength: ${player.ratings.fielding_arm_strength ?? 3}`,
+    `Fly Ball Ability: ${player.ratings.fly_ball_ability ?? 3}`,
+  ]
+
+  // Add pitching ratings only if eligible to pitch
+  if (player.eligibility.can_pitch) {
+    baseRatings.push(
+      `Pitch Control: ${player.ratings.pitch_control ?? 3}`,
+      `Pitch Velocity: ${player.ratings.pitch_velocity ?? 3}`,
+      `Pitch Composure: ${player.ratings.pitch_composure ?? 3}`
+    )
+  }
+
+  // Add catching rating only if eligible to catch
+  if (player.eligibility.can_catch) {
+    baseRatings.push(`Catcher Ability: ${player.ratings.catcher_ability ?? 3}`)
+  }
+
+  let text = `---
+Name: ${player.name}
+ID: ${player.id}
+Subjective Ratings: ${baseRatings.join(', ')}`
+
+  // Add GameChanger stats if available (defensive stats only)
+  if (player.stats && player.stats.tc > 0) {
+    text += `
+GameChanger Stats: FPCT: ${player.stats.fpct.toFixed(3)}, Errors: ${player.stats.errors}, TC: ${player.stats.tc}`
+  }
+
+  text += `
+Premium Position Eligibility: Pitch: ${player.eligibility.can_pitch ? 'yes' : 'no'}, Catch: ${player.eligibility.can_catch ? 'yes' : 'no'}, SS: ${player.eligibility.can_play_ss ? 'yes' : 'no'}, 1B: ${player.eligibility.can_play_1b ? 'yes' : 'no'}
+Position Strengths: ${positionStrengthsText}`
+
+  // Add coach notes if available
+  const notes = player.restrictions
+  text += `
+Coach Notes: ${notes || 'none'}`
+
+  return text
 }
 
 // Build the prompt for defensive position generation (Phase 2)
@@ -275,24 +331,16 @@ export function buildDefensivePrompt(
   lockedPositions: LockedPosition[],
   startFromInning: number,
   teamContext?: TeamContext | null,
-  additionalNotes?: string | null
+  additionalNotes?: string | null,
+  scoutingReport?: string | null
 ): string {
   const availablePlayers = players.filter(p => p.available)
 
-  // Build team context section
-  let teamContextText = ''
-  if (teamContext) {
-    teamContextText = `
-TEAM CONTEXT:
-- Team: ${teamContext.name}
-- Age Group: ${teamContext.age_group || 'Not specified'}
-- League: ${teamContext.league_name || 'Not specified'}
-- Description: ${teamContext.description || 'Not specified'}
-`
-  }
+  // Get age group for persona
+  const ageGroup = teamContext?.age_group || 'youth'
 
   // Build players section
-  const playersText = availablePlayers.map(buildPlayerText).join('\n')
+  const playersText = availablePlayers.map(buildDefensivePlayerText).join('\n')
 
   // Build batting order section
   const battingOrderText = battingOrder
@@ -300,7 +348,7 @@ TEAM CONTEXT:
     .join('\n')
 
   // Build locked positions section
-  let lockedPositionsText = ''
+  let lockedPositionsText = 'None'
   if (lockedPositions.length > 0) {
     const lockedByInning = new Map<number, string[]>()
     lockedPositions.forEach(lp => {
@@ -310,70 +358,60 @@ TEAM CONTEXT:
       lockedByInning.set(lp.inning, existing)
     })
 
-    lockedPositionsText = '\n\nLOCKED POSITIONS (DO NOT CHANGE):\n'
+    const lockedLines: string[] = []
     Array.from(lockedByInning.entries())
       .sort((a, b) => a[0] - b[0])
       .forEach(([inning, positions]) => {
-        lockedPositionsText += `Inning ${inning}: ${positions.join(', ')}\n`
+        lockedLines.push(`Inning ${inning}: ${positions.join(', ')}`)
       })
+    lockedPositionsText = lockedLines.join('\n')
   }
 
-  // Build rules section
+  // Build rules section - locked positions is always rule #1
   const activeRules = rules.filter(r => r.active)
-  const rulesText = activeRules.length > 0
-    ? activeRules.map((r, i) => `${i + 1}. ${r.rule_text}`).join('\n')
-    : '1. No specific rules defined - use standard youth baseball best practices'
+  let rulesText = '1. All locked positions must be maintained (see locked positions below)'
+  if (activeRules.length > 0) {
+    rulesText += '\n' + activeRules.map((r, i) => `${i + 2}. ${r.rule_text}`).join('\n')
+  }
 
-  // Build preferences section
-  const prefsText = preferences.length > 0
-    ? preferences.map(p => `- ${p.preference_text}`).join('\n')
-    : '- Optimize for player development and fair playing time'
+  // Build scouting report section
+  const scoutingReportSection = scoutingReport
+    ? `
 
-  // Build the full prompt
-  const ruleGroupInfo = ruleGroupName
-    ? `- Rule Group: ${ruleGroupName}`
-    : '- Rule Group: None selected (using default best practices)'
+Scouting Report: ${scoutingReport}`
+    : `
 
-  // Build additional notes section if provided
+Scouting Report: None provided`
+
+  // Build additional notes section
   const additionalNotesSection = additionalNotes
     ? `
 
-ADDITIONAL NOTES FROM COACH (IMPORTANT - FOLLOW THESE INSTRUCTIONS):
-${additionalNotes}`
+Notes for AI: ${additionalNotes}`
     : ''
 
-  // Build regeneration note if starting from a later inning
-  const regenerationNote = startFromInning > 1
-    ? `\n\nREGENERATION NOTE: Generate defensive positions starting from inning ${startFromInning}. Keep all locked positions intact.`
+  // Note about which innings to generate
+  const inningsNote = startFromInning > 1
+    ? `(Generate for innings ${startFromInning}-${innings})`
     : ''
 
-  return `DEFENSIVE POSITION GENERATION
-${teamContextText}
-GAME SETUP:
-- Innings: ${innings}
-- Players Available: ${availablePlayers.length}
-- Generate from inning: ${startFromInning}
-${ruleGroupInfo}
+  return `You are the highest rated youth baseball coach for ${ageGroup} players.
 
-BATTING ORDER (already determined):
-${battingOrderText}
-${lockedPositionsText}
-PLAYERS:
-${playersText}
+You will be coming up with defense and positions for ${innings} innings. ${inningsNote}
 
-TEAM RULES (MANDATORY):
+Here are the rules listed in order of priority that you must follow:
 ${rulesText}
 
-GAME PREFERENCES (OPTIMIZE FOR):
-${prefsText}${additionalNotesSection}${regenerationNote}
+Batting Order (already determined):
+${battingOrderText}
 
-Generate defensive positions for ${startFromInning === 1 ? 'all' : `innings ${startFromInning}-${innings}`}. Consider:
-- Respect all LOCKED POSITIONS - do not change them
-- Player position strengths (use them optimally)
-- Premium positions (P, C, SS, 1B) should go to eligible players
-- Rotate players through different positions for development
-- Balance playing time - minimize consecutive sitting
-- If more than 9 players, some must sit each inning
+Locked Positions (DO NOT CHANGE):
+${lockedPositionsText}
+
+Here are the available players:
+${playersText}
+${scoutingReportSection}
+${additionalNotesSection}
 
 Return JSON only:
 

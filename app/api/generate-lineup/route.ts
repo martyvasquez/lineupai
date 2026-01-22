@@ -88,8 +88,6 @@ export async function POST(request: NextRequest) {
     const teamContext: TeamContext | null = game.teams ? {
       name: game.teams.name,
       age_group: game.teams.age_group,
-      league_name: game.teams.league_name,
-      description: (game.teams as typeof game.teams & { description?: string | null }).description || null,
     } : null
 
     // Fetch the rule group if provided
@@ -222,6 +220,9 @@ export async function POST(request: NextRequest) {
 
     const innings = game.innings ?? 6
 
+    // Get scouting report from game data
+    const scoutingReport = game.scouting_report || null
+
     // Handle phased generation
     if (phase === 'batting_order') {
       // Phase 1: Generate batting order only
@@ -232,10 +233,22 @@ export async function POST(request: NextRequest) {
         teamRules,
         gamePreferences,
         teamContext,
-        additional_notes
+        additional_notes,
+        scoutingReport
       )
 
       const response = await claudeClient.generateBattingOrder(prompt)
+
+      // Filter out any empty entries from the AI response
+      const filteredBattingOrder = response.batting_order.filter(
+        entry => entry.player_id && entry.name
+      )
+
+      // Re-number the order to be sequential
+      const cleanedBattingOrder = filteredBattingOrder.map((entry, index) => ({
+        ...entry,
+        order: index + 1,
+      }))
 
       // Save batting order to the lineups table
       const { data: existingLineups } = await supabase
@@ -252,7 +265,7 @@ export async function POST(request: NextRequest) {
         .insert({
           game_id,
           version: newVersion,
-          batting_order: response.batting_order,
+          batting_order: cleanedBattingOrder,
           defensive_grid: [], // Empty array - will be filled in defensive phase
           rules_check: [],
           warnings: [],
@@ -273,7 +286,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         phase: 'batting_order',
-        batting_order: response.batting_order,
+        batting_order: cleanedBattingOrder,
         rationale: response.rationale,
         lineup: savedLineup,
       })
@@ -290,7 +303,8 @@ export async function POST(request: NextRequest) {
         locked_positions || [],
         start_from_inning || 1,
         teamContext,
-        additional_notes
+        additional_notes,
+        scoutingReport
       )
 
       const response = await claudeClient.generateDefensive(prompt)

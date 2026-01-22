@@ -55,6 +55,7 @@ export interface PlayerForLineup {
     k_rate: number
     bb_rate: number
     sb: number
+    cs: number
     fpct: number
     errors: number
     tc: number

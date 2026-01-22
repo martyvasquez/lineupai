@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.98.0] - 2026-01-22
+
+### Removed
+
+#### UI Simplification - Unused Fields
+Removed fields that added UI complexity without functional value:
+
+**Team Level:**
+- **League Name** - Removed from team dialog and settings display
+- **Team Description** - Removed from team dialog and settings display
+- **Innings Per Game** - Removed from team level (remains at game level where it belongs)
+
+**Game Level:**
+- **Location/Field** - Removed from game dialog and game detail display
+
+**AI Prompts:**
+- **TeamContext** interface simplified to only `name` and `age_group`
+- Removed `league_name` and `description` from AI prompt context
+
+### Changed
+
+#### Team Dialog
+- Simplified to just Team Name and Age Group fields
+- Removed 2-column grid layout (now single column)
+- Cleaner, more focused form
+
+#### Game Dialog
+- Removed Location input field
+- Focused on essential fields: Opponent, Date, Time, Innings, Scouting Report
+
+#### Settings Page
+- Team cards no longer display innings per game
+- Simplified team card layout
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/dashboard/settings/_components/team-dialog.tsx` | Removed league_name, description, innings_per_game fields |
+| `app/dashboard/settings/_components/settings-client.tsx` | Removed fields from save function and display |
+| `app/dashboard/[teamId]/games/_components/game-dialog.tsx` | Removed location field |
+| `app/dashboard/[teamId]/games/[gameId]/_components/game-detail-client.tsx` | Removed location display |
+| `lib/ai/prompt-builder.ts` | Simplified TeamContext interface |
+| `app/api/generate-lineup/route.ts` | Updated TeamContext creation |
+
+### Notes
+- Database columns remain unchanged (non-breaking change)
+- Innings per game is still set at the game level when creating/editing games
+- AI prompts still receive team name and age group for context
+
+---
+
 ## [0.97.0] - 2026-01-22
 
 ### Added

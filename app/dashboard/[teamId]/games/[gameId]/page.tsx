@@ -60,6 +60,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
       gameRoster={gameRoster || []}
       existingLineup={lineup}
       ruleGroups={ruleGroups || []}
+      teamId={teamId}
     />
   )
 }

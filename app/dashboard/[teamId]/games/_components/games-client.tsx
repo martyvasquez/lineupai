@@ -132,7 +132,7 @@ export function GamesClient({ initialGames, teamId }: GamesClientProps) {
   }
 
   const handleViewGame = (gameId: string) => {
-    router.push(`/dashboard/games/${gameId}`)
+    router.push(`/dashboard/${teamId}/games/${gameId}`)
   }
 
   return (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useRef, useEffect } from 'react'
+import { useMemo, useState, useRef, useEffect, useId } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -419,6 +419,9 @@ export function LineupGrid({
   const [activeDropdown, setActiveDropdown] = useState<{ playerId: string; inning: number } | null>(null)
   const [showRationale, setShowRationale] = useState(false)
 
+  // Stable ID for DndContext to prevent hydration mismatch
+  const dndContextId = useId()
+
   // Drag and drop sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -511,6 +514,7 @@ export function LineupGrid({
 
   return (
     <DndContext
+      id={dndContextId}
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
@@ -546,9 +550,9 @@ export function LineupGrid({
             </thead>
             <SortableContext items={playerIds} strategy={verticalListSortingStrategy}>
               <tbody>
-                {battingOrder.map((entry) => (
+                {battingOrder.map((entry, index) => (
                   <SortableRow
-                    key={entry.player_id}
+                    key={entry.player_id || `row-${index}`}
                     entry={entry}
                     inningNumbers={inningNumbers}
                     getCell={getCell}
@@ -571,9 +575,9 @@ export function LineupGrid({
         {/* Mobile Card View */}
         <SortableContext items={playerIds} strategy={verticalListSortingStrategy}>
           <div className="md:hidden space-y-3">
-            {battingOrder.map((entry) => (
+            {battingOrder.map((entry, index) => (
               <SortableCard
-                key={entry.player_id}
+                key={entry.player_id || `card-${index}`}
                 entry={entry}
                 inningNumbers={inningNumbers}
                 getCell={getCell}

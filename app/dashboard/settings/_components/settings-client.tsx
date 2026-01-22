@@ -45,9 +45,6 @@ export function SettingsClient({ initialTeams, userId }: SettingsClientProps) {
   async function handleSaveTeam(data: {
     name: string
     age_group?: string | null
-    league_name?: string | null
-    innings_per_game?: number
-    description?: string | null
   }): Promise<Team | null> {
     setIsSaving(true)
     try {
@@ -58,9 +55,6 @@ export function SettingsClient({ initialTeams, userId }: SettingsClientProps) {
           .update({
             name: data.name,
             age_group: data.age_group || null,
-            league_name: data.league_name || null,
-            innings_per_game: data.innings_per_game,
-            description: data.description || null,
           })
           .eq('id', editingTeam.id)
           .select()
@@ -81,9 +75,6 @@ export function SettingsClient({ initialTeams, userId }: SettingsClientProps) {
           .insert({
             name: data.name,
             age_group: data.age_group || null,
-            league_name: data.league_name || null,
-            innings_per_game: data.innings_per_game || 6,
-            description: data.description || null,
             created_by: userId,
           })
           .select()
@@ -189,9 +180,9 @@ export function SettingsClient({ initialTeams, userId }: SettingsClientProps) {
                       <Users className="h-5 w-5" />
                       {team.name}
                     </CardTitle>
-                    {(team.age_group || team.league_name) && (
+                    {team.age_group && (
                       <CardDescription>
-                        {[team.age_group, team.league_name].filter(Boolean).join(' • ')}
+                        {team.age_group}
                       </CardDescription>
                     )}
                   </div>
@@ -214,15 +205,9 @@ export function SettingsClient({ initialTeams, userId }: SettingsClientProps) {
                 </div>
               </CardHeader>
               <CardContent>
-                {team.description && (
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {team.description}
-                  </p>
-                )}
                 <div className="flex gap-4 text-sm text-muted-foreground">
                   <span>{team.player_count ?? 0} players</span>
                   <span>{team.game_count ?? 0} games</span>
-                  <span>{team.innings_per_game} innings/game</span>
                 </div>
               </CardContent>
             </Card>

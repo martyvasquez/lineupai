@@ -41,7 +41,6 @@ export function GameDialog({ open, onOpenChange, game, onSave }: GameDialogProps
   const [opponent, setOpponent] = useState('')
   const [gameDate, setGameDate] = useState('')
   const [gameTime, setGameTime] = useState('')
-  const [location, setLocation] = useState('')
   const [innings, setInnings] = useState('6')
   const [scoutingReport, setScoutingReport] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -51,7 +50,6 @@ export function GameDialog({ open, onOpenChange, game, onSave }: GameDialogProps
       setOpponent(game.opponent || '')
       setGameDate(game.game_date)
       setGameTime(game.game_time || '')
-      setLocation(game.location || '')
       setInnings(String(game.innings || 6))
       setScoutingReport(game.scouting_report || '')
     } else {
@@ -61,7 +59,6 @@ export function GameDialog({ open, onOpenChange, game, onSave }: GameDialogProps
       setOpponent('')
       setGameDate(tomorrow.toISOString().split('T')[0])
       setGameTime('')
-      setLocation('')
       setInnings('6')
       setScoutingReport('')
     }
@@ -77,7 +74,7 @@ export function GameDialog({ open, onOpenChange, game, onSave }: GameDialogProps
         opponent: opponent.trim(),
         game_date: gameDate,
         game_time: gameTime || null,
-        location: location.trim() || null,
+        location: null,
         innings: parseInt(innings, 10),
         scouting_report: scoutingReport.trim() || null,
       })
@@ -129,16 +126,6 @@ export function GameDialog({ open, onOpenChange, game, onSave }: GameDialogProps
                 onChange={(e) => setGameTime(e.target.value)}
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="e.g., Main Field, Diamond 3"
-            />
           </div>
 
           <div className="space-y-2">
