@@ -1,0 +1,623 @@
+# LineupAI - AI-Powered Baseball Lineup Optimizer
+
+**Status:** 🚧 In Development (97% Complete)
+**Last Updated:** January 21, 2026 (v0.96.1)
+
+---
+
+## 🎯 Goal
+
+Build a **mobile-first web application** that generates optimized youth baseball/softball lineups using AI. Coaches input their roster, subjective ratings, and team-specific rules. The system combines this with GameChanger statistics to generate batting orders and defensive assignments that comply with league rules while maximizing team performance.
+
+### Core Value Proposition
+
+1. **Rule Compliance** - Never violate league rules; app tracks constraints automatically
+2. **Data-Driven** - Integrates GameChanger stats with coach observations
+3. **Mid-Game Adjustments** - Re-optimize on the fly when circumstances change
+4. **Flexible Rules** - Each team defines their own rules in plain language; AI interprets them
+
+### Tech Stack
+
+- **Frontend:** Next.js 14 (App Router), React 19, Tailwind CSS, shadcn/ui
+- **Backend:** Supabase (PostgreSQL + Auth)
+- **AI:** Claude API (Anthropic Sonnet 4.5)
+- **Deployment:** Vercel
+- **MVP Scope:** P0 features + GameChanger CSV import (single team, email auth)
+- **Timeline:** ~5 weeks total
+
+---
+
+## 📊 Where We Are At
+
+### ✅ Completed (Phase 1: Foundation & Infrastructure)
+
+#### Project Setup
+- [x] Next.js 14 initialized with TypeScript and Tailwind CSS v3
+- [x] All dependencies installed (Supabase, Claude SDK, forms, drag-drop, CSV parser)
+- [x] Git repository initialized with organized commits
+- [x] Project structure created following Next.js 14 App Router conventions
+- [x] Environment variables template (`.env.example`)
+- [x] Comprehensive README with setup instructions
+
+#### Database & Backend
+- [x] Complete PostgreSQL schema designed (13 tables)
+- [x] Supabase migration file created with:
+  - All core tables (teams, players, ratings, eligibility, stats, games, lineups)
+  - Row Level Security (RLS) policies for all tables
+  - Season aggregate views for batting/fielding stats
+  - Performance indexes on all foreign keys
+- [x] Supabase client utilities (browser and server-side)
+- [x] Auth middleware protecting dashboard routes
+
+#### Authentication
+- [x] Login page with email/password
+- [x] Signup page with password confirmation
+- [x] Form validation (react-hook-form + Zod)
+- [x] Automatic redirects based on auth state
+- [x] Auth layouts (centered, no navigation)
+- [x] User dropdown menu with sign out
+
+#### UI Components
+- [x] 17+ shadcn/ui components installed and configured:
+  - Forms: Button, Input, Label, Select, Textarea, Switch
+  - Feedback: Toast, Alert, Badge, Skeleton
+  - Layout: Card, Dialog, Dropdown Menu, Table, Tabs, Separator
+- [x] Toast notification system
+- [x] Responsive layouts
+- [x] Mobile-first design patterns
+
+#### Dashboard Layout
+- [x] Header with navigation (Roster, Rules, Games, Import)
+- [x] Dashboard home page with:
+  - Quick stats overview (placeholder)
+  - Getting started guide (4-step onboarding)
+  - Quick links to all sections
+- [x] Responsive mobile navigation
+- [x] User account dropdown
+
+### 📁 File Structure Created
+
+```
+baseball-lineups/
+├── app/
+│   ├── (auth)/
+│   │   ├── login/page.tsx              ✅ Login form
+│   │   ├── signup/page.tsx             ✅ Signup form
+│   │   └── layout.tsx                  ✅ Auth layout
+│   ├── dashboard/
+│   │   ├── page.tsx                    ✅ Dashboard home
+│   │   ├── layout.tsx                  ✅ Main layout
+│   │   ├── roster/
+│   │   │   ├── page.tsx                ✅ Roster list page
+│   │   │   └── _components/
+│   │   │       ├── roster-client.tsx   ✅ Roster CRUD client
+│   │   │       ├── player-dialog.tsx   ✅ Add/edit player (3 tabs)
+│   │   │       ├── star-rating.tsx     ✅ 1-5 star rating input
+│   │   │       ├── position-toggles.tsx ✅ P/C/SS/1B eligibility
+│   │   │       └── position-strength-editor.tsx ✅ Drag-drop position ordering
+│   │   ├── rules/
+│   │   │   ├── page.tsx                ✅ Rules list with groups
+│   │   │   └── _components/
+│   │   │       ├── rules-client.tsx    ✅ Rules CRUD with group tabs
+│   │   │       ├── rule-dialog.tsx     ✅ Add/edit rule
+│   │   │       ├── rule-group-dialog.tsx ✅ Create/edit rule groups
+│   │   │       └── sortable-rule.tsx   ✅ Draggable rule card
+│   │   ├── games/
+│   │   │   ├── page.tsx                ✅ Games list page
+│   │   │   ├── [gameId]/
+│   │   │   │   ├── page.tsx            ✅ Game detail page
+│   │   │   │   └── _components/
+│   │   │   │       ├── game-detail-client.tsx ✅ Two-phase lineup generation workflow
+│   │   │   │       ├── roster-setup.tsx ✅ Availability/pitching setup
+│   │   │   │       ├── lineup-grid.tsx ✅ Interactive defensive position grid
+│   │   │   │       ├── batting-order.tsx ✅ Batting order display
+│   │   │   │       ├── defensive-grid.tsx ✅ Defensive assignments (legacy)
+│   │   │   │       ├── rule-compliance.tsx ✅ Rule checks display
+│   │   │   │       └── lineup-display.tsx ✅ Combined lineup view
+│   │   │   └── _components/
+│   │   │       ├── games-client.tsx    ✅ Games list client
+│   │   │       ├── game-card.tsx       ✅ Game card component
+│   │   │       └── game-dialog.tsx     ✅ Add/edit game
+│   │   ├── stats/
+│   │   │   ├── page.tsx                ✅ Stats page (renamed from Import)
+│   │   │   └── _components/
+│   │   │       └── stats-client.tsx    ✅ Player stats with AI analysis
+│   │   ├── import/
+│   │   │   ├── page.tsx                ✅ Import page (legacy)
+│   │   │   └── _components/
+│   │   │       └── import-client.tsx   ✅ CSV upload & preview
+│   │   └── settings/                   📁 Created (empty)
+│   ├── api/
+│   │   ├── generate-lineup/route.ts    ✅ AI lineup generation endpoint
+│   │   ├── stats/
+│   │   │   └── analyze/route.ts        ✅ AI stats analysis endpoint
+│   │   └── import/
+│   │       └── gamechanger/route.ts    ✅ CSV import API
+│   ├── layout.tsx                      ✅ Root layout
+│   ├── page.tsx                        ✅ Root redirect
+│   ├── globals.css                     ✅ Global styles
+│   └── providers.tsx                   ✅ Client providers
+├── components/
+│   ├── ui/                             ✅ 20+ shadcn components
+│   ├── layout/
+│   │   └── header.tsx                  ✅ Header with nav
+│   └── shared/                         📁 Created (empty)
+├── lib/
+│   ├── supabase/
+│   │   ├── client.ts                   ✅ Browser client
+│   │   ├── server.ts                   ✅ Server client
+│   │   └── middleware.ts               📁 (in root middleware.ts)
+│   ├── ai/
+│   │   ├── claude-client.ts            ✅ Claude API wrapper
+│   │   └── prompt-builder.ts           ✅ Prompt construction (with rule groups)
+│   ├── parsers/
+│   │   └── gamechanger-csv.ts          ✅ CSV parser & player matcher
+│   ├── hooks/
+│   │   └── use-toast.ts                ✅ Toast hook
+│   ├── validations/                    📁 Created (empty)
+│   └── utils.ts                        ✅ Utility functions (cn)
+├── types/
+│   ├── database.ts                     ✅ Supabase types (auto-generated)
+│   └── lineup.ts                       ✅ Lineup types (RuleGroup, PlayerForLineup)
+├── supabase/
+│   ├── migrations/
+│   │   ├── initial_schema.sql          ✅ Complete schema
+│   │   ├── 20260120210000_update_player_ratings.sql ✅ 14 player ratings
+│   │   ├── 20260121000000_add_rule_groups.sql ✅ Rule groups table
+│   │   ├── 20260121000001_add_position_strengths.sql ✅ Position strengths
+│   │   ├── 20260121000002_add_player_notes.sql ✅ Coach notes
+│   │   └── 20260121000004_add_stats_analysis.sql ✅ Stats analysis JSONB
+│   └── config.toml                     ✅ Supabase config
+├── middleware.ts                       ✅ Auth middleware
+├── .env.example                        ✅ Environment template
+├── README.md                           ✅ Setup instructions
+├── CHANGELOG.md                        📄 Version history
+└── CLAUDE.md                           📄 This file
+```
+
+### 🧪 What Works Right Now
+
+Even without credentials configured, you can test:
+- ✅ App runs with `npm run dev`
+- ✅ Homepage redirects to `/login`
+- ✅ Login/signup forms are fully functional (UI only)
+- ✅ Dashboard layout and navigation work
+- ✅ Responsive design on mobile/desktop
+- ✅ TypeScript compilation with no errors
+
+### 📦 Packages Installed
+
+**Core:**
+- next@16.1.4, react@19.2.3, typescript@5.9.3
+
+**Database & Auth:**
+- @supabase/supabase-js@2.91.0, @supabase/ssr@0.8.0
+
+**AI:**
+- @anthropic-ai/sdk@0.71.2
+
+**Forms & Validation:**
+- react-hook-form@7.71.1, zod@4.3.5, @hookform/resolvers@5.2.2
+
+**UI & Styling:**
+- tailwindcss@3.4.1, tailwindcss-animate@1.0.7
+- class-variance-authority@0.7.1, clsx@2.1.1, tailwind-merge@3.4.0
+- lucide-react@0.562.0 (icons)
+
+**Features:**
+- @dnd-kit/core@6.3.1, @dnd-kit/sortable@10.0.0, @dnd-kit/utilities@3.2.2
+- papaparse@5.5.3 (CSV parsing)
+- date-fns@4.1.0 (date utilities)
+
+---
+
+## ✅ Completed Phases
+
+### Phase 2: Team & Roster Management ✅
+
+#### Roster CRUD
+- [x] `app/dashboard/roster/page.tsx` - Player list with table
+- [x] `app/dashboard/roster/_components/roster-client.tsx` - Client component with CRUD
+- [x] `app/dashboard/roster/_components/player-dialog.tsx` - Add/edit player dialog with tabs
+- [x] Add, edit, delete player functionality
+- [x] Player count display ("X/14 rated")
+
+#### Player Ratings (14 Specific Ratings)
+- [x] `app/dashboard/roster/_components/star-rating.tsx` - 1-5 star rating component
+- [x] Batting ratings: Plate Discipline, Contact Ability, Run Speed, Batting Power
+- [x] Fielding ratings: Fielding Hands, Throw Accuracy, Arm Strength, Fly Ball Ability
+- [x] Mental ratings: Baseball IQ, Attention
+- [x] Pitching ratings: Pitch Control, Pitch Velocity, Pitch Composure
+- [x] Catching rating: Catcher Ability
+- [x] Save ratings to `player_ratings` table (migration: `20260120210000_update_player_ratings.sql`)
+
+#### Position Eligibility
+- [x] `app/dashboard/roster/_components/position-toggles.tsx` - P/C/SS/1B toggles
+- [x] Save eligibility to `position_eligibility` table
+
+#### Position Strengths (NEW)
+- [x] `app/dashboard/roster/_components/position-strength-editor.tsx` - Drag-drop position ordering
+- [x] Ordered list of positions from strongest to weakest
+- [x] Supports all 10 positions: P, C, 1B, 2B, 3B, SS, LF, CF, RF, OF (generic outfield)
+- [x] Visual rank indicators (1st = primary position for AI)
+- [x] Save to `players.position_strengths` column (TEXT[] array)
+- [x] Migration: `20260121000001_add_position_strengths.sql`
+
+#### Coach Notes (NEW)
+- [x] Free-form text area in Ratings tab for coach observations
+- [x] Save to `players.notes` column
+- [x] Migration: `20260121000002_add_player_notes.sql`
+
+---
+
+### Phase 3: Rules & Games Setup ✅
+
+#### Team Rules Management
+- [x] `app/dashboard/rules/page.tsx` - Rules list and management
+- [x] `app/dashboard/rules/_components/rules-client.tsx` - Client with drag-drop and group tabs
+- [x] `app/dashboard/rules/_components/sortable-rule.tsx` - Draggable rule card
+- [x] `app/dashboard/rules/_components/rule-dialog.tsx` - Add/edit rule dialog
+- [x] Integrated @dnd-kit for drag-drop priority ordering
+- [x] Active/inactive toggle per rule
+- [x] Priority automatically updates on reorder
+
+#### Rule Groups (NEW - Replaces Optimization Modes)
+- [x] `app/dashboard/rules/_components/rule-group-dialog.tsx` - Create/edit rule groups
+- [x] Rule groups replace hardcoded modes (competitive/balanced/developmental)
+- [x] Each rule belongs to a specific group
+- [x] Group tabs in Rules page for easy switching
+- [x] Rules filtered by selected group
+- [x] Save to `rule_groups` table with RLS policies
+- [x] Migration: `20260121000000_add_rule_groups.sql`
+
+#### Game Creation & Management
+- [x] `app/dashboard/games/page.tsx` - Game list with Upcoming/Past tabs
+- [x] `app/dashboard/games/_components/games-client.tsx` - Client with filtering
+- [x] `app/dashboard/games/_components/game-card.tsx` - Game card with details
+- [x] `app/dashboard/games/_components/game-dialog.tsx` - Add/edit game dialog
+- [x] Filter games by upcoming vs past
+
+#### Game Detail & Roster Setup
+- [x] `app/dashboard/games/[gameId]/page.tsx` - Game detail page
+- [x] `app/dashboard/games/[gameId]/_components/game-detail-client.tsx` - Game detail client
+- [x] `app/dashboard/games/[gameId]/_components/roster-setup.tsx` - Roster availability
+- [x] Player availability checkboxes
+- [x] Pitching innings input per player
+- [x] Restrictions/notes textarea
+- [x] Save to `game_roster` table
+
+---
+
+## ✅ Phase 4: AI Integration & Lineup Generation ✅ COMPLETE
+
+#### AI Infrastructure ✅
+- [x] `lib/ai/claude-client.ts` - Claude API wrapper with error handling
+  - `generateBattingOrder()` - Phase 1: batting order only
+  - `generateDefensive()` - Phase 2: defensive positions with locked cells
+  - Separate system prompts for each phase
+- [x] `lib/ai/prompt-builder.ts` - Build prompt from database data
+  - `buildBattingOrderPrompt()` - Batting order prompt construction
+  - `buildDefensivePrompt()` - Defensive prompt with locked positions support
+  - Includes rule group name in prompt context
+  - Formats player position strengths for AI
+- [x] `types/lineup.ts` - TypeScript types for AI responses
+  - PlayerForLineup (includes position_strengths), TeamRule, GamePreference
+  - BattingOrderEntry, DefensiveInning, RuleCheck
+  - **NEW:** LockedPosition, GridCell, GenerationPhase types
+
+#### Two-Phase Lineup Generation ✅
+- [x] **Phase 1: Batting Order** - Generate batting order first
+  - API accepts `phase: 'batting_order'`
+  - Saves batting order to database immediately
+  - Returns rationale for batting decisions
+- [x] **Phase 2: Defensive Positions** - Fill remaining cells
+  - API accepts `phase: 'defensive'` with `batting_order` and `locked_positions`
+  - AI respects locked positions (coach decisions)
+  - Supports `start_from_inning` for mid-game regeneration
+
+#### Lineup Generation API ✅
+- [x] `app/api/generate-lineup/route.ts` - Main generation endpoint
+  - Two-phase generation support
+  - Accepts `{ game_id, rule_group_id, phase, batting_order, locked_positions }`
+  - Calls Claude API (claude-sonnet-4-20250514)
+  - Parses JSON response, validates structure
+  - Saves to `lineups` table with `rule_group_id` reference
+
+#### Interactive Lineup Grid ✅
+- [x] `app/dashboard/games/[gameId]/_components/lineup-grid.tsx` - Interactive grid
+  - Players as rows (batting order), innings as columns
+  - Click cell to open position dropdown (P, C, 1B, 2B, 3B, SS, LF, CF, RF, SIT)
+  - **Position Auto-Swap:** Selecting a taken position removes it from other player
+  - Visual indicators: lock icons, amber color for taken positions, ↔ for swaps
+  - **Inning Locking:** Click inning header to lock/unlock entire inning
+  - Locked innings prevent editing (visual: blue tint, lock icon, not-allowed cursor)
+  - Always editable (coaches can make mid-game substitutions)
+  - Mobile-responsive card view
+
+#### Lineup Display UI ✅
+- [x] `app/dashboard/games/[gameId]/_components/batting-order.tsx` - Batting order list
+- [x] `app/dashboard/games/[gameId]/_components/defensive-grid.tsx` - Defensive grid (legacy)
+- [x] `app/dashboard/games/[gameId]/_components/rule-compliance.tsx` - Rules check with ✅/⚠️
+- [x] `app/dashboard/games/[gameId]/_components/lineup-display.tsx` - Combined lineup display
+- [x] Rule group selector dropdown (replaces optimization mode selector)
+- [x] Warning message when no rule groups exist with link to create one
+
+#### Game Detail Client Rewrite ✅
+- [x] `app/dashboard/games/[gameId]/_components/game-detail-client.tsx`
+  - Phase-based workflow: setup → batting → defense → complete
+  - State management: battingOrder, grid, lockedPositions, lockedInnings
+  - `handleCellChange` with auto-swap logic
+  - `handleLockInning` for inning-level locking
+  - Collapsible rationale sections for AI explanations
+
+#### ⏳ Remaining for Phase 4
+- [ ] **BLOCKER: Add ANTHROPIC_API_KEY to .env.local** - Required for AI to work
+- [ ] Test end-to-end lineup generation with real API
+
+**Deliverable:** Full two-phase lineup generation with interactive editing ✅
+
+---
+
+### Phase 5: GameChanger CSV Import ✅ COMPLETE
+
+#### CSV Parser ✅
+- [x] `lib/parsers/gamechanger-csv.ts` - Parse CSV with papaparse
+  - Parses GameChanger CSV format (category headers, column names, player data)
+  - Handles batting stats: GP, PA, AB, AVG, OBP, SLG, OPS, H, 1B, 2B, 3B, HR, RBI, R, BB, SO, HBP, SB, CS
+  - Handles fielding stats: TC, A, PO, FPCT, E, DP
+  - Handles pitching stats: IP, ERA, WHIP, SO, BB, H, R, ER
+  - Skips "Totals" and "Glossary" rows automatically
+- [x] Player matching by jersey number (primary) and name (fallback)
+- [x] Handles edge cases: missing columns, "-" values, percentages
+
+#### Import UI & API ✅
+- [x] `app/dashboard/import/page.tsx` - Server component with team/player data
+- [x] `app/dashboard/import/_components/import-client.tsx` - Client component with:
+  - Drag-and-drop file upload zone
+  - Preview table showing parsed players
+  - Match status indicators (matched by jersey#, matched by name, no match)
+  - Import button to save matched stats
+  - Clear Stats button to remove all imported data
+- [x] `app/api/import/gamechanger/route.ts` - API endpoints:
+  - POST: Parse CSV, match players by jersey number, upsert stats to database
+  - DELETE: Clear all stats for team's players
+  - Auth verification and team ownership checks
+  - Inserts into `gamechanger_batting` / `gamechanger_fielding` tables
+  - Uses season date for upsert behavior (re-import replaces existing)
+
+**Deliverable:** Complete CSV import with stats integration ✅
+
+---
+
+### Phase 6: Polish & Deployment (Week 5)
+
+#### Error Handling
+- [ ] Error boundaries for all major sections
+- [ ] Retry logic for API calls
+- [ ] User-friendly error messages with Toast
+- [ ] Validate all form inputs with Zod
+- [ ] Handle edge cases:
+  - 0 players available
+  - Not enough eligible players for premium positions
+  - Conflicting rules
+  - API failures (Claude rate limits, Supabase downtime)
+
+#### Loading States & UX
+- [ ] Skeleton components for all data loading
+- [ ] Optimistic updates where appropriate
+- [ ] Empty states for all lists (roster, games, rules)
+- [ ] Mobile responsiveness testing on real devices
+- [ ] Confirmation dialogs for destructive actions
+- [ ] Loading spinners for API calls
+
+#### Deployment
+- [ ] Push to GitHub
+- [ ] Connect to Vercel
+- [ ] Add environment variables in Vercel dashboard
+- [ ] Deploy to production
+- [ ] Test on real mobile devices (iOS Safari, Android Chrome)
+- [ ] Create example team with sample data
+- [ ] Performance testing (Lighthouse)
+
+**Deliverable:** Production-ready MVP deployed to Vercel
+
+---
+
+## ⚙️ Setup Required (Before Continuing Development)
+
+### 1. Create Supabase Project (5 minutes)
+```bash
+# 1. Go to https://supabase.com
+# 2. Create new project
+# 3. Save database password, project URL, and API keys
+```
+
+### 2. Link Local Project to Supabase
+```bash
+# Link to your Supabase project
+npx supabase link --project-ref <your-project-ref>
+
+# Push database schema
+npx supabase db push
+
+# Generate TypeScript types
+mkdir -p types
+npx supabase gen types typescript --project-id <your-project-ref> > types/database.ts
+```
+
+### 3. Get Claude API Key (2 minutes)
+```bash
+# 1. Go to https://console.anthropic.com
+# 2. Create API key
+# 3. Copy key
+```
+
+### 4. Configure Environment Variables
+```bash
+# Copy template
+cp .env.example .env.local
+
+# Edit .env.local with your values:
+# NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
+# SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
+# ANTHROPIC_API_KEY=sk-ant-...
+# NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+### 5. Restart Development Server
+```bash
+# Kill existing server
+# Then restart
+npm run dev
+```
+
+---
+
+## 📈 Progress Overview
+
+### Completed: ~97%
+- [x] Foundation & Infrastructure (Week 1) - **100%**
+  - Project setup, dependencies, database schema
+  - Authentication system, dashboard layout
+  - UI component library
+
+- [x] Team & Roster Management (Week 2) - **100%**
+  - Roster CRUD with player dialog
+  - 14 specific player ratings (batting, fielding, mental, pitching)
+  - Position eligibility toggles (P, C, SS, 1B)
+  - Position strengths with drag-drop ordering (10 positions)
+  - Coach notes text field
+
+- [x] Rules & Games Setup (Week 2-3) - **100%**
+  - Rule Groups (replaces optimization modes)
+  - Rules management with drag-drop priority
+  - Group tabs for organizing rules
+  - Games list with upcoming/past filters
+  - Game detail page with roster setup
+  - Player availability, pitching limits, restrictions
+
+- [x] AI Integration & Lineup Generation (Week 3-4) - **100%**
+  - Two-phase generation (batting order → defensive positions)
+  - Interactive lineup grid with position dropdowns
+  - Position auto-swap when selecting taken positions
+  - Inning locking (click header to lock/unlock)
+  - Claude API integration with phased prompts
+  - **Remaining:** Test with real API key (ANTHROPIC_API_KEY)
+
+- [x] GameChanger CSV Import (Week 4-5) - **100%**
+  - CSV parser with papaparse
+  - Player matching by jersey number and name
+  - Import UI with drag-drop upload and preview
+  - API endpoints for import and clear operations
+
+### In Progress: ~3%
+- [ ] Polish & Deployment (Week 5) - **0%**
+
+### MVP Feature Checklist
+
+**P0 Features (Must Have)**
+- [x] Team Setup
+- [x] Roster Management
+- [x] Subjective Ratings (14 specific ratings, 1-5 scale)
+- [x] Position Eligibility (P, C, SS, 1B flags)
+- [x] Position Strengths (ordered list with drag-drop)
+- [x] Coach Notes (free-form text per player)
+- [x] Team Rules (with drag-drop priority)
+- [x] Rule Groups (user-defined, replaces hardcoded modes)
+- [x] Game Creation
+- [x] Game Roster (availability, pitching limits, restrictions)
+- [x] Lineup Generation (AI) - needs API key testing
+- [x] Lineup Review (batting order, defense grid, rule compliance)
+- [x] Position Editing (click cell to change position, auto-swap)
+- [x] Inning Locking (click header to lock/unlock entire inning)
+
+**P1 Features (Should Have - Included in MVP)**
+- [x] GameChanger CSV Import
+
+**Out of Scope (Post-MVP)**
+- ❌ Multi-team support
+- ❌ Google OAuth
+- ❌ Error monitoring (Sentry)
+- ❌ Analytics (Posthog)
+- ❌ Lineup history/versioning
+- ❌ PWA/offline mode
+- ❌ Screenshot OCR import
+- ❌ Native mobile apps
+
+---
+
+## 🎯 Success Criteria
+
+MVP is complete when:
+- ✅ Coach can sign up and create team in < 5 minutes
+- ✅ Coach can add roster and set ratings in < 10 minutes
+- ✅ Lineup generation completes in < 10 seconds
+- ✅ Generated lineups satisfy all team rules 100% of time
+- ✅ CSV import works with real GameChanger exports
+- ✅ All features work on mobile Safari and Chrome
+- ✅ App is deployed to production on Vercel
+- ✅ No TypeScript errors
+- ✅ No console errors in production
+
+---
+
+## 📚 Reference Documentation
+
+- **Build Plan:** `/lineup_ai_build_plan.md` - Complete technical specification
+- **AI Prompts:** `/lineup_mvp_prompt.md` - Claude API prompt templates
+- **Implementation Plan:** `/.claude/plans/ticklish-shimmying-cookie.md` - Detailed build phases
+- **Setup Guide:** `/README.md` - Getting started instructions
+
+---
+
+## 🔄 Next Session
+
+**Immediate Next Steps:**
+1. Add `ANTHROPIC_API_KEY` to `.env.local` and test end-to-end lineup generation
+2. Start Phase 6: Polish & Deployment
+   - Error boundaries for all major sections
+   - Loading skeletons and empty states
+   - Mobile responsiveness testing
+   - Deploy to Vercel
+
+**Current Development Environment:**
+- Using Supabase local development with Docker
+- Run `npx supabase start` to start local database
+- Run `npm run dev` to start Next.js dev server
+- Access app at http://localhost:3000
+
+**What's Working:**
+- Full authentication flow (login/signup)
+- Roster management with 14 player ratings + position strengths + coach notes
+- Rules management with drag-drop priority and rule groups
+- Games management with upcoming/past filtering
+- Game detail page with two-phase lineup generation
+- Interactive defensive grid with position editing
+- **NEW:** Position auto-swap when selecting a taken position
+- **NEW:** Inning locking (click header to lock/unlock)
+- GameChanger CSV import with player matching
+- AI prompt builder ready (needs API key to test)
+
+**Recent Changes (January 21, 2026 - v0.96.1):**
+- **Bug Fix: Player Ratings Not Saving**
+  - Root cause: Code was loading first rating record without checking season
+  - If player had old rating records, wrong data was displayed
+  - Fixed `player-dialog.tsx` and `roster-client.tsx` to find current season's rating first
+  - Ratings now save and persist correctly
+- **Player Stats Page with AI Analysis (v0.96.0):**
+  - Renamed "Import" to "Stats" in navigation
+  - AI-powered player analysis (strengths, weaknesses, recommendations)
+  - Expandable player cards with batting/fielding stats
+  - "Generate Analysis" button for one-click analysis
+  - Collapsible CSV import section
+- Implemented Two-Phase Lineup Generation (v0.95.0):
+  - Phase 1: Generate batting order only, saved immediately
+  - Phase 2: Lock positions, then AI fills remaining cells
+- Interactive Lineup Grid with position editing and inning locking
+- Position auto-swap when selecting a taken position
+
+---
+
+**Last Updated:** January 21, 2026
+**Version:** 0.96.1 (Player Ratings Bug Fix)

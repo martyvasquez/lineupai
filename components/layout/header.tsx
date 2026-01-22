@@ -51,10 +51,10 @@ export function Header() {
             Games
           </Link>
           <Link
-            href="/dashboard/import"
+            href="/dashboard/stats"
             className="text-sm font-medium transition-colors hover:text-primary hidden md:inline-block"
           >
-            Import
+            Stats
           </Link>
 
           <DropdownMenu>

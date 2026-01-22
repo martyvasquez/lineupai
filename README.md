@@ -106,10 +106,10 @@ baseball-lineups/
 ├── lib/
 │   ├── supabase/          # Supabase client setup
 │   ├── ai/                # Claude AI integration
-│   ├── parsers/           # CSV parsing logic
+│   ├── parsers/           # GameChanger CSV parsing & player matching
 │   ├── hooks/             # React hooks
 │   ├── validations/       # Zod schemas
-│   └── utils/             # Utility functions
+│   └── utils.ts           # Utility functions (cn)
 ├── types/                 # TypeScript types
 ├── supabase/
 │   └── migrations/        # Database migrations
