@@ -7,6 +7,100 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.97.0] - 2026-01-22
+
+### Added
+
+#### Multi-Team Support (Major Feature)
+- **New URL Structure** - Team-scoped routes: `/dashboard/[teamId]/roster`, `/dashboard/[teamId]/games`, etc.
+- **Team Switcher** - Dropdown in header to switch between teams, preserves current page when switching
+- **Team Selection Page** - Dashboard root shows team grid for users with multiple teams, auto-redirects for single team
+- **Team Management** - Dedicated settings pages for team and profile management
+- **Team Description** - New field for AI context (e.g., "Competitive 12U travel ball team")
+- **AI Context Integration** - Team name, age group, and description included in lineup generation prompts
+- **Migration** `20260122000000_add_multi_team_support.sql`:
+  - Adds `description TEXT` column to `teams` table
+  - Adds index on `created_by` for faster team lookups
+
+#### Authentication Flow
+- **Forgot Password Page** (`/forgot-password`) - Request password reset via email
+- **Reset Password Page** (`/reset-password`) - Set new password after clicking reset link
+- **Auth Callback Route** (`/auth/callback`) - Handles Supabase email confirmations and redirects
+- **Email Change Support** - Users can update their email in profile settings
+- **Password Change** - Users can update password from profile settings
+
+#### Roster Import from CSV
+- **Import API** (`/api/import/roster`) - Creates players from GameChanger CSV with optional stats
+- **Import During Team Creation** - After creating a team, dialog shows roster import step
+- **Import on Roster Page** - "Import CSV" button opens import dialog for existing teams
+- **Stats Toggle** - Option to import just roster (names/numbers) or include batting/fielding stats
+- **Preview Table** - Shows parsed players before import with stats preview
+
+#### Settings Pages Separation
+- **Team Settings** (`/dashboard/settings/teams`) - Create, edit, delete teams
+- **Profile Settings** (`/dashboard/settings/account`) - Email and password management
+- **Settings Navigation** (`/dashboard/settings`) - Cards linking to team and profile settings
+
+### Fixed
+
+#### Team Switcher 404 Bug
+- **Issue:** Selecting a team from dropdown while on settings page caused 404
+- **Cause:** Switcher tried to navigate to `/dashboard/[teamId]/settings/teams` which doesn't exist
+- **Fix:** Detect settings pages and navigate to team's main page instead
+
+### Changed
+
+#### URL Structure Migration
+| Old Path | New Path |
+|----------|----------|
+| `/dashboard/roster` | `/dashboard/[teamId]/roster` |
+| `/dashboard/rules` | `/dashboard/[teamId]/rules` |
+| `/dashboard/games` | `/dashboard/[teamId]/games` |
+| `/dashboard/games/[gameId]` | `/dashboard/[teamId]/games/[gameId]` |
+| `/dashboard/stats` | `/dashboard/[teamId]/stats` |
+| `/dashboard/settings` | `/dashboard/settings` (unchanged, not team-scoped) |
+
+#### Team-Scoped Layout
+- New `app/dashboard/[teamId]/layout.tsx` validates user owns the team
+- Redirects to `/dashboard` if team not found or access denied
+- Child pages no longer need individual auth/team ownership checks
+
+### Files Added
+
+| File | Description |
+|------|-------------|
+| `app/dashboard/[teamId]/layout.tsx` | Team validation layout |
+| `app/dashboard/[teamId]/page.tsx` | Team dashboard index |
+| `app/dashboard/[teamId]/roster/` | Moved roster pages |
+| `app/dashboard/[teamId]/rules/` | Moved rules pages |
+| `app/dashboard/[teamId]/games/` | Moved games pages |
+| `app/dashboard/[teamId]/stats/` | Moved stats pages |
+| `app/dashboard/settings/page.tsx` | Settings navigation |
+| `app/dashboard/settings/teams/page.tsx` | Team management |
+| `app/dashboard/settings/account/page.tsx` | Profile settings |
+| `app/dashboard/settings/_components/settings-client.tsx` | Team CRUD client |
+| `app/dashboard/settings/_components/team-dialog.tsx` | Create/edit team dialog with import step |
+| `app/dashboard/settings/_components/account-settings.tsx` | Email/password forms |
+| `app/dashboard/settings/_components/roster-import.tsx` | CSV import component |
+| `app/(auth)/forgot-password/page.tsx` | Password reset request |
+| `app/(auth)/reset-password/page.tsx` | New password form |
+| `app/auth/callback/route.ts` | Auth redirect handler |
+| `app/api/import/roster/route.ts` | Roster import API |
+| `components/layout/team-switcher.tsx` | Team dropdown component |
+| `supabase/migrations/20260122000000_add_multi_team_support.sql` | Multi-team migration |
+
+### Database Schema
+
+```sql
+-- Team description for AI context
+ALTER TABLE teams ADD COLUMN description TEXT;
+
+-- Index for faster team lookups
+CREATE INDEX idx_teams_created_by ON teams(created_by);
+```
+
+---
+
 ## [0.96.1] - 2026-01-21
 
 ### Fixed
@@ -420,6 +514,7 @@ ALTER TABLE lineups ADD COLUMN rule_group_id UUID REFERENCES rule_groups(id) ON 
 | `20260121000001_add_position_strengths.sql` | Position strengths array | 2026-01-21 |
 | `20260121000002_add_player_notes.sql` | Coach notes field | 2026-01-21 |
 | `20260121000004_add_stats_analysis.sql` | Stats analysis JSONB column | 2026-01-21 |
+| `20260122000000_add_multi_team_support.sql` | Team description and index | 2026-01-22 |
 
 ---
 

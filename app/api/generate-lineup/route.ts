@@ -4,7 +4,8 @@ import { claudeClient } from '@/lib/ai/claude-client'
 import {
   buildBattingOrderPrompt,
   buildDefensivePrompt,
-  transformPlayerData
+  transformPlayerData,
+  type TeamContext,
 } from '@/lib/ai/prompt-builder'
 import type {
   TeamRule,
@@ -82,6 +83,14 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       )
     }
+
+    // Extract team context for AI prompts
+    const teamContext: TeamContext | null = game.teams ? {
+      name: game.teams.name,
+      age_group: game.teams.age_group,
+      league_name: game.teams.league_name,
+      description: (game.teams as typeof game.teams & { description?: string | null }).description || null,
+    } : null
 
     // Fetch the rule group if provided
     let ruleGroupName: string | null = null
@@ -222,6 +231,7 @@ export async function POST(request: NextRequest) {
         playersForLineup,
         teamRules,
         gamePreferences,
+        teamContext,
         additional_notes
       )
 
@@ -279,6 +289,7 @@ export async function POST(request: NextRequest) {
         gamePreferences,
         locked_positions || [],
         start_from_inning || 1,
+        teamContext,
         additional_notes
       )
 

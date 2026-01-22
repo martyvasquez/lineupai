@@ -8,6 +8,14 @@ import type {
 import type { Database } from '@/types/database'
 
 type Player = Database['public']['Tables']['players']['Row']
+
+// Team context for AI prompts
+export interface TeamContext {
+  name: string
+  age_group: string | null
+  league_name: string | null
+  description: string | null
+}
 type PlayerRatings = Database['public']['Tables']['player_ratings']['Row']
 type PositionEligibility = Database['public']['Tables']['position_eligibility']['Row']
 type GameRoster = Database['public']['Tables']['game_roster']['Row']
@@ -179,9 +187,22 @@ export function buildBattingOrderPrompt(
   players: PlayerForLineup[],
   rules: TeamRule[],
   preferences: GamePreference[],
+  teamContext?: TeamContext | null,
   additionalNotes?: string | null
 ): string {
   const availablePlayers = players.filter(p => p.available)
+
+  // Build team context section
+  let teamContextText = ''
+  if (teamContext) {
+    teamContextText = `
+TEAM CONTEXT:
+- Team: ${teamContext.name}
+- Age Group: ${teamContext.age_group || 'Not specified'}
+- League: ${teamContext.league_name || 'Not specified'}
+- Description: ${teamContext.description || 'Not specified'}
+`
+  }
 
   // Build players section
   const playersText = availablePlayers.map(buildPlayerText).join('\n')
@@ -211,6 +232,7 @@ ${additionalNotes}`
     : ''
 
   return `BATTING ORDER GENERATION
+${teamContextText}
 
 GAME SETUP:
 - Innings: ${innings}
@@ -252,9 +274,22 @@ export function buildDefensivePrompt(
   preferences: GamePreference[],
   lockedPositions: LockedPosition[],
   startFromInning: number,
+  teamContext?: TeamContext | null,
   additionalNotes?: string | null
 ): string {
   const availablePlayers = players.filter(p => p.available)
+
+  // Build team context section
+  let teamContextText = ''
+  if (teamContext) {
+    teamContextText = `
+TEAM CONTEXT:
+- Team: ${teamContext.name}
+- Age Group: ${teamContext.age_group || 'Not specified'}
+- League: ${teamContext.league_name || 'Not specified'}
+- Description: ${teamContext.description || 'Not specified'}
+`
+  }
 
   // Build players section
   const playersText = availablePlayers.map(buildPlayerText).join('\n')
@@ -313,7 +348,7 @@ ${additionalNotes}`
     : ''
 
   return `DEFENSIVE POSITION GENERATION
-
+${teamContextText}
 GAME SETUP:
 - Innings: ${innings}
 - Players Available: ${availablePlayers.length}

@@ -1,39 +1,28 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { RulesClient } from './_components/rules-client'
 
-export default async function RulesPage() {
+interface RulesPageProps {
+  params: Promise<{ teamId: string }>
+}
+
+export default async function RulesPage({ params }: RulesPageProps) {
+  const { teamId } = await params
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  // Get user's team
-  const { data: team } = await supabase
-    .from('teams')
-    .select('*')
-    .eq('created_by', user.id)
-    .single()
-
-  if (!team) {
-    redirect('/dashboard')
-  }
+  // Note: Auth and team ownership are validated by the layout
 
   // Fetch rule groups
   const { data: ruleGroups } = await supabase
     .from('rule_groups')
     .select('*')
-    .eq('team_id', team.id)
+    .eq('team_id', teamId)
     .order('created_at', { ascending: true })
 
   // Fetch rules ordered by priority
   const { data: rules } = await supabase
     .from('team_rules')
     .select('*')
-    .eq('team_id', team.id)
+    .eq('team_id', teamId)
     .order('priority', { ascending: true })
 
   return (
@@ -48,7 +37,7 @@ export default async function RulesPage() {
       <RulesClient
         initialRules={rules || []}
         initialRuleGroups={ruleGroups || []}
-        teamId={team.id}
+        teamId={teamId}
       />
     </div>
   )

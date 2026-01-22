@@ -1,32 +1,21 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { StatsClient } from './_components/stats-client'
 
-export default async function StatsPage() {
+interface StatsPageProps {
+  params: Promise<{ teamId: string }>
+}
+
+export default async function StatsPage({ params }: StatsPageProps) {
+  const { teamId } = await params
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  // Get team for user
-  const { data: team } = await supabase
-    .from('teams')
-    .select('*')
-    .eq('created_by', user.id)
-    .single()
-
-  if (!team) {
-    redirect('/dashboard/roster')
-  }
+  // Note: Auth and team ownership are validated by the layout
 
   // Fetch players with their stats analysis
   const { data: players } = await supabase
     .from('players')
     .select('id, name, jersey_number, stats_analysis, stats_analyzed_at')
-    .eq('team_id', team.id)
+    .eq('team_id', teamId)
     .eq('active', true)
     .order('jersey_number', { ascending: true })
 
@@ -91,7 +80,7 @@ export default async function StatsPage() {
       </div>
 
       <StatsClient
-        teamId={team.id}
+        teamId={teamId}
         players={playersWithStats}
         statsCount={statsCount}
         lastImportDate={lastImportDate}

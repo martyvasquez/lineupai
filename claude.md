@@ -1,7 +1,7 @@
 # LineupAI - AI-Powered Baseball Lineup Optimizer
 
-**Status:** 🚧 In Development (97% Complete)
-**Last Updated:** January 21, 2026 (v0.96.1)
+**Status:** 🚧 In Development (98% Complete)
+**Last Updated:** January 22, 2026 (v0.97.0)
 
 ---
 
@@ -22,7 +22,7 @@ Build a **mobile-first web application** that generates optimized youth baseball
 - **Backend:** Supabase (PostgreSQL + Auth)
 - **AI:** Claude API (Anthropic Sonnet 4.5)
 - **Deployment:** Vercel
-- **MVP Scope:** P0 features + GameChanger CSV import (single team, email auth)
+- **MVP Scope:** P0 features + GameChanger CSV import + Multi-team support
 - **Timeline:** ~5 weeks total
 
 ---
@@ -83,56 +83,66 @@ baseball-lineups/
 │   ├── (auth)/
 │   │   ├── login/page.tsx              ✅ Login form
 │   │   ├── signup/page.tsx             ✅ Signup form
+│   │   ├── forgot-password/page.tsx    ✅ Password reset request
+│   │   ├── reset-password/page.tsx     ✅ New password form
 │   │   └── layout.tsx                  ✅ Auth layout
+│   ├── auth/
+│   │   └── callback/route.ts           ✅ Auth redirect handler
 │   ├── dashboard/
-│   │   ├── page.tsx                    ✅ Dashboard home
-│   │   ├── layout.tsx                  ✅ Main layout
-│   │   ├── roster/
-│   │   │   ├── page.tsx                ✅ Roster list page
-│   │   │   └── _components/
-│   │   │       ├── roster-client.tsx   ✅ Roster CRUD client
-│   │   │       ├── player-dialog.tsx   ✅ Add/edit player (3 tabs)
-│   │   │       ├── star-rating.tsx     ✅ 1-5 star rating input
-│   │   │       ├── position-toggles.tsx ✅ P/C/SS/1B eligibility
-│   │   │       └── position-strength-editor.tsx ✅ Drag-drop position ordering
-│   │   ├── rules/
-│   │   │   ├── page.tsx                ✅ Rules list with groups
-│   │   │   └── _components/
-│   │   │       ├── rules-client.tsx    ✅ Rules CRUD with group tabs
-│   │   │       ├── rule-dialog.tsx     ✅ Add/edit rule
-│   │   │       ├── rule-group-dialog.tsx ✅ Create/edit rule groups
-│   │   │       └── sortable-rule.tsx   ✅ Draggable rule card
-│   │   ├── games/
-│   │   │   ├── page.tsx                ✅ Games list page
-│   │   │   ├── [gameId]/
-│   │   │   │   ├── page.tsx            ✅ Game detail page
+│   │   ├── page.tsx                    ✅ Team selection/redirect
+│   │   ├── layout.tsx                  ✅ Main layout with team switcher
+│   │   ├── [teamId]/                   ✅ Team-scoped routes
+│   │   │   ├── layout.tsx              ✅ Team validation
+│   │   │   ├── page.tsx                ✅ Team dashboard
+│   │   │   ├── roster/
+│   │   │   │   ├── page.tsx            ✅ Roster list page
 │   │   │   │   └── _components/
-│   │   │   │       ├── game-detail-client.tsx ✅ Two-phase lineup generation workflow
-│   │   │   │       ├── roster-setup.tsx ✅ Availability/pitching setup
-│   │   │   │       ├── lineup-grid.tsx ✅ Interactive defensive position grid
-│   │   │   │       ├── batting-order.tsx ✅ Batting order display
-│   │   │   │       ├── defensive-grid.tsx ✅ Defensive assignments (legacy)
-│   │   │   │       ├── rule-compliance.tsx ✅ Rule checks display
-│   │   │   │       └── lineup-display.tsx ✅ Combined lineup view
-│   │   │   └── _components/
-│   │   │       ├── games-client.tsx    ✅ Games list client
-│   │   │       ├── game-card.tsx       ✅ Game card component
-│   │   │       └── game-dialog.tsx     ✅ Add/edit game
-│   │   ├── stats/
-│   │   │   ├── page.tsx                ✅ Stats page (renamed from Import)
-│   │   │   └── _components/
-│   │   │       └── stats-client.tsx    ✅ Player stats with AI analysis
-│   │   ├── import/
-│   │   │   ├── page.tsx                ✅ Import page (legacy)
-│   │   │   └── _components/
-│   │   │       └── import-client.tsx   ✅ CSV upload & preview
-│   │   └── settings/                   📁 Created (empty)
+│   │   │   │       ├── roster-client.tsx   ✅ Roster CRUD + CSV import
+│   │   │   │       ├── player-dialog.tsx   ✅ Add/edit player (3 tabs)
+│   │   │   │       ├── star-rating.tsx     ✅ 1-5 star rating input
+│   │   │   │       ├── position-toggles.tsx ✅ P/C/SS/1B eligibility
+│   │   │   │       ├── position-strength-editor.tsx ✅ Drag-drop position ordering
+│   │   │   │       └── roster-import-inline.tsx ✅ CSV import dialog
+│   │   │   ├── rules/
+│   │   │   │   ├── page.tsx            ✅ Rules list with groups
+│   │   │   │   └── _components/
+│   │   │   │       ├── rules-client.tsx    ✅ Rules CRUD with group tabs
+│   │   │   │       ├── rule-dialog.tsx     ✅ Add/edit rule
+│   │   │   │       ├── rule-group-dialog.tsx ✅ Create/edit rule groups
+│   │   │   │       └── sortable-rule.tsx   ✅ Draggable rule card
+│   │   │   ├── games/
+│   │   │   │   ├── page.tsx            ✅ Games list page
+│   │   │   │   ├── [gameId]/
+│   │   │   │   │   ├── page.tsx        ✅ Game detail page
+│   │   │   │   │   └── _components/
+│   │   │   │   │       ├── game-detail-client.tsx ✅ Two-phase lineup generation
+│   │   │   │   │       ├── roster-setup.tsx ✅ Availability/pitching setup
+│   │   │   │   │       ├── lineup-grid.tsx ✅ Interactive defensive grid
+│   │   │   │   │       └── rule-compliance.tsx ✅ Rule checks display
+│   │   │   │   └── _components/
+│   │   │   │       ├── games-client.tsx    ✅ Games list client
+│   │   │   │       ├── game-card.tsx       ✅ Game card component
+│   │   │   │       └── game-dialog.tsx     ✅ Add/edit game
+│   │   │   └── stats/
+│   │   │       ├── page.tsx            ✅ Stats page with AI analysis
+│   │   │       └── _components/
+│   │   │           └── stats-client.tsx ✅ Player stats with AI analysis
+│   │   └── settings/
+│   │       ├── page.tsx                ✅ Settings navigation
+│   │       ├── teams/page.tsx          ✅ Team management
+│   │       ├── account/page.tsx        ✅ Profile settings
+│   │       └── _components/
+│   │           ├── settings-client.tsx ✅ Team CRUD client
+│   │           ├── team-dialog.tsx     ✅ Create/edit team + import step
+│   │           ├── account-settings.tsx ✅ Email/password forms
+│   │           └── roster-import.tsx   ✅ CSV import component
 │   ├── api/
 │   │   ├── generate-lineup/route.ts    ✅ AI lineup generation endpoint
 │   │   ├── stats/
 │   │   │   └── analyze/route.ts        ✅ AI stats analysis endpoint
 │   │   └── import/
-│   │       └── gamechanger/route.ts    ✅ CSV import API
+│   │       ├── gamechanger/route.ts    ✅ CSV stats import API
+│   │       └── roster/route.ts         ✅ CSV roster import API
 │   ├── layout.tsx                      ✅ Root layout
 │   ├── page.tsx                        ✅ Root redirect
 │   ├── globals.css                     ✅ Global styles
@@ -140,7 +150,8 @@ baseball-lineups/
 ├── components/
 │   ├── ui/                             ✅ 20+ shadcn components
 │   ├── layout/
-│   │   └── header.tsx                  ✅ Header with nav
+│   │   ├── header.tsx                  ✅ Header with nav + team switcher
+│   │   └── team-switcher.tsx           ✅ Team dropdown component
 │   └── shared/                         📁 Created (empty)
 ├── lib/
 │   ├── supabase/
@@ -166,7 +177,8 @@ baseball-lineups/
 │   │   ├── 20260121000000_add_rule_groups.sql ✅ Rule groups table
 │   │   ├── 20260121000001_add_position_strengths.sql ✅ Position strengths
 │   │   ├── 20260121000002_add_player_notes.sql ✅ Coach notes
-│   │   └── 20260121000004_add_stats_analysis.sql ✅ Stats analysis JSONB
+│   │   ├── 20260121000004_add_stats_analysis.sql ✅ Stats analysis JSONB
+│   │   └── 20260122000000_add_multi_team_support.sql ✅ Team description + index
 │   └── config.toml                     ✅ Supabase config
 ├── middleware.ts                       ✅ Auth middleware
 ├── .env.example                        ✅ Environment template
@@ -476,7 +488,7 @@ npm run dev
 
 ## 📈 Progress Overview
 
-### Completed: ~97%
+### Completed: ~98%
 - [x] Foundation & Infrastructure (Week 1) - **100%**
   - Project setup, dependencies, database schema
   - Authentication system, dashboard layout
@@ -511,7 +523,14 @@ npm run dev
   - Import UI with drag-drop upload and preview
   - API endpoints for import and clear operations
 
-### In Progress: ~3%
+- [x] Multi-Team Support (Week 5) - **100%**
+  - Team-scoped URL structure (`/dashboard/[teamId]/...`)
+  - Team switcher dropdown in header
+  - Team management settings page
+  - Roster import from CSV during team creation
+  - Auth flow (password reset, email change)
+
+### In Progress: ~2%
 - [ ] Polish & Deployment (Week 5) - **0%**
 
 ### MVP Feature Checklist
@@ -534,9 +553,10 @@ npm run dev
 
 **P1 Features (Should Have - Included in MVP)**
 - [x] GameChanger CSV Import
+- [x] Multi-Team Support (team switcher, management, CSV roster import)
+- [x] Auth Flow (password reset, email change)
 
 **Out of Scope (Post-MVP)**
-- ❌ Multi-team support
 - ❌ Google OAuth
 - ❌ Error monitoring (Sentry)
 - ❌ Analytics (Posthog)
@@ -588,36 +608,39 @@ MVP is complete when:
 - Access app at http://localhost:3000
 
 **What's Working:**
-- Full authentication flow (login/signup)
+- Full authentication flow (login/signup/password reset/email change)
+- **Multi-team support** with team switcher and management
+- **Roster import from CSV** during team creation or on roster page
 - Roster management with 14 player ratings + position strengths + coach notes
 - Rules management with drag-drop priority and rule groups
 - Games management with upcoming/past filtering
 - Game detail page with two-phase lineup generation
 - Interactive defensive grid with position editing
-- **NEW:** Position auto-swap when selecting a taken position
-- **NEW:** Inning locking (click header to lock/unlock)
+- Position auto-swap when selecting a taken position
+- Inning locking (click header to lock/unlock)
 - GameChanger CSV import with player matching
 - AI prompt builder ready (needs API key to test)
 
-**Recent Changes (January 21, 2026 - v0.96.1):**
-- **Bug Fix: Player Ratings Not Saving**
-  - Root cause: Code was loading first rating record without checking season
-  - If player had old rating records, wrong data was displayed
-  - Fixed `player-dialog.tsx` and `roster-client.tsx` to find current season's rating first
-  - Ratings now save and persist correctly
-- **Player Stats Page with AI Analysis (v0.96.0):**
-  - Renamed "Import" to "Stats" in navigation
-  - AI-powered player analysis (strengths, weaknesses, recommendations)
-  - Expandable player cards with batting/fielding stats
-  - "Generate Analysis" button for one-click analysis
-  - Collapsible CSV import section
-- Implemented Two-Phase Lineup Generation (v0.95.0):
-  - Phase 1: Generate batting order only, saved immediately
-  - Phase 2: Lock positions, then AI fills remaining cells
-- Interactive Lineup Grid with position editing and inning locking
-- Position auto-swap when selecting a taken position
+**Recent Changes (January 22, 2026 - v0.97.0):**
+- **Multi-Team Support (Major Feature):**
+  - New URL structure: `/dashboard/[teamId]/roster`, `/dashboard/[teamId]/games`, etc.
+  - Team switcher dropdown in header to switch between teams
+  - Team management page (create, edit, delete teams)
+  - Team description field for AI context
+  - AI prompts now include team name, age group, and description
+- **Authentication Flow:**
+  - Forgot password page with email reset
+  - Reset password page after clicking email link
+  - Email change in profile settings
+  - Password change in profile settings
+- **Roster Import from CSV:**
+  - Import roster during team creation (step 2 of dialog)
+  - "Import CSV" button on roster page for existing teams
+  - Toggle to import just roster or include stats
+- **Bug Fix:** Team switcher no longer 404s when on settings page
+- **Settings Separation:** Team Settings and Profile Settings are now separate pages
 
 ---
 
-**Last Updated:** January 21, 2026
-**Version:** 0.96.1 (Player Ratings Bug Fix)
+**Last Updated:** January 22, 2026
+**Version:** 0.97.0 (Multi-Team Support)

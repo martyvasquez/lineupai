@@ -13,10 +13,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/lib/hooks/use-toast'
-import { Plus, Search, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Search, Pencil, Trash2, Upload } from 'lucide-react'
 import { PlayerDialog, type PlayerRatings } from './player-dialog'
+import { RosterImportInline } from './roster-import-inline'
 import type { Database } from '@/types/database'
 
 type Player = Database['public']['Tables']['players']['Row'] & {
@@ -33,6 +41,7 @@ export function RosterClient({ initialPlayers, teamId }: RosterClientProps) {
   const [players, setPlayers] = useState<Player[]>(initialPlayers)
   const [searchQuery, setSearchQuery] = useState('')
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
   const router = useRouter()
   const { toast } = useToast()
@@ -265,10 +274,16 @@ export function RosterClient({ initialPlayers, teamId }: RosterClientProps) {
             className="pl-9"
           />
         </div>
-        <Button onClick={handleAddPlayer}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Player
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import CSV
+          </Button>
+          <Button onClick={handleAddPlayer}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Player
+          </Button>
+        </div>
       </div>
 
       {filteredPlayers.length === 0 ? (
@@ -357,6 +372,24 @@ export function RosterClient({ initialPlayers, teamId }: RosterClientProps) {
         player={editingPlayer}
         onSave={handleSavePlayer}
       />
+
+      <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>Import Roster from CSV</DialogTitle>
+            <DialogDescription>
+              Upload a GameChanger CSV file to import players. You can choose to import just the roster or include stats.
+            </DialogDescription>
+          </DialogHeader>
+          <RosterImportInline
+            teamId={teamId}
+            onImportComplete={() => {
+              setImportDialogOpen(false)
+              router.refresh()
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

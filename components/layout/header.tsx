@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,10 +12,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Menu, User } from 'lucide-react'
+import { User } from 'lucide-react'
+import { TeamSwitcher } from './team-switcher'
 
-export function Header() {
+interface Team {
+  id: string
+  name: string
+  age_group: string | null
+}
+
+interface HeaderProps {
+  teams?: Team[]
+  currentTeamId?: string
+}
+
+export function Header({ teams = [], currentTeamId }: HeaderProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const supabase = createClient()
 
   async function handleSignOut() {
@@ -24,6 +37,19 @@ export function Header() {
     router.refresh()
   }
 
+  // Extract currentTeamId from pathname if not provided
+  const effectiveTeamId = currentTeamId || extractTeamIdFromPath(pathname)
+
+  // Build nav links based on whether we have a current team
+  const navLinks = effectiveTeamId
+    ? [
+        { href: `/dashboard/${effectiveTeamId}/roster`, label: 'Roster' },
+        { href: `/dashboard/${effectiveTeamId}/rules`, label: 'Rules' },
+        { href: `/dashboard/${effectiveTeamId}/games`, label: 'Games' },
+        { href: `/dashboard/${effectiveTeamId}/stats`, label: 'Stats' },
+      ]
+    : []
+
   return (
     <header className="border-b bg-white">
       <div className="flex h-16 items-center px-4 md:px-6">
@@ -31,31 +57,24 @@ export function Header() {
           LineupAI
         </Link>
 
+        {teams.length > 0 && (
+          <div className="ml-4">
+            <TeamSwitcher teams={teams} currentTeamId={effectiveTeamId} />
+          </div>
+        )}
+
         <nav className="ml-auto flex items-center gap-4">
-          <Link
-            href="/dashboard/roster"
-            className="text-sm font-medium transition-colors hover:text-primary hidden md:inline-block"
-          >
-            Roster
-          </Link>
-          <Link
-            href="/dashboard/rules"
-            className="text-sm font-medium transition-colors hover:text-primary hidden md:inline-block"
-          >
-            Rules
-          </Link>
-          <Link
-            href="/dashboard/games"
-            className="text-sm font-medium transition-colors hover:text-primary hidden md:inline-block"
-          >
-            Games
-          </Link>
-          <Link
-            href="/dashboard/stats"
-            className="text-sm font-medium transition-colors hover:text-primary hidden md:inline-block"
-          >
-            Stats
-          </Link>
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`text-sm font-medium transition-colors hover:text-primary hidden md:inline-block ${
+                pathname === link.href ? 'text-primary' : ''
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -78,4 +97,17 @@ export function Header() {
       </div>
     </header>
   )
+}
+
+function extractTeamIdFromPath(pathname: string): string | undefined {
+  // pathname is like /dashboard/abc123/roster or /dashboard/abc123
+  const parts = pathname.split('/')
+  if (parts.length >= 3 && parts[1] === 'dashboard') {
+    const potentialTeamId = parts[2]
+    // Check if it looks like a UUID (or at least not a known static route)
+    if (potentialTeamId && potentialTeamId !== 'settings') {
+      return potentialTeamId
+    }
+  }
+  return undefined
 }

@@ -1,32 +1,21 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { GamesClient } from './_components/games-client'
 
-export default async function GamesPage() {
+interface GamesPageProps {
+  params: Promise<{ teamId: string }>
+}
+
+export default async function GamesPage({ params }: GamesPageProps) {
+  const { teamId } = await params
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  // Get user's team
-  const { data: team } = await supabase
-    .from('teams')
-    .select('*')
-    .eq('created_by', user.id)
-    .single()
-
-  if (!team) {
-    redirect('/dashboard')
-  }
+  // Note: Auth and team ownership are validated by the layout
 
   // Fetch games ordered by date
   const { data: games } = await supabase
     .from('games')
     .select('*')
-    .eq('team_id', team.id)
+    .eq('team_id', teamId)
     .order('game_date', { ascending: true })
 
   return (
@@ -40,7 +29,7 @@ export default async function GamesPage() {
 
       <GamesClient
         initialGames={games || []}
-        teamId={team.id}
+        teamId={teamId}
       />
     </div>
   )

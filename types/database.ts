@@ -496,6 +496,8 @@ export type Database = {
           name: string
           notes: string | null
           position_strengths: string[] | null
+          stats_analysis: Json | null
+          stats_analyzed_at: string | null
           team_id: string | null
         }
         Insert: {
@@ -506,6 +508,8 @@ export type Database = {
           name: string
           notes?: string | null
           position_strengths?: string[] | null
+          stats_analysis?: Json | null
+          stats_analyzed_at?: string | null
           team_id?: string | null
         }
         Update: {
@@ -516,6 +520,8 @@ export type Database = {
           name?: string
           notes?: string | null
           position_strengths?: string[] | null
+          stats_analysis?: Json | null
+          stats_analyzed_at?: string | null
           team_id?: string | null
         }
         Relationships: [
@@ -648,6 +654,7 @@ export type Database = {
           age_group: string | null
           created_at: string | null
           created_by: string | null
+          description: string | null
           id: string
           innings_per_game: number | null
           league_name: string | null
@@ -657,6 +664,7 @@ export type Database = {
           age_group?: string | null
           created_at?: string | null
           created_by?: string | null
+          description?: string | null
           id?: string
           innings_per_game?: number | null
           league_name?: string | null
@@ -666,6 +674,7 @@ export type Database = {
           age_group?: string | null
           created_at?: string | null
           created_by?: string | null
+          description?: string | null
           id?: string
           innings_per_game?: number | null
           league_name?: string | null
