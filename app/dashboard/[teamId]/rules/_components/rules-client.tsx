@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   DndContext,
@@ -35,6 +35,7 @@ interface RulesClientProps {
 }
 
 export function RulesClient({ initialRules, initialRuleGroups, teamId }: RulesClientProps) {
+  const [mounted, setMounted] = useState(false)
   const [rules, setRules] = useState<Rule[]>(initialRules)
   const [ruleGroups, setRuleGroups] = useState<RuleGroup[]>(initialRuleGroups)
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(
@@ -46,6 +47,11 @@ export function RulesClient({ initialRules, initialRuleGroups, teamId }: RulesCl
   const [editingGroup, setEditingGroup] = useState<RuleGroup | null>(null)
   const { toast } = useToast()
   const supabase = createClient()
+
+  // Prevent hydration mismatch with DndContext by only rendering after mount
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -406,7 +412,7 @@ export function RulesClient({ initialRules, initialRuleGroups, teamId }: RulesCl
                     Add rules to define how AI should generate lineups when using this rule group.
                   </p>
                 </div>
-              ) : (
+              ) : mounted ? (
                 <DndContext
                   sensors={sensors}
                   collisionDetection={closestCenter}
@@ -430,6 +436,19 @@ export function RulesClient({ initialRules, initialRuleGroups, teamId }: RulesCl
                     </div>
                   </SortableContext>
                 </DndContext>
+              ) : (
+                <div className="space-y-2">
+                  {filteredRules.map((rule, index) => (
+                    <SortableRule
+                      key={rule.id}
+                      rule={rule}
+                      index={index}
+                      onEdit={() => handleEditRule(rule)}
+                      onDelete={() => handleDeleteRule(rule.id)}
+                      onToggleActive={(active) => handleToggleActive(rule.id, active)}
+                    />
+                  ))}
+                </div>
               )}
             </div>
           )}

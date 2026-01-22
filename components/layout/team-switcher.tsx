@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { ChevronDown, Plus, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -24,8 +25,14 @@ interface TeamSwitcherProps {
 }
 
 export function TeamSwitcher({ teams, currentTeamId }: TeamSwitcherProps) {
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
+
+  // Prevent hydration mismatch by only rendering dropdown after mount
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const currentTeam = teams.find(t => t.id === currentTeamId)
 
@@ -52,6 +59,18 @@ export function TeamSwitcher({ teams, currentTeamId }: TeamSwitcherProps) {
       // Just /dashboard/[teamId]
       router.push(`/dashboard/${teamId}`)
     }
+  }
+
+  // Show placeholder during SSR to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <Button variant="outline" size="sm" className="gap-2" disabled>
+        <span className="max-w-[150px] truncate">
+          {teams.find(t => t.id === currentTeamId)?.name || 'Select Team'}
+        </span>
+        <ChevronDown className="h-4 w-4 opacity-50" />
+      </Button>
+    )
   }
 
   if (teams.length === 0) {
