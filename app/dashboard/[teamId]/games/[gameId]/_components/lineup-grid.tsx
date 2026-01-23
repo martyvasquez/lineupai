@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState, useRef, useEffect, useId } from 'react'
+import * as ReactDOM from 'react-dom'
 import {
   DndContext,
   closestCenter,
@@ -39,39 +40,47 @@ interface LineupGridProps {
 }
 
 interface PositionDropdownProps {
-  playerId: string
-  inning: number
   currentPosition: Position | 'SIT' | null
   usedPositions: Set<string>
   onSelect: (position: Position | 'SIT' | null) => void
   onClose: () => void
+  triggerRect: DOMRect | null
 }
 
 function PositionDropdown({
-  playerId,
-  inning,
   currentPosition,
   usedPositions,
   onSelect,
-  onClose
+  onClose,
+  triggerRect,
 }: PositionDropdownProps) {
   const ref = useRef<HTMLDivElement>(null)
-  const [openUpward, setOpenUpward] = useState(false)
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null)
 
   useEffect(() => {
-    // Calculate if dropdown should open upward based on available space
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect()
-      const viewportHeight = window.innerHeight
-      const spaceBelow = viewportHeight - rect.top
-      const dropdownHeight = ref.current.offsetHeight
+    if (!triggerRect) return
 
-      // If not enough space below (less than dropdown height + some padding), open upward
-      if (spaceBelow < dropdownHeight + 20) {
-        setOpenUpward(true)
-      }
+    // Calculate position - dropdown height is approximately 320px (11 items * ~28px + padding)
+    const dropdownHeight = 320
+    const viewportHeight = window.innerHeight
+    const spaceBelow = viewportHeight - triggerRect.bottom
+
+    let top: number
+    if (spaceBelow < dropdownHeight + 10) {
+      // Open upward - position above the trigger
+      top = triggerRect.top - dropdownHeight
+      // Make sure it doesn't go above the viewport
+      if (top < 10) top = 10
+    } else {
+      // Open downward - position below the trigger
+      top = triggerRect.bottom + 4
     }
-  }, [])
+
+    setPosition({
+      top,
+      left: triggerRect.left,
+    })
+  }, [triggerRect])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -92,18 +101,22 @@ function PositionDropdown({
   const handleSelect = (pos: Position | 'SIT' | null) => (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    // Call onSelect first, then close after a microtask to ensure state updates
     onSelect(pos)
     setTimeout(() => onClose(), 0)
   }
 
-  return (
+  if (!position) return null
+
+  return ReactDOM.createPortal(
     <div
       ref={ref}
-      className={cn(
-        "absolute z-50 left-0 bg-background border rounded-lg shadow-lg p-1 min-w-[80px]",
-        openUpward ? "bottom-full mb-1" : "top-full mt-1"
-      )}
+      style={{
+        position: 'fixed',
+        top: position.top,
+        left: position.left,
+        zIndex: 9999,
+      }}
+      className="bg-background border rounded-lg shadow-lg p-1 min-w-[80px]"
       onClick={(e) => e.stopPropagation()}
     >
       {POSITIONS.map((pos) => {
@@ -136,7 +149,8 @@ function PositionDropdown({
       >
         Clear
       </button>
-    </div>
+    </div>,
+    document.body
   )
 }
 
@@ -145,14 +159,14 @@ interface SortableRowProps {
   entry: BattingOrderEntry
   inningNumbers: number[]
   getCell: (playerId: string, inning: number) => GridCell | undefined
-  activeDropdown: { playerId: string; inning: number } | null
+  activeDropdown: { playerId: string; inning: number; triggerRect: DOMRect } | null
   usedPositionsByInning: Map<number, Set<string>>
   lockedInnings: Set<number>
   readOnly: boolean
-  onCellClick: (playerId: string, inning: number) => void
+  onCellClick: (playerId: string, inning: number, element: HTMLElement) => void
   onCellChange: (playerId: string, inning: number, position: Position | 'SIT' | null) => void
   onLockToggle: (playerId: string, inning: number, e: React.MouseEvent) => void
-  setActiveDropdown: (dropdown: { playerId: string; inning: number } | null) => void
+  setActiveDropdown: (dropdown: { playerId: string; inning: number; triggerRect: DOMRect } | null) => void
   isDraggable: boolean
 }
 
@@ -216,9 +230,9 @@ function SortableRow({
         const isInningLocked = lockedInnings.has(inning)
 
         return (
-          <td key={inning} className={cn('text-center p-1 relative', isInningLocked && 'bg-primary/5')}>
+          <td key={inning} className={cn('text-center p-1', isInningLocked && 'bg-primary/5')}>
             <div
-              onClick={() => onCellClick(entry.player_id, inning)}
+              onClick={(e) => onCellClick(entry.player_id, inning, e.currentTarget)}
               className={cn(
                 'relative flex items-center justify-center gap-1 px-2 py-1.5 rounded min-h-[36px]',
                 cell?.locked && 'ring-2 ring-primary/50 bg-primary/5',
@@ -263,18 +277,16 @@ function SortableRow({
               ) : (
                 <ChevronDown className="h-3 w-3 text-muted-foreground" />
               )}
-
-              {isActive && (
-                <PositionDropdown
-                  playerId={entry.player_id}
-                  inning={inning}
-                  currentPosition={cell?.position || null}
-                  usedPositions={usedPositions}
-                  onSelect={(pos) => onCellChange(entry.player_id, inning, pos)}
-                  onClose={() => setActiveDropdown(null)}
-                />
-              )}
             </div>
+            {isActive && (
+              <PositionDropdown
+                currentPosition={cell?.position || null}
+                usedPositions={usedPositions}
+                onSelect={(pos) => onCellChange(entry.player_id, inning, pos)}
+                onClose={() => setActiveDropdown(null)}
+                triggerRect={activeDropdown?.triggerRect || null}
+              />
+            )}
           </td>
         )
       })}
@@ -287,15 +299,15 @@ interface SortableCardProps {
   entry: BattingOrderEntry
   inningNumbers: number[]
   getCell: (playerId: string, inning: number) => GridCell | undefined
-  activeDropdown: { playerId: string; inning: number } | null
+  activeDropdown: { playerId: string; inning: number; triggerRect: DOMRect } | null
   usedPositionsByInning: Map<number, Set<string>>
   lockedInnings: Set<number>
   hasDefensivePositions: boolean
   readOnly: boolean
-  onCellClick: (playerId: string, inning: number) => void
+  onCellClick: (playerId: string, inning: number, element: HTMLElement) => void
   onCellChange: (playerId: string, inning: number, position: Position | 'SIT' | null) => void
   onInningHeaderClick: (inning: number) => void
-  setActiveDropdown: (dropdown: { playerId: string; inning: number } | null) => void
+  setActiveDropdown: (dropdown: { playerId: string; inning: number; triggerRect: DOMRect } | null) => void
   isDraggable: boolean
 }
 
@@ -359,7 +371,7 @@ function SortableCard({
           const isInningLocked = lockedInnings.has(inning)
 
           return (
-            <div key={inning} className="text-center relative">
+            <div key={inning} className="text-center">
               <div
                 className={cn(
                   'text-[10px] text-muted-foreground mb-0.5 flex items-center justify-center gap-0.5',
@@ -372,7 +384,7 @@ function SortableCard({
                 {isInningLocked && <Lock className="h-2 w-2" />}
               </div>
               <div
-                onClick={() => onCellClick(entry.player_id, inning)}
+                onClick={(e) => onCellClick(entry.player_id, inning, e.currentTarget)}
                 className={cn(
                   'relative flex items-center justify-center gap-0.5 px-2 py-1 rounded min-w-[40px]',
                   cell?.locked && 'ring-2 ring-primary/50 bg-primary/5',
@@ -403,18 +415,16 @@ function SortableCard({
                 ) : (
                   <span className="text-xs text-muted-foreground">-</span>
                 )}
-
-                {isActive && (
-                  <PositionDropdown
-                    playerId={entry.player_id}
-                    inning={inning}
-                    currentPosition={cell?.position || null}
-                    usedPositions={usedPositions}
-                    onSelect={(pos) => onCellChange(entry.player_id, inning, pos)}
-                    onClose={() => setActiveDropdown(null)}
-                  />
-                )}
               </div>
+              {isActive && (
+                <PositionDropdown
+                  currentPosition={cell?.position || null}
+                  usedPositions={usedPositions}
+                  onSelect={(pos) => onCellChange(entry.player_id, inning, pos)}
+                  onClose={() => setActiveDropdown(null)}
+                  triggerRect={activeDropdown?.triggerRect || null}
+                />
+              )}
             </div>
           )
         })}
@@ -435,7 +445,7 @@ export function LineupGrid({
   readOnly = false,
   defensiveRationale,
 }: LineupGridProps) {
-  const [activeDropdown, setActiveDropdown] = useState<{ playerId: string; inning: number } | null>(null)
+  const [activeDropdown, setActiveDropdown] = useState<{ playerId: string; inning: number; triggerRect: DOMRect } | null>(null)
   const [showRationale, setShowRationale] = useState(false)
 
   // Stable ID for DndContext to prevent hydration mismatch
@@ -502,7 +512,7 @@ export function LineupGrid({
     return playerRow?.find(cell => cell.inning === inning)
   }
 
-  const handleCellClick = (playerId: string, inning: number) => {
+  const handleCellClick = (playerId: string, inning: number, element: HTMLElement) => {
     if (readOnly) return
     // Don't allow editing locked innings
     if (lockedInnings.has(inning)) return
@@ -511,7 +521,7 @@ export function LineupGrid({
       if (prev?.playerId === playerId && prev?.inning === inning) {
         return null
       }
-      return { playerId, inning }
+      return { playerId, inning, triggerRect: element.getBoundingClientRect() }
     })
   }
 
