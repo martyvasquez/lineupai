@@ -9,7 +9,7 @@ import '@/lib/env'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'LineupAI - Youth Baseball Lineup Optimizer',
+  title: 'Peanut Manager - Youth Baseball Lineup Optimizer',
   description: 'AI-powered lineup generation for youth baseball and softball coaches',
 }
 

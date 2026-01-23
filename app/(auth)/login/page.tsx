@@ -87,7 +87,7 @@ export default function LoginPage() {
     <Card>
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold text-center">
-          LineupAI
+          Peanut Manager
         </CardTitle>
         <CardDescription className="text-center">
           Sign in to your account

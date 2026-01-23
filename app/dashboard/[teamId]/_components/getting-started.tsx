@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { X, HelpCircle } from 'lucide-react'
 
-const STORAGE_KEY = 'lineupai-hide-getting-started'
+const STORAGE_KEY = 'peanutmgr-hide-getting-started'
 
 export function GettingStarted() {
   const [hidden, setHidden] = useState(true) // Start hidden to avoid flash

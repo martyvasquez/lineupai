@@ -62,7 +62,7 @@ export function Header({ teams = [], currentTeamId }: HeaderProps) {
     <header className="border-b bg-white">
       <div className="flex h-16 items-center px-4 md:px-6">
         <Link href="/dashboard" className="font-bold text-xl">
-          LineupAI
+          Peanut Manager
         </Link>
 
         {teams.length > 0 && (
