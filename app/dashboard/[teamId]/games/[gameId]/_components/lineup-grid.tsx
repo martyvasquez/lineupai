@@ -561,7 +561,7 @@ export function LineupGrid({
                     <th
                       key={inning}
                       className={cn(
-                        'text-center p-2 font-medium min-w-[60px]',
+                        'text-center p-2 font-medium min-w-[60px] group',
                         hasDefensivePositions && 'cursor-pointer hover:bg-muted/50',
                         isLocked && 'bg-primary/10'
                       )}
@@ -571,6 +571,9 @@ export function LineupGrid({
                       <div className="flex items-center justify-center gap-1">
                         {inning}
                         {isLocked && <Lock className="h-3 w-3 text-primary" />}
+                        {!isLocked && hasDefensivePositions && (
+                          <Lock className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-50 transition-opacity" />
+                        )}
                       </div>
                     </th>
                   )
