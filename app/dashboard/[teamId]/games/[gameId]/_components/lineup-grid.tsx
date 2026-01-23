@@ -568,12 +568,10 @@ export function LineupGrid({
                       onClick={() => handleInningHeaderClick(inning)}
                       title={hasDefensivePositions ? (isLocked ? 'Click to unlock inning' : 'Click to lock inning') : undefined}
                     >
-                      <div className="relative flex items-center justify-center">
-                        {hasDefensivePositions && (
-                          <Lock className={cn(
-                            'h-3 w-3 transition-opacity absolute -left-1 -translate-x-full',
-                            isLocked ? 'text-primary opacity-100' : 'text-muted-foreground opacity-0 group-hover:opacity-50'
-                          )} />
+                      <div className="flex items-center justify-center gap-1">
+                        {isLocked && <Lock className="h-3 w-3 text-primary" />}
+                        {!isLocked && hasDefensivePositions && (
+                          <Lock className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-50 transition-opacity" />
                         )}
                         {inning}
                       </div>
