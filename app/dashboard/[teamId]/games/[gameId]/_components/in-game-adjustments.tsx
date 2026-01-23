@@ -21,49 +21,29 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Settings, UserMinus, RefreshCw, Clock } from 'lucide-react'
+import { RefreshCw, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { Database } from '@/types/database'
-
-type Player = Database['public']['Tables']['players']['Row']
 
 interface InGameAdjustmentsProps {
   currentInnings: number
-  players: Player[]
-  availablePlayers: string[]
   onInningsChange: (innings: number) => void
-  onMarkUnavailable: (playerIds: string[]) => void
   onRegenerateInnings: (innings: number[], feedback: string) => void
   isGenerating?: boolean
 }
 
 export function InGameAdjustments({
   currentInnings,
-  players,
-  availablePlayers,
   onInningsChange,
-  onMarkUnavailable,
   onRegenerateInnings,
   isGenerating = false,
 }: InGameAdjustmentsProps) {
-  const [showUnavailableDialog, setShowUnavailableDialog] = useState(false)
-  const [selectedUnavailable, setSelectedUnavailable] = useState<string[]>([])
   const [showRegenerateDialog, setShowRegenerateDialog] = useState(false)
   const [selectedInnings, setSelectedInnings] = useState<number[]>([])
   const [regenerateFeedback, setRegenerateFeedback] = useState('')
 
   const inningOptions = Array.from({ length: 9 }, (_, i) => i + 1)
-  const availablePlayersList = players.filter(p => availablePlayers.includes(p.id))
   const allInnings = Array.from({ length: currentInnings }, (_, i) => i + 1)
   const allSelected = selectedInnings.length === currentInnings
-
-  const handleMarkUnavailable = () => {
-    if (selectedUnavailable.length > 0) {
-      onMarkUnavailable(selectedUnavailable)
-      setSelectedUnavailable([])
-      setShowUnavailableDialog(false)
-    }
-  }
 
   const handleToggleInning = (inning: number, checked: boolean) => {
     if (checked) {
@@ -113,68 +93,7 @@ export function InGameAdjustments({
         </Select>
       </div>
 
-      {/* Mark Player Unavailable */}
-      <Dialog open={showUnavailableDialog} onOpenChange={setShowUnavailableDialog}>
-        <DialogTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2">
-            <UserMinus className="h-4 w-4" />
-            <span className="hidden sm:inline">Mark Unavailable</span>
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Mark Players Unavailable</DialogTitle>
-            <DialogDescription>
-              Select players who can no longer play. This will regenerate the lineup.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="max-h-[300px] overflow-y-auto space-y-2">
-            {availablePlayersList.map((player) => (
-              <label
-                key={player.id}
-                className={cn(
-                  'flex items-center gap-3 p-2 rounded-lg border cursor-pointer hover:bg-accent',
-                  selectedUnavailable.includes(player.id) && 'bg-accent'
-                )}
-              >
-                <Checkbox
-                  checked={selectedUnavailable.includes(player.id)}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      setSelectedUnavailable([...selectedUnavailable, player.id])
-                    } else {
-                      setSelectedUnavailable(selectedUnavailable.filter(id => id !== player.id))
-                    }
-                  }}
-                />
-                <div className="flex items-center gap-2">
-                  {player.jersey_number && (
-                    <span className="text-xs font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                      #{player.jersey_number}
-                    </span>
-                  )}
-                  <span className="font-medium">{player.name}</span>
-                </div>
-              </label>
-            ))}
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowUnavailableDialog(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleMarkUnavailable}
-              disabled={selectedUnavailable.length === 0}
-            >
-              Mark Unavailable ({selectedUnavailable.length})
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Regenerate from Inning */}
+      {/* Regenerate Innings */}
       <Dialog open={showRegenerateDialog} onOpenChange={setShowRegenerateDialog}>
         <DialogTrigger asChild>
           <Button

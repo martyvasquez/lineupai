@@ -1,7 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 import { Users, FileText, Calendar, BarChart3 } from 'lucide-react'
+import { TeamInsights } from './_components/team-insights'
+import { GettingStarted } from './_components/getting-started'
+import type { TeamAnalysis } from '@/types/lineup'
 
 interface TeamDashboardPageProps {
   params: Promise<{ teamId: string }>
@@ -13,7 +16,7 @@ export default async function TeamDashboardPage({ params }: TeamDashboardPagePro
 
   // Note: Auth and team ownership are validated by the layout
 
-  // Fetch team info
+  // Fetch team info with analysis data
   const { data: team } = await supabase
     .from('teams')
     .select('*')
@@ -22,16 +25,46 @@ export default async function TeamDashboardPage({ params }: TeamDashboardPagePro
 
   const today = new Date().toISOString().split('T')[0]
 
-  // Fetch counts in parallel
-  const [playersResult, rulesResult, gamesResult] = await Promise.all([
+  // Fetch counts and stats data in parallel
+  const [playersResult, rulesResult, gamesResult, playersWithStatsResult] = await Promise.all([
     supabase.from('players').select('id', { count: 'exact', head: true }).eq('team_id', teamId),
     supabase.from('team_rules').select('id', { count: 'exact', head: true }).eq('team_id', teamId).eq('active', true),
     supabase.from('games').select('id', { count: 'exact', head: true }).eq('team_id', teamId).gte('game_date', today),
+    // Get player IDs to check for stats
+    supabase.from('players').select('id').eq('team_id', teamId).eq('active', true),
   ])
 
   const playerCount = playersResult.count ?? 0
   const ruleCount = rulesResult.count ?? 0
   const upcomingGameCount = gamesResult.count ?? 0
+
+  // Check how many players have stats (using the season view which aggregates per player)
+  let statsCount = 0
+  let lastImportDate: string | null = team?.stats_imported_at || null
+  const playerIds = playersWithStatsResult.data?.map(p => p.id) || []
+  if (playerIds.length > 0) {
+    const { data: playersWithStats } = await supabase
+      .from('gamechanger_batting_season')
+      .select('player_id')
+      .in('player_id', playerIds)
+    statsCount = playersWithStats?.length ?? 0
+
+    // If no stats_imported_at on team, get it from the batting records
+    if (!lastImportDate && statsCount > 0) {
+      const { data: recentImport } = await supabase
+        .from('gamechanger_batting')
+        .select('imported_at')
+        .in('player_id', playerIds)
+        .order('imported_at', { ascending: false })
+        .limit(1)
+
+      if (recentImport && recentImport.length > 0) {
+        lastImportDate = recentImport[0].imported_at
+      }
+    }
+  }
+
+  const hasStats = statsCount > 0
 
   return (
     <div className="space-y-6">
@@ -105,9 +138,9 @@ export default async function TeamDashboardPage({ params }: TeamDashboardPagePro
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">CSV</div>
+              <div className="text-2xl font-bold">{statsCount > 0 ? statsCount : 'CSV'}</div>
               <p className="text-xs text-muted-foreground">
-                GameChanger import
+                {statsCount > 0 ? `${statsCount} players with stats` : 'GameChanger import'}
               </p>
               <span className="text-sm text-primary hover:underline">
                 View stats →
@@ -117,63 +150,18 @@ export default async function TeamDashboardPage({ params }: TeamDashboardPagePro
         </Link>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Getting Started</CardTitle>
-          <CardDescription>
-            Set up your team to start generating lineups
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-start space-x-4">
-            <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-bold">
-              1
-            </div>
-            <div>
-              <h3 className="font-medium">Add players to your roster</h3>
-              <p className="text-sm text-muted-foreground">
-                Go to Roster to add your players with jersey numbers.
-              </p>
-            </div>
-          </div>
+      {/* Team Insights Section */}
+      <TeamInsights
+        teamId={teamId}
+        hasStats={hasStats}
+        statsCount={statsCount}
+        playerCount={playerCount}
+        statsImportedAt={lastImportDate}
+        teamAnalysis={team?.team_analysis as TeamAnalysis | null}
+        teamAnalyzedAt={team?.team_analyzed_at || null}
+      />
 
-          <div className="flex items-start space-x-4">
-            <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-bold">
-              2
-            </div>
-            <div>
-              <h3 className="font-medium">Set player ratings and eligibility</h3>
-              <p className="text-sm text-muted-foreground">
-                Rate each player&apos;s abilities and mark position eligibility for key positions.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-4">
-            <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-bold">
-              3
-            </div>
-            <div>
-              <h3 className="font-medium">Define team rules</h3>
-              <p className="text-sm text-muted-foreground">
-                Add your league and team rules in plain language for AI to follow.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start space-x-4">
-            <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 font-bold">
-              4
-            </div>
-            <div>
-              <h3 className="font-medium">Create a game and generate lineup</h3>
-              <p className="text-sm text-muted-foreground">
-                Create an upcoming game, mark players as available, and let AI generate your lineup!
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <GettingStarted />
     </div>
   )
 }

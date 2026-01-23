@@ -5,9 +5,10 @@ import { claudeClient } from '@/lib/ai/claude-client'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { team_id, player_ids } = body as {
+    const { team_id, player_ids, include_team_analysis = true } = body as {
       team_id: string
       player_ids?: string[] // Optional: if not provided, analyze all players
+      include_team_analysis?: boolean // Whether to also generate team-level analysis
     }
 
     if (!team_id) {
@@ -201,7 +202,7 @@ Return your analysis in this exact JSON format:
 
     const response = await claudeClient.generateStatsAnalysis(prompt)
 
-    // Save analyses to database
+    // Save player analyses to database
     const now = new Date().toISOString()
     for (const result of response.analyses) {
       await supabase
@@ -213,10 +214,141 @@ Return your analysis in this exact JSON format:
         .eq('id', result.player_id)
     }
 
+    // Generate team-level analysis if requested
+    let teamAnalysis = null
+    console.log('[Stats Analyze] Team analysis check:', { include_team_analysis, playersWithStatsCount: playersWithStats.length })
+    if (include_team_analysis && playersWithStats.length >= 3) {
+      // Calculate team aggregate stats
+      const teamBattingStats = {
+        total_pa: battingStats?.reduce((sum, s) => sum + (s.pa || 0), 0) || 0,
+        total_ab: battingStats?.reduce((sum, s) => sum + (s.ab || 0), 0) || 0,
+        total_h: battingStats?.reduce((sum, s) => sum + (s.h || 0), 0) || 0,
+        total_bb: battingStats?.reduce((sum, s) => sum + (s.bb || 0), 0) || 0,
+        total_so: battingStats?.reduce((sum, s) => sum + (s.so || 0), 0) || 0,
+        total_sb: battingStats?.reduce((sum, s) => sum + (s.sb || 0), 0) || 0,
+        avg_avg: battingStats && battingStats.length > 0
+          ? battingStats.reduce((sum, s) => sum + (s.avg || 0), 0) / battingStats.length
+          : 0,
+        avg_obp: battingStats && battingStats.length > 0
+          ? battingStats.reduce((sum, s) => sum + (s.obp || 0), 0) / battingStats.length
+          : 0,
+        avg_slg: battingStats && battingStats.length > 0
+          ? battingStats.reduce((sum, s) => sum + (s.slg || 0), 0) / battingStats.length
+          : 0,
+      }
+
+      const teamFieldingStats = {
+        total_tc: fieldingStats?.reduce((sum, s) => sum + (s.tc || 0), 0) || 0,
+        total_e: fieldingStats?.reduce((sum, s) => sum + (s.e || 0), 0) || 0,
+        total_po: fieldingStats?.reduce((sum, s) => sum + (s.po || 0), 0) || 0,
+        total_a: fieldingStats?.reduce((sum, s) => sum + (s.a || 0), 0) || 0,
+        avg_fpct: fieldingStats && fieldingStats.length > 0
+          ? fieldingStats.reduce((sum, s) => sum + (s.fpct || 0), 0) / fieldingStats.length
+          : 0,
+      }
+
+      // Collect individual player summaries
+      const playerSummaries = response.analyses.map(r => ({
+        name: playersWithStats.find(p => p.id === r.player_id)?.name || 'Unknown',
+        summary: r.analysis.summary,
+        strengths: r.analysis.strengths.map(s => s.category),
+        weaknesses: r.analysis.weaknesses.map(w => w.category),
+      }))
+
+      const teamPrompt = `Analyze the following youth baseball team based on aggregate statistics and individual player analyses.
+
+TEAM AGGREGATE BATTING STATS:
+- Total Plate Appearances: ${teamBattingStats.total_pa}
+- Total At Bats: ${teamBattingStats.total_ab}
+- Total Hits: ${teamBattingStats.total_h}
+- Total Walks: ${teamBattingStats.total_bb}
+- Total Strikeouts: ${teamBattingStats.total_so}
+- Total Stolen Bases: ${teamBattingStats.total_sb}
+- Team Average AVG: ${teamBattingStats.avg_avg.toFixed(3)}
+- Team Average OBP: ${teamBattingStats.avg_obp.toFixed(3)}
+- Team Average SLG: ${teamBattingStats.avg_slg.toFixed(3)}
+- Team K Rate: ${teamBattingStats.total_ab > 0 ? ((teamBattingStats.total_so / teamBattingStats.total_ab) * 100).toFixed(1) : 0}%
+- Team BB Rate: ${teamBattingStats.total_pa > 0 ? ((teamBattingStats.total_bb / teamBattingStats.total_pa) * 100).toFixed(1) : 0}%
+
+TEAM AGGREGATE FIELDING STATS:
+- Total Chances: ${teamFieldingStats.total_tc}
+- Total Errors: ${teamFieldingStats.total_e}
+- Total Putouts: ${teamFieldingStats.total_po}
+- Total Assists: ${teamFieldingStats.total_a}
+- Team Average FPCT: ${teamFieldingStats.avg_fpct.toFixed(3)}
+
+INDIVIDUAL PLAYER SUMMARIES:
+${JSON.stringify(playerSummaries, null, 2)}
+
+Provide team-level analysis in this exact JSON format:
+{
+  "team_strengths": [
+    {
+      "category": "Plate Discipline",
+      "description": "Team draws walks at an above-average rate",
+      "supporting_stats": "12% BB rate, well above youth average"
+    }
+  ],
+  "team_weaknesses": [
+    {
+      "category": "Strikeouts",
+      "description": "High strikeout rate indicates contact issues",
+      "supporting_stats": "25% K rate across the roster"
+    }
+  ],
+  "practice_recommendations": [
+    {
+      "focus_area": "Contact hitting",
+      "drill_suggestions": "Soft toss, tee work focusing on bat-to-ball contact, two-strike approach drills",
+      "priority": "high"
+    }
+  ],
+  "lineup_insights": {
+    "best_leadoff_candidates": ["Player A", "Player B"],
+    "best_power_spots": ["Player C", "Player D"],
+    "defensive_strengths": ["Middle infield depth", "Catching"],
+    "defensive_concerns": ["Outfield arm strength", "Corner infield consistency"]
+  },
+  "summary": "A brief 2-3 sentence summary of the team's overall profile and top priorities."
+}`
+
+      try {
+        console.log('[Stats Analyze] Generating team analysis...')
+        teamAnalysis = await claudeClient.generateTeamAnalysis(teamPrompt)
+        console.log('[Stats Analyze] Team analysis generated:', teamAnalysis ? 'success' : 'null')
+
+        // Save team analysis to database
+        const { error: updateError } = await supabase
+          .from('teams')
+          .update({
+            team_analysis: teamAnalysis,
+            team_analyzed_at: now,
+          })
+          .eq('id', team_id)
+
+        if (updateError) {
+          console.error('[Stats Analyze] Failed to save team analysis:', updateError)
+        } else {
+          console.log('[Stats Analyze] Team analysis saved to database')
+        }
+      } catch (teamError) {
+        console.error('[Stats Analyze] Team analysis error:', teamError)
+        // Return error info for debugging
+        return NextResponse.json({
+          success: true,
+          analyzed_count: response.analyses.length,
+          analyses: response.analyses,
+          team_analysis: null,
+          team_analysis_error: teamError instanceof Error ? teamError.message : 'Unknown error',
+        })
+      }
+    }
+
     return NextResponse.json({
       success: true,
       analyzed_count: response.analyses.length,
       analyses: response.analyses,
+      team_analysis: teamAnalysis,
     })
 
   } catch (error) {

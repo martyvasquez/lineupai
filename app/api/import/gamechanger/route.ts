@@ -137,6 +137,12 @@ export async function POST(request: NextRequest) {
       // Don't fail completely - batting stats were saved
     }
 
+    // Update team's stats_imported_at timestamp
+    await supabase
+      .from('teams')
+      .update({ stats_imported_at: new Date().toISOString() })
+      .eq('id', team_id)
+
     return NextResponse.json({
       success: true,
       imported_count: validStats.length,
@@ -223,6 +229,22 @@ export async function DELETE(request: NextRequest) {
     if (fieldingError) {
       console.error('Failed to delete fielding stats:', fieldingError)
     }
+
+    // Clear player analyses
+    await supabase
+      .from('players')
+      .update({ stats_analysis: null, stats_analyzed_at: null })
+      .in('id', playerIds)
+
+    // Clear team analysis and stats_imported_at
+    await supabase
+      .from('teams')
+      .update({
+        team_analysis: null,
+        team_analyzed_at: null,
+        stats_imported_at: null,
+      })
+      .eq('id', team_id)
 
     return NextResponse.json({
       success: true,

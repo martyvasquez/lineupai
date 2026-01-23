@@ -50,6 +50,7 @@ export function Header({ teams = [], currentTeamId }: HeaderProps) {
   // Build nav links based on whether we have a current team
   const navLinks = effectiveTeamId
     ? [
+        { href: `/dashboard/${effectiveTeamId}`, label: 'Dashboard' },
         { href: `/dashboard/${effectiveTeamId}/roster`, label: 'Roster' },
         { href: `/dashboard/${effectiveTeamId}/rules`, label: 'Rules' },
         { href: `/dashboard/${effectiveTeamId}/games`, label: 'Games' },

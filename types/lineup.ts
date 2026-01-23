@@ -205,3 +205,29 @@ export interface StatsAnalysisResponse {
     analysis: PlayerStatsAnalysis
   }>
 }
+
+// Team-level analysis types
+export interface TeamAnalysis {
+  team_strengths: Array<{
+    category: string
+    description: string
+    supporting_stats: string
+  }>
+  team_weaknesses: Array<{
+    category: string
+    description: string
+    supporting_stats: string
+  }>
+  practice_recommendations: Array<{
+    focus_area: string
+    drill_suggestions: string
+    priority: 'high' | 'medium' | 'low'
+  }>
+  lineup_insights: {
+    best_leadoff_candidates: string[]
+    best_power_spots: string[]
+    defensive_strengths: string[]
+    defensive_concerns: string[]
+  }
+  summary: string
+}

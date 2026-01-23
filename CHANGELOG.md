@@ -7,6 +7,94 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.0] - 2026-01-22
+
+### Added
+
+#### Team Dashboard Overhaul - AI Insights (Major Feature)
+- **Team Insights Card** - New dashboard section with three states:
+  - **No stats uploaded:** Prompts to upload GameChanger CSV
+  - **Stats exist, no analysis:** Shows "Generate Insights" button with data import date
+  - **Analysis complete:** Displays team strengths, weaknesses, practice recommendations
+- **Team-Level AI Analysis** - Claude analyzes aggregate team stats to provide:
+  - Team strengths with supporting statistics
+  - Areas for improvement with recommendations
+  - Practice drill suggestions with priority levels (high/medium/low)
+  - Lineup insights (best leadoff candidates, power spots, defensive strengths/concerns)
+- **Data Timestamps** - Shows when stats were imported and when analysis was generated
+- **Refresh Analysis** - Button to regenerate insights with updated data
+
+#### Database Migration (`20260122100000_add_team_analysis.sql`)
+- `team_analysis JSONB` - Stores AI-generated team-level insights
+- `team_analyzed_at TIMESTAMPTZ` - When team analysis was last generated
+- `stats_imported_at TIMESTAMPTZ` - When GameChanger stats were last uploaded
+
+#### Dismissible Getting Started Guide
+- **"Don't show again" button** - Hides the getting started card
+- **Persists to localStorage** - Preference remembered across sessions
+- **"Show getting started guide" link** - Brings back the card when hidden
+
+#### Dashboard Navigation
+- **Added "Dashboard" link** - Now shows: Dashboard → Roster → Rules → Games → Stats
+
+#### Stats Page Enhancements
+- **Last Analysis Date** - Shows when AI player analysis was last generated
+- **Sparkles icon indicator** - Visual indicator next to analysis timestamp
+
+#### Team Settings UX
+- **Clickable team cards** - Click anywhere on team box to navigate to that team's dashboard
+- **Edit/Delete buttons preserved** - Pencil and trash icons still work independently
+
+### Fixed
+
+#### Blank Positions After Lineup Generation
+- **Issue:** Sometimes positions were blank after AI generation due to ID mismatch
+- **Cause:** `buildGridFromDefense` only matched players by exact UUID
+- **Fix:** Added fallback matching by player name when ID match fails
+- **Debug:** Console warnings when name fallback is used to help identify AI ID issues
+
+### Changed
+
+#### API Updates
+- **`/api/stats/analyze`**:
+  - Now generates team-level analysis alongside individual player analyses
+  - Calculates aggregate team batting/fielding stats
+  - Saves team analysis to `teams` table
+  - Returns `team_analysis` in response
+
+- **`/api/import/gamechanger`**:
+  - Sets `stats_imported_at` on team when stats are imported
+  - Clears team analysis and timestamps when stats are cleared
+
+#### Type Updates
+- **`types/lineup.ts`**: Added `TeamAnalysis` interface
+- **`types/database.ts`**: Added team analysis columns to teams table type
+
+### Files Added
+
+| File | Description |
+|------|-------------|
+| `app/dashboard/[teamId]/_components/team-insights.tsx` | Team insights card component |
+| `app/dashboard/[teamId]/_components/getting-started.tsx` | Dismissible getting started component |
+| `supabase/migrations/20260122100000_add_team_analysis.sql` | Team analysis columns migration |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/dashboard/[teamId]/page.tsx` | Added TeamInsights and GettingStarted components |
+| `app/dashboard/[teamId]/stats/_components/stats-client.tsx` | Added last analysis date display |
+| `app/dashboard/settings/_components/settings-client.tsx` | Made team cards clickable |
+| `components/layout/header.tsx` | Added Dashboard to navigation |
+| `app/api/stats/analyze/route.ts` | Added team-level analysis generation |
+| `app/api/import/gamechanger/route.ts` | Track stats_imported_at timestamp |
+| `lib/ai/claude-client.ts` | Added generateTeamAnalysis() method |
+| `types/lineup.ts` | Added TeamAnalysis interface |
+| `types/database.ts` | Added team analysis columns |
+| `game-detail-client.tsx` | Fixed blank positions with name fallback |
+
+---
+
 ## [0.99.0] - 2026-01-22
 
 ### Added
@@ -622,6 +710,7 @@ ALTER TABLE lineups ADD COLUMN rule_group_id UUID REFERENCES rule_groups(id) ON 
 | `20260121000002_add_player_notes.sql` | Coach notes field | 2026-01-21 |
 | `20260121000004_add_stats_analysis.sql` | Stats analysis JSONB column | 2026-01-21 |
 | `20260122000000_add_multi_team_support.sql` | Team description and index | 2026-01-22 |
+| `20260122100000_add_team_analysis.sql` | Team analysis and stats timestamps | 2026-01-22 |
 
 ---
 

@@ -659,6 +659,9 @@ export type Database = {
           innings_per_game: number | null
           league_name: string | null
           name: string
+          stats_imported_at: string | null
+          team_analysis: Json | null
+          team_analyzed_at: string | null
         }
         Insert: {
           age_group?: string | null
@@ -669,6 +672,9 @@ export type Database = {
           innings_per_game?: number | null
           league_name?: string | null
           name: string
+          stats_imported_at?: string | null
+          team_analysis?: Json | null
+          team_analyzed_at?: string | null
         }
         Update: {
           age_group?: string | null
@@ -679,6 +685,9 @@ export type Database = {
           innings_per_game?: number | null
           league_name?: string | null
           name?: string
+          stats_imported_at?: string | null
+          team_analysis?: Json | null
+          team_analyzed_at?: string | null
         }
         Relationships: []
       }

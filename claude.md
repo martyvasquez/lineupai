@@ -1,7 +1,7 @@
 # LineupAI - AI-Powered Baseball Lineup Optimizer
 
-**Status:** 🚧 In Development (98% Complete)
-**Last Updated:** January 22, 2026 (v0.99.0)
+**Status:** 🚧 In Development (99% Complete)
+**Last Updated:** January 22, 2026 (v1.0.0)
 
 ---
 
@@ -488,7 +488,7 @@ npm run dev
 
 ## 📈 Progress Overview
 
-### Completed: ~98%
+### Completed: ~99%
 - [x] Foundation & Infrastructure (Week 1) - **100%**
   - Project setup, dependencies, database schema
   - Authentication system, dashboard layout
@@ -621,9 +621,29 @@ MVP is complete when:
 - **Regeneration with feedback** - provide instructions for AI adjustments
 - **Multi-inning selection** - checkbox-based inning selection for regeneration
 - GameChanger CSV import with player matching
-- AI prompt builder ready (needs API key to test)
+- **Team Insights** - AI-powered team analysis on dashboard
+- **Dismissible Getting Started** - Can hide and restore the onboarding guide
 
-**Recent Changes (January 22, 2026 - v0.99.0):**
+**Recent Changes (January 22, 2026 - v1.0.0):**
+- **Team Dashboard Overhaul:**
+  - New Team Insights card with AI-powered team analysis
+  - Shows team strengths, weaknesses, and practice recommendations
+  - Displays data import date and analysis generation date
+  - Three states: no stats, ready to analyze, analysis complete
+- **Dashboard Navigation:**
+  - Added "Dashboard" link to header nav (Dashboard → Roster → Rules → Games → Stats)
+- **Dismissible Getting Started:**
+  - "Don't show again" button hides the onboarding card
+  - "Show getting started guide" link to bring it back
+  - Preference saved to localStorage
+- **Stats Page Enhancement:**
+  - Shows when AI player analysis was last generated
+- **Team Settings UX:**
+  - Team cards are now clickable to navigate to team dashboard
+- **Bug Fix:**
+  - Fixed blank positions after lineup generation (added name fallback matching)
+
+**Previous Changes (v0.99.0):**
 - **Regeneration Feedback System:**
   - Coaches can now provide feedback when regenerating defensive positions
   - Text field for instructions like "Move Jake to outfield" or "Cole should pitch inning 3"
@@ -640,21 +660,6 @@ MVP is complete when:
   - Removed team-level Innings Per Game (now only at game level)
   - Removed game Location/Field input
   - Simplified TeamContext for AI prompts (only name and age_group)
-
-**Previous Changes (v0.97.0):**
-- **Multi-Team Support (Major Feature):**
-  - New URL structure: `/dashboard/[teamId]/roster`, `/dashboard/[teamId]/games`, etc.
-  - Team switcher dropdown in header to switch between teams
-  - Team management page (create, edit, delete teams)
-- **Authentication Flow:**
-  - Forgot password page with email reset
-  - Reset password page after clicking email link
-  - Email change in profile settings
-  - Password change in profile settings
-- **Roster Import from CSV:**
-  - Import roster during team creation (step 2 of dialog)
-  - "Import CSV" button on roster page for existing teams
-  - Toggle to import just roster or include stats
 
 ---
 

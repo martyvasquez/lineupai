@@ -313,22 +313,36 @@ export function StatsClient({
   const unmatchedCount = matchResults?.filter(r => r.player_id === null).length ?? 0
   const playersWithAnalysis = players.filter(p => p.stats_analysis !== null).length
 
+  // Get the most recent analysis date from players
+  const lastAnalysisDate = players
+    .filter(p => p.stats_analyzed_at)
+    .map(p => new Date(p.stats_analyzed_at!).getTime())
+    .sort((a, b) => b - a)[0]
+
   return (
     <div className="space-y-6">
       {/* Stats Summary & Actions */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-muted-foreground" />
             <span className="text-sm">
               <strong>{statsCount}</strong> of {players.length} players have stats
             </span>
           </div>
-          {lastImportDate && (
-            <span className="text-sm text-muted-foreground">
-              Last import: {format(new Date(lastImportDate), 'MMM d, yyyy')}
-            </span>
-          )}
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            {lastImportDate && (
+              <span>
+                Import: {format(new Date(lastImportDate), 'MMM d, yyyy')}
+              </span>
+            )}
+            {lastAnalysisDate && (
+              <span className="flex items-center gap-1">
+                <Sparkles className="h-3 w-3" />
+                Analysis: {format(new Date(lastAnalysisDate), 'MMM d, yyyy')}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex gap-2">
           <Button

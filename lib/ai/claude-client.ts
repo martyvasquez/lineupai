@@ -4,6 +4,7 @@ import type {
   BattingOrderResponse,
   DefensiveResponse,
   StatsAnalysisResponse,
+  TeamAnalysis,
 } from '@/types/lineup'
 
 const SYSTEM_PROMPT = `You are a youth baseball lineup optimizer. Generate batting orders and defensive assignments that strictly comply with team rules while maximizing performance.
@@ -85,6 +86,29 @@ CATEGORIES TO CONSIDER:
 - Batting: Contact, Power, Plate Discipline, Speed
 - Fielding: Hands, Range, Arm Strength, Consistency
 - Mental: Baseball IQ, Focus, Composure
+
+OUTPUT FORMAT:
+Return valid JSON only. No markdown, no explanation outside the JSON structure.`
+
+const TEAM_ANALYSIS_SYSTEM_PROMPT = `You are a youth baseball team analyst. Analyze aggregate team statistics to identify team-wide strengths, weaknesses, and provide practice recommendations.
+
+INPUTS YOU WILL RECEIVE:
+- Team aggregate batting statistics
+- Team aggregate fielding statistics
+- Individual player analyses (summaries)
+
+ANALYSIS PRINCIPLES:
+1. Focus on actionable insights for coaches
+2. Be constructive - this is for youth development
+3. Back up claims with specific team-wide statistics
+4. Consider youth baseball context
+5. Provide specific practice drill recommendations
+
+KEY AREAS TO ANALYZE:
+- Team batting approach (contact vs power, discipline)
+- Team fielding consistency
+- Defensive depth and flexibility
+- Areas where multiple players struggle
 
 OUTPUT FORMAT:
 Return valid JSON only. No markdown, no explanation outside the JSON structure.`
@@ -220,6 +244,33 @@ export class ClaudeClient {
     } catch (error) {
       console.error('Failed to parse Claude response:', content.text)
       throw new Error('Failed to parse stats analysis response from AI')
+    }
+  }
+
+  // Generate team-level analysis
+  async generateTeamAnalysis(prompt: string): Promise<TeamAnalysis> {
+    const response = await this.client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 4000,
+      system: TEAM_ANALYSIS_SYSTEM_PROMPT,
+      messages: [
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+    })
+
+    const content = response.content[0]
+    if (content.type !== 'text') {
+      throw new Error('Unexpected response type from Claude')
+    }
+
+    try {
+      return parseJsonResponse<TeamAnalysis>(content.text)
+    } catch (error) {
+      console.error('Failed to parse Claude response:', content.text)
+      throw new Error('Failed to parse team analysis response from AI')
     }
   }
 }

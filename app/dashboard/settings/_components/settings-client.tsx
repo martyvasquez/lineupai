@@ -172,7 +172,11 @@ export function SettingsClient({ initialTeams, userId }: SettingsClientProps) {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {teams.map((team) => (
-            <Card key={team.id}>
+            <Card
+              key={team.id}
+              className="cursor-pointer transition-colors hover:bg-muted/50"
+              onClick={() => router.push(`/dashboard/${team.id}`)}
+            >
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <div>
@@ -190,14 +194,20 @@ export function SettingsClient({ initialTeams, userId }: SettingsClientProps) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => openEditDialog(team)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        openEditDialog(team)
+                      }}
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => setDeleteTeam(team)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setDeleteTeam(team)
+                      }}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
