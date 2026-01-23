@@ -571,7 +571,7 @@ export function LineupGrid({
                       <div className="flex items-center justify-center gap-1">
                         {isLocked && <Lock className="h-3 w-3 text-primary" />}
                         {!isLocked && hasDefensivePositions && (
-                          <Lock className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-50 transition-opacity" />
+                          <Lock className="h-3 w-3 text-muted-foreground hidden group-hover:block opacity-50" />
                         )}
                         {inning}
                       </div>
