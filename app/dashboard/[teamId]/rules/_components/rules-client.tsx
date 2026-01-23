@@ -330,18 +330,44 @@ export function RulesClient({ initialRules, initialRuleGroups, teamId }: RulesCl
       </div>
 
       {ruleGroups.length === 0 ? (
-        <div className="text-center py-12 border rounded-lg bg-muted/50">
-          <p className="text-muted-foreground mb-4">
-            No rule groups yet. Create a rule group to start adding rules.
-          </p>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
-            Rule groups let you organize different sets of rules for different situations,
-            like tournaments vs regular league games.
-          </p>
-          <Button onClick={handleAddGroup}>
-            <FolderPlus className="h-4 w-4 mr-2" />
-            Create First Group
-          </Button>
+        <div className="py-8 border rounded-lg bg-muted/50">
+          <div className="text-center mb-6">
+            <p className="text-muted-foreground mb-2">
+              No rule groups yet. Create a rule group to start adding rules.
+            </p>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto">
+              Rule groups let you organize different sets of rules for different situations,
+              like tournaments vs regular league games.
+            </p>
+          </div>
+
+          {/* Example Rules */}
+          <div className="max-w-lg mx-auto px-6 mb-6">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
+              Example Rules
+            </p>
+            <ul className="space-y-2 text-sm">
+              <li className="flex gap-2">
+                <span className="text-muted-foreground">•</span>
+                <span>All players must play an infield position by the end of the 4th inning.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-muted-foreground">•</span>
+                <span>All players must be included in the batting order.</span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-muted-foreground">•</span>
+                <span>Prioritize GameChanger data when generating the batting order.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="text-center">
+            <Button onClick={handleAddGroup}>
+              <FolderPlus className="h-4 w-4 mr-2" />
+              Create First Group
+            </Button>
+          </div>
         </div>
       ) : (
         <>

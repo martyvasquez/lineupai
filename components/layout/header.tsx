@@ -13,7 +13,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { User } from 'lucide-react'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+import { Menu, User } from 'lucide-react'
 import { TeamSwitcher } from './team-switcher'
 import { brandFont } from '@/lib/fonts'
 
@@ -30,6 +37,7 @@ interface HeaderProps {
 
 export function Header({ teams = [], currentTeamId }: HeaderProps) {
   const [mounted, setMounted] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
@@ -38,6 +46,11 @@ export function Header({ teams = [], currentTeamId }: HeaderProps) {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -67,11 +80,12 @@ export function Header({ teams = [], currentTeamId }: HeaderProps) {
         </Link>
 
         {teams.length > 0 && (
-          <div className="ml-4">
+          <div className="ml-4 hidden md:block">
             <TeamSwitcher teams={teams} currentTeamId={effectiveTeamId} />
           </div>
         )}
 
+        {/* Desktop Navigation */}
         <nav className="ml-auto flex items-center gap-4">
           {navLinks.map((link) => (
             <Link
@@ -85,10 +99,11 @@ export function Header({ teams = [], currentTeamId }: HeaderProps) {
             </Link>
           ))}
 
+          {/* User Menu - Desktop */}
           {mounted ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="hidden md:flex">
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -104,9 +119,65 @@ export function Header({ teams = [], currentTeamId }: HeaderProps) {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button variant="ghost" size="icon" disabled>
+            <Button variant="ghost" size="icon" disabled className="hidden md:flex">
               <User className="h-5 w-5" />
             </Button>
+          )}
+
+          {/* Mobile Hamburger Menu */}
+          {mounted && (
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px]">
+                <SheetHeader>
+                  <SheetTitle className={brandFont.className}>Peanut Manager</SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-4 mt-6">
+                  {/* Team Switcher in Mobile Menu */}
+                  {teams.length > 0 && (
+                    <div className="pb-4 border-b">
+                      <p className="text-xs text-muted-foreground mb-2">Current Team</p>
+                      <TeamSwitcher teams={teams} currentTeamId={effectiveTeamId} />
+                    </div>
+                  )}
+
+                  {/* Navigation Links */}
+                  <nav className="flex flex-col gap-2">
+                    {navLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className={`text-sm font-medium py-2 px-3 rounded-md transition-colors hover:bg-muted ${
+                          pathname === link.href ? 'bg-muted text-primary' : ''
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </nav>
+
+                  {/* Settings & Sign Out */}
+                  <div className="pt-4 border-t flex flex-col gap-2">
+                    <Link
+                      href="/dashboard/settings"
+                      className="text-sm font-medium py-2 px-3 rounded-md transition-colors hover:bg-muted"
+                    >
+                      Settings
+                    </Link>
+                    <button
+                      onClick={handleSignOut}
+                      className="text-sm font-medium py-2 px-3 rounded-md transition-colors hover:bg-muted text-left text-red-600"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           )}
         </nav>
       </div>

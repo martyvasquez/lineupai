@@ -9,6 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.0] - 2026-01-23
 
+### Added
+
+#### Mobile Navigation (Hamburger Menu)
+- **Sheet-based mobile menu** - Slide-out navigation drawer for mobile devices
+- **Hamburger icon** - Menu button visible only on mobile (hidden on `md:` breakpoint and up)
+- **Mobile menu includes:**
+  - Brand name header (Pacifico font)
+  - Team switcher dropdown
+  - All navigation links (Dashboard, Roster, Rules, Games, Stats)
+  - Settings link
+  - Sign out button (red text)
+- **Auto-close** - Menu closes automatically on route change
+- **Installed `sheet` component** from shadcn/ui
+
+#### Rules Page Example Rules
+- **Example rules section** - Shows when no rule groups exist to help users understand the feature
+- **Example rules displayed:**
+  - "All players must play an infield position by the end of the 4th inning."
+  - "All players must be included in the batting order."
+  - "Prioritize GameChanger data when generating the batting order."
+
 ### Changed
 
 #### Rebrand to "Peanut Manager"
@@ -28,18 +49,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | File | Description |
 |------|-------------|
 | `lib/fonts.ts` | Brand font configuration (Pacifico) |
+| `components/ui/sheet.tsx` | shadcn Sheet component for mobile menu |
 
 ### Files Modified
 
 | File | Changes |
 |------|---------|
 | `app/layout.tsx` | Updated page title |
-| `components/layout/header.tsx` | Brand name with Pacifico font |
+| `components/layout/header.tsx` | Brand name with Pacifico font, hamburger menu for mobile |
 | `app/(auth)/login/page.tsx` | Brand name with Pacifico font |
 | `app/(auth)/signup/page.tsx` | Brand name with Pacifico font |
 | `app/dashboard/page.tsx` | Updated welcome message |
 | `app/dashboard/[teamId]/games/[gameId]/_components/game-detail-client.tsx` | Updated print footer |
 | `app/dashboard/[teamId]/_components/getting-started.tsx` | Updated localStorage key |
+| `app/dashboard/[teamId]/rules/_components/rules-client.tsx` | Added example rules in empty state |
 
 ---
 
