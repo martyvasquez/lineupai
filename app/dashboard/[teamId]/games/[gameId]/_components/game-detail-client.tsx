@@ -293,7 +293,7 @@ export function GameDetailClient({
   }
 
   // Fill defensive positions (Phase 2)
-  const handleFillDefensive = async (startFromInning: number = 1) => {
+  const handleFillDefensive = async (startFromInning: number = 1, feedback?: string) => {
     if (!battingOrder) {
       toast({
         title: 'No Batting Order',
@@ -305,6 +305,9 @@ export function GameDetailClient({
 
     setIsGenerating(true)
     try {
+      // Build current grid data to send to API for context
+      const currentGrid = grid.length > 0 ? buildCurrentGridForAPI(battingOrder, grid) : null
+
       const response = await fetch('/api/generate-lineup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -316,6 +319,8 @@ export function GameDetailClient({
           batting_order: battingOrder,
           locked_positions: lockedPositions,
           start_from_inning: startFromInning,
+          current_grid: currentGrid,
+          feedback: feedback || null,
         }),
       })
 
@@ -512,9 +517,12 @@ export function GameDetailClient({
     })
   }, [handleRosterUpdate, toast])
 
-  // Regenerate from inning
-  const handleRegenerateFrom = useCallback((startInning: number) => {
-    handleFillDefensive(startInning)
+  // Regenerate selected innings with optional feedback
+  const handleRegenerateInnings = useCallback((innings: number[], feedback: string) => {
+    // For now, use the minimum selected inning as the start point
+    // The AI will regenerate from that point forward, respecting locked positions
+    const startInning = Math.min(...innings)
+    handleFillDefensive(startInning, feedback)
   }, [handleFillDefensive])
 
   // Batting order change handler (drag and drop reorder)
@@ -907,7 +915,7 @@ export function GameDetailClient({
                     availablePlayers={availablePlayerIds}
                     onInningsChange={handleInningsChange}
                     onMarkUnavailable={handleMarkUnavailable}
-                    onRegenerateFrom={handleRegenerateFrom}
+                    onRegenerateInnings={handleRegenerateInnings}
                     isGenerating={isGenerating}
                   />
                 </div>
@@ -986,6 +994,55 @@ function initializeGrid(battingOrder: BattingOrderEntry[], innings: number): Gri
       locked: false,
     }))
   })
+}
+
+// Helper function to build current grid data for API (for feedback context)
+function buildCurrentGridForAPI(
+  battingOrder: BattingOrderEntry[],
+  grid: GridCell[][]
+): DefensiveInning[] {
+  const POSITIONS_LIST: Position[] = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF']
+  const innings = grid[0]?.length || 0
+
+  const result: DefensiveInning[] = []
+
+  for (let inning = 1; inning <= innings; inning++) {
+    const defensiveInning: DefensiveInning = {
+      inning,
+      P: null as unknown as { id: string; name: string },
+      C: null as unknown as { id: string; name: string },
+      '1B': null as unknown as { id: string; name: string },
+      '2B': null as unknown as { id: string; name: string },
+      '3B': null as unknown as { id: string; name: string },
+      SS: null as unknown as { id: string; name: string },
+      LF: null as unknown as { id: string; name: string },
+      CF: null as unknown as { id: string; name: string },
+      RF: null as unknown as { id: string; name: string },
+      sit: [],
+      reasoning: '',
+    }
+
+    grid.forEach((playerRow, playerIndex) => {
+      const cell = playerRow.find(c => c.inning === inning)
+      if (!cell) return
+
+      const player = battingOrder[playerIndex]
+      if (!player) return
+
+      const playerInfo = { id: player.player_id, name: player.name }
+
+      if (cell.position === 'SIT') {
+        defensiveInning.sit = defensiveInning.sit || []
+        defensiveInning.sit.push(playerInfo)
+      } else if (cell.position && POSITIONS_LIST.includes(cell.position as Position)) {
+        defensiveInning[cell.position as Position] = playerInfo
+      }
+    })
+
+    result.push(defensiveInning)
+  }
+
+  return result
 }
 
 // Helper function to build grid from defensive response

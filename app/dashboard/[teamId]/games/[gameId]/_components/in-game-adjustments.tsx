@@ -19,6 +19,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 import { Settings, UserMinus, RefreshCw, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Database } from '@/types/database'
@@ -31,7 +33,7 @@ interface InGameAdjustmentsProps {
   availablePlayers: string[]
   onInningsChange: (innings: number) => void
   onMarkUnavailable: (playerIds: string[]) => void
-  onRegenerateFrom: (inning: number) => void
+  onRegenerateInnings: (innings: number[], feedback: string) => void
   isGenerating?: boolean
 }
 
@@ -41,16 +43,19 @@ export function InGameAdjustments({
   availablePlayers,
   onInningsChange,
   onMarkUnavailable,
-  onRegenerateFrom,
+  onRegenerateInnings,
   isGenerating = false,
 }: InGameAdjustmentsProps) {
   const [showUnavailableDialog, setShowUnavailableDialog] = useState(false)
   const [selectedUnavailable, setSelectedUnavailable] = useState<string[]>([])
   const [showRegenerateDialog, setShowRegenerateDialog] = useState(false)
-  const [regenerateFromInning, setRegenerateFromInning] = useState<string>('1')
+  const [selectedInnings, setSelectedInnings] = useState<number[]>([])
+  const [regenerateFeedback, setRegenerateFeedback] = useState('')
 
   const inningOptions = Array.from({ length: 9 }, (_, i) => i + 1)
   const availablePlayersList = players.filter(p => availablePlayers.includes(p.id))
+  const allInnings = Array.from({ length: currentInnings }, (_, i) => i + 1)
+  const allSelected = selectedInnings.length === currentInnings
 
   const handleMarkUnavailable = () => {
     if (selectedUnavailable.length > 0) {
@@ -60,11 +65,28 @@ export function InGameAdjustments({
     }
   }
 
+  const handleToggleInning = (inning: number, checked: boolean) => {
+    if (checked) {
+      setSelectedInnings([...selectedInnings, inning].sort((a, b) => a - b))
+    } else {
+      setSelectedInnings(selectedInnings.filter(i => i !== inning))
+    }
+  }
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedInnings(allInnings)
+    } else {
+      setSelectedInnings([])
+    }
+  }
+
   const handleRegenerate = () => {
-    const inning = parseInt(regenerateFromInning, 10)
-    if (inning >= 1 && inning <= currentInnings) {
-      onRegenerateFrom(inning)
+    if (selectedInnings.length > 0) {
+      onRegenerateInnings(selectedInnings, regenerateFeedback.trim())
       setShowRegenerateDialog(false)
+      setSelectedInnings([])
+      setRegenerateFeedback('')
     }
   }
 
@@ -169,40 +191,68 @@ export function InGameAdjustments({
           <DialogHeader>
             <DialogTitle>Regenerate Defensive Positions</DialogTitle>
             <DialogDescription>
-              Keep positions from earlier innings and regenerate from a specific point.
+              Select which innings to regenerate. Unselected innings will keep their current positions.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-4">
-            <label className="text-sm font-medium">Regenerate starting from inning:</label>
-            <Select
-              value={regenerateFromInning}
-              onValueChange={setRegenerateFromInning}
-            >
-              <SelectTrigger className="w-full mt-2">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: currentInnings }, (_, i) => i + 1).map((n) => (
-                  <SelectItem key={n} value={n.toString()}>
-                    Inning {n}
-                    {n === 1 && ' (regenerate all)'}
-                  </SelectItem>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              <Label>Innings to regenerate</Label>
+
+              {/* Select All */}
+              <label className={cn(
+                'flex items-center gap-3 p-2 rounded-lg border cursor-pointer hover:bg-accent',
+                allSelected && 'bg-accent'
+              )}>
+                <Checkbox
+                  checked={allSelected}
+                  onCheckedChange={handleSelectAll}
+                />
+                <span className="font-medium">Select All</span>
+              </label>
+
+              {/* Individual innings */}
+              <div className="grid grid-cols-3 gap-2">
+                {allInnings.map((inning) => (
+                  <label
+                    key={inning}
+                    className={cn(
+                      'flex items-center gap-2 p-2 rounded-lg border cursor-pointer hover:bg-accent',
+                      selectedInnings.includes(inning) && 'bg-accent'
+                    )}
+                  >
+                    <Checkbox
+                      checked={selectedInnings.includes(inning)}
+                      onCheckedChange={(checked) => handleToggleInning(inning, !!checked)}
+                    />
+                    <span className="text-sm">Inning {inning}</span>
+                  </label>
                 ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground mt-2">
-              Positions in innings 1-{Math.max(1, parseInt(regenerateFromInning, 10) - 1)} will be kept.
-              Positions from inning {regenerateFromInning} onward will be regenerated.
-            </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="regenerate-feedback">Feedback for AI</Label>
+              <Textarea
+                id="regenerate-feedback"
+                placeholder="e.g., 'Move Jake to outfield', 'Cole should pitch inning 3', 'More rotation in infield'..."
+                value={regenerateFeedback}
+                onChange={(e) => setRegenerateFeedback(e.target.value)}
+                rows={3}
+                className="resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                Tell the AI what changes you want. It will see the current lineup and your feedback.
+              </p>
+            </div>
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRegenerateDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleRegenerate} disabled={isGenerating}>
-              {isGenerating ? 'Regenerating...' : 'Regenerate'}
+            <Button onClick={handleRegenerate} disabled={isGenerating || selectedInnings.length === 0}>
+              {isGenerating ? 'Regenerating...' : `Regenerate${selectedInnings.length > 0 ? ` (${selectedInnings.length})` : ''}`}
             </Button>
           </DialogFooter>
         </DialogContent>

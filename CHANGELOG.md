@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.99.0] - 2026-01-22
+
+### Added
+
+#### Regeneration Feedback System
+- **Feedback Text Field** - When regenerating defensive positions, coaches can now provide feedback to the AI
+  - Text area in the regeneration dialog for instructions like "Move Jake to outfield" or "Cole should pitch inning 3"
+  - AI receives the current lineup context along with the feedback
+  - Enables targeted adjustments without starting from scratch
+
+#### Multi-Inning Selection for Regeneration
+- **Checkbox-based Inning Selection** - Replaced single dropdown with checkboxes for each inning
+  - Select specific innings to regenerate (not just "from inning X onward")
+  - "Select All" checkbox for quick full regeneration
+  - Grid layout (3 columns) for compact display
+  - Button shows count of selected innings
+
+### Changed
+
+#### Regeneration Dialog UX
+- **`in-game-adjustments.tsx`**:
+  - Changed `onRegenerateFrom` to `onRegenerateInnings` (accepts array of innings)
+  - Added checkbox grid for inning selection
+  - Added "Select All" option at top
+  - Button disabled when no innings selected
+  - Feedback field with helper text explaining AI context
+
+#### API & Prompt Updates
+- **`game-detail-client.tsx`**:
+  - Added `buildCurrentGridForAPI()` helper to convert grid state for API
+  - `handleFillDefensive()` now accepts optional feedback parameter
+  - Passes current grid and feedback to API for context-aware regeneration
+
+- **`app/api/generate-lineup/route.ts`**:
+  - Added `current_grid` and `feedback` parameters to request body
+  - Passes new parameters to `buildDefensivePrompt()`
+
+- **`lib/ai/prompt-builder.ts`**:
+  - Added `formatCurrentLineupForPrompt()` helper function
+  - `buildDefensivePrompt()` now accepts `currentGrid` and `feedback` parameters
+  - When regenerating with feedback, prompt includes:
+    - Current lineup positions by inning
+    - Coach's feedback as high-priority instructions
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/dashboard/[teamId]/games/[gameId]/_components/in-game-adjustments.tsx` | Checkbox inning selection, feedback textarea |
+| `app/dashboard/[teamId]/games/[gameId]/_components/game-detail-client.tsx` | Pass feedback and current grid to API |
+| `app/api/generate-lineup/route.ts` | Accept feedback and current_grid parameters |
+| `lib/ai/prompt-builder.ts` | Include current lineup and feedback in prompt |
+
+---
+
 ## [0.98.0] - 2026-01-22
 
 ### Removed

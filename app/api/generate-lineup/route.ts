@@ -13,6 +13,7 @@ import type {
   BattingOrderEntry,
   LockedPosition,
   GenerationPhase,
+  DefensiveInning,
 } from '@/types/lineup'
 
 export async function POST(request: NextRequest) {
@@ -26,6 +27,8 @@ export async function POST(request: NextRequest) {
       batting_order,
       locked_positions,
       start_from_inning,
+      current_grid,
+      feedback,
     } = body as {
       game_id: string
       rule_group_id: string | null
@@ -34,6 +37,8 @@ export async function POST(request: NextRequest) {
       batting_order?: BattingOrderEntry[]
       locked_positions?: LockedPosition[]
       start_from_inning?: number
+      current_grid?: DefensiveInning[] | null
+      feedback?: string | null
     }
 
     if (!game_id) {
@@ -304,7 +309,9 @@ export async function POST(request: NextRequest) {
         start_from_inning || 1,
         teamContext,
         additional_notes,
-        scoutingReport
+        scoutingReport,
+        current_grid || null,
+        feedback || null
       )
 
       const response = await claudeClient.generateDefensive(prompt)

@@ -4,6 +4,8 @@ import type {
   GamePreference,
   BattingOrderEntry,
   LockedPosition,
+  DefensiveInning,
+  Position,
 } from '@/types/lineup'
 import type { Database } from '@/types/database'
 
@@ -320,6 +322,35 @@ Coach Notes: ${notes || 'none'}`
   return text
 }
 
+// Helper function to format the current lineup for the prompt (for regeneration context)
+function formatCurrentLineupForPrompt(
+  grid: DefensiveInning[],
+  battingOrder: BattingOrderEntry[]
+): string {
+  const POSITIONS_LIST: Position[] = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF']
+  const lines: string[] = []
+
+  for (const inningData of grid) {
+    const positions: string[] = []
+
+    for (const pos of POSITIONS_LIST) {
+      const player = inningData[pos]
+      if (player?.name) {
+        positions.push(`${pos}: ${player.name}`)
+      }
+    }
+
+    if (inningData.sit && inningData.sit.length > 0) {
+      const sittingNames = inningData.sit.map(p => p.name).join(', ')
+      positions.push(`SIT: ${sittingNames}`)
+    }
+
+    lines.push(`Inning ${inningData.inning}: ${positions.join(', ')}`)
+  }
+
+  return lines.join('\n')
+}
+
 // Build the prompt for defensive position generation (Phase 2)
 export function buildDefensivePrompt(
   innings: number,
@@ -332,7 +363,9 @@ export function buildDefensivePrompt(
   startFromInning: number,
   teamContext?: TeamContext | null,
   additionalNotes?: string | null,
-  scoutingReport?: string | null
+  scoutingReport?: string | null,
+  currentGrid?: DefensiveInning[] | null,
+  feedback?: string | null
 ): string {
   const availablePlayers = players.filter(p => p.available)
 
@@ -390,6 +423,24 @@ Scouting Report: None provided`
 Notes for AI: ${additionalNotes}`
     : ''
 
+  // Build current lineup section (for regeneration context)
+  let currentLineupSection = ''
+  if (currentGrid && currentGrid.length > 0 && feedback) {
+    const currentLineupText = formatCurrentLineupForPrompt(currentGrid, battingOrder)
+    currentLineupSection = `
+
+CURRENT LINEUP (for context - the coach wants adjustments):
+${currentLineupText}`
+  }
+
+  // Build feedback section
+  const feedbackSection = feedback
+    ? `
+
+COACH FEEDBACK (IMPORTANT - This is what the coach wants changed):
+${feedback}`
+    : ''
+
   // Note about which innings to generate
   const inningsNote = startFromInning > 1
     ? `(Generate for innings ${startFromInning}-${innings})`
@@ -411,7 +462,7 @@ ${lockedPositionsText}
 Here are the available players:
 ${playersText}
 ${scoutingReportSection}
-${additionalNotesSection}
+${additionalNotesSection}${currentLineupSection}${feedbackSection}
 
 Return JSON only:
 

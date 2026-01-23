@@ -1,7 +1,7 @@
 # LineupAI - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (98% Complete)
-**Last Updated:** January 22, 2026 (v0.98.0)
+**Last Updated:** January 22, 2026 (v0.99.0)
 
 ---
 
@@ -618,17 +618,28 @@ MVP is complete when:
 - Interactive defensive grid with position editing
 - Position auto-swap when selecting a taken position
 - Inning locking (click header to lock/unlock)
+- **Regeneration with feedback** - provide instructions for AI adjustments
+- **Multi-inning selection** - checkbox-based inning selection for regeneration
 - GameChanger CSV import with player matching
 - AI prompt builder ready (needs API key to test)
 
-**Recent Changes (January 22, 2026 - v0.98.0):**
+**Recent Changes (January 22, 2026 - v0.99.0):**
+- **Regeneration Feedback System:**
+  - Coaches can now provide feedback when regenerating defensive positions
+  - Text field for instructions like "Move Jake to outfield" or "Cole should pitch inning 3"
+  - AI receives current lineup context along with feedback for targeted adjustments
+- **Multi-Inning Selection:**
+  - Replaced single dropdown with checkboxes for each inning
+  - "Select All" checkbox for quick full regeneration
+  - Grid layout (3 columns) for compact display
+  - Select specific innings to regenerate instead of "from inning X onward"
+
+**Previous Changes (v0.98.0):**
 - **UI Simplification:**
   - Removed unused team fields: League Name, Team Description
   - Removed team-level Innings Per Game (now only at game level)
   - Removed game Location/Field input
   - Simplified TeamContext for AI prompts (only name and age_group)
-  - Cleaner team dialog with just Name and Age Group
-  - Cleaner game dialog focused on essential fields
 
 **Previous Changes (v0.97.0):**
 - **Multi-Team Support (Major Feature):**
@@ -644,10 +655,8 @@ MVP is complete when:
   - Import roster during team creation (step 2 of dialog)
   - "Import CSV" button on roster page for existing teams
   - Toggle to import just roster or include stats
-- **Bug Fix:** Team switcher no longer 404s when on settings page
-- **Settings Separation:** Team Settings and Profile Settings are now separate pages
 
 ---
 
 **Last Updated:** January 22, 2026
-**Version:** 0.98.0 (UI Simplification)
+**Version:** 0.99.0 (Regeneration Feedback & Multi-Inning Selection)
