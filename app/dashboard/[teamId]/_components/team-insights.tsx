@@ -49,7 +49,6 @@ export function TeamInsights({
     setAnalyzing(true)
 
     try {
-      console.log('[TeamInsights] Starting analysis for team:', teamId)
       const response = await fetch('/api/stats/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -57,7 +56,6 @@ export function TeamInsights({
       })
 
       const data = await response.json()
-      console.log('[TeamInsights] API response:', response.status, data)
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to generate analysis')
@@ -65,7 +63,6 @@ export function TeamInsights({
 
       // Check for team analysis error
       if (data.team_analysis_error) {
-        console.error('[TeamInsights] Team analysis failed:', data.team_analysis_error)
         toast({
           title: 'Partial analysis complete',
           description: `Analyzed ${data.analyzed_count} players. Team analysis failed: ${data.team_analysis_error}`,
@@ -81,7 +78,6 @@ export function TeamInsights({
       // Force a hard refresh to pick up new data
       router.refresh()
     } catch (err) {
-      console.error('[TeamInsights] Analysis error:', err)
       toast({
         title: 'Analysis failed',
         description: err instanceof Error ? err.message : 'Failed to generate analysis',

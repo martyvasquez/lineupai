@@ -281,7 +281,6 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (saveError) {
-        console.error('Failed to save lineup:', saveError)
         return NextResponse.json(
           { error: 'Failed to save lineup' },
           { status: 500 }
@@ -337,7 +336,6 @@ export async function POST(request: NextRequest) {
           .eq('id', existingLineups[0].id)
 
         if (updateError) {
-          console.error('Failed to update lineup:', updateError)
           return NextResponse.json(
             { error: 'Failed to update lineup' },
             { status: 500 }
@@ -379,7 +377,6 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (saveError) {
-          console.error('Failed to save lineup:', saveError)
           return NextResponse.json(
             { error: 'Failed to save lineup' },
             { status: 500 }
@@ -399,7 +396,10 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    console.error('Lineup generation error:', error)
+    // Error logged for debugging in development only
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Lineup generation error:', error)
+    }
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to generate lineup' },
       { status: 500 }

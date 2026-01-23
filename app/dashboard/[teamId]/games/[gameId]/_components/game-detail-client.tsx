@@ -282,7 +282,6 @@ export function GameDetailClient({
         description: 'Now you can lock defensive positions before filling the rest.',
       })
     } catch (error) {
-      console.error('Batting order generation error:', error)
       toast({
         title: 'Generation Failed',
         description: error instanceof Error ? error.message : 'Failed to generate batting order',
@@ -357,7 +356,6 @@ export function GameDetailClient({
         description: 'Defensive positions have been filled.',
       })
     } catch (error) {
-      console.error('Defensive generation error:', error)
       toast({
         title: 'Generation Failed',
         description: error instanceof Error ? error.message : 'Failed to fill defensive positions',
@@ -1209,7 +1207,6 @@ function buildGridFromDefense(
         }
         // Fallback: match by name if ID doesn't match
         if (posPlayer?.name === entry.name) {
-          console.warn(`[buildGridFromDefense] Name fallback match for "${entry.name}" at ${pos} inning ${inning} (AI returned ID: ${posPlayer?.id}, expected: ${entry.player_id})`)
           return {
             playerId: entry.player_id,
             inning,
@@ -1223,10 +1220,6 @@ function buildGridFromDefense(
       const sitById = defensiveInning.sit?.some(p => p.id === entry.player_id)
       const sitByName = !sitById && defensiveInning.sit?.some(p => p.name === entry.name)
       if (sitById || sitByName) {
-        if (sitByName) {
-          const matchedSit = defensiveInning.sit?.find(p => p.name === entry.name)
-          console.warn(`[buildGridFromDefense] Name fallback match for "${entry.name}" in SIT inning ${inning} (AI returned ID: ${matchedSit?.id}, expected: ${entry.player_id})`)
-        }
         return {
           playerId: entry.player_id,
           inning,

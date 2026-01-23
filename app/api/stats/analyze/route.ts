@@ -216,7 +216,6 @@ Return your analysis in this exact JSON format:
 
     // Generate team-level analysis if requested
     let teamAnalysis = null
-    console.log('[Stats Analyze] Team analysis check:', { include_team_analysis, playersWithStatsCount: playersWithStats.length })
     if (include_team_analysis && playersWithStats.length >= 3) {
       // Calculate team aggregate stats
       const teamBattingStats = {
@@ -313,9 +312,7 @@ Provide team-level analysis in this exact JSON format:
 }`
 
       try {
-        console.log('[Stats Analyze] Generating team analysis...')
         teamAnalysis = await claudeClient.generateTeamAnalysis(teamPrompt)
-        console.log('[Stats Analyze] Team analysis generated:', teamAnalysis ? 'success' : 'null')
 
         // Save team analysis to database
         const { error: updateError } = await supabase
@@ -326,13 +323,8 @@ Provide team-level analysis in this exact JSON format:
           })
           .eq('id', team_id)
 
-        if (updateError) {
-          console.error('[Stats Analyze] Failed to save team analysis:', updateError)
-        } else {
-          console.log('[Stats Analyze] Team analysis saved to database')
-        }
+        // Update error is non-critical, analysis still succeeded
       } catch (teamError) {
-        console.error('[Stats Analyze] Team analysis error:', teamError)
         // Return error info for debugging
         return NextResponse.json({
           success: true,
@@ -352,7 +344,9 @@ Provide team-level analysis in this exact JSON format:
     })
 
   } catch (error) {
-    console.error('Stats analysis error:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Stats analysis error:', error)
+    }
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to generate analysis' },
       { status: 500 }
