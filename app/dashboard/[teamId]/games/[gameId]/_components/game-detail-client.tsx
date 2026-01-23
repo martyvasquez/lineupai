@@ -891,7 +891,7 @@ export function GameDetailClient({
                             <div className="space-y-1.5">
                               {recommendedBattingOrder.map((entry, index) => (
                                 <div
-                                  key={entry.player_id || `order-${index}`}
+                                  key={`order-${index}`}
                                   className="flex items-start gap-2 text-sm"
                                 >
                                   <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 text-primary text-xs font-medium flex-shrink-0 mt-0.5">

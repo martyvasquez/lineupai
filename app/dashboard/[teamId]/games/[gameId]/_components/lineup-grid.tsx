@@ -584,7 +584,7 @@ export function LineupGrid({
               <tbody>
                 {battingOrder.map((entry, index) => (
                   <SortableRow
-                    key={entry.player_id || `row-${index}`}
+                    key={`row-${index}`}
                     entry={entry}
                     inningNumbers={inningNumbers}
                     getCell={getCell}
@@ -609,7 +609,7 @@ export function LineupGrid({
           <div className="md:hidden space-y-3">
             {battingOrder.map((entry, index) => (
               <SortableCard
-                key={entry.player_id || `card-${index}`}
+                key={`card-${index}`}
                 entry={entry}
                 inningNumbers={inningNumbers}
                 getCell={getCell}
