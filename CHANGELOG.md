@@ -1,9 +1,45 @@
 # Changelog
 
-All notable changes to LineupAI will be documented in this file.
+All notable changes to Peanut Manager will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [1.1.0] - 2026-01-23
+
+### Changed
+
+#### Rebrand to "Peanut Manager"
+- **App Name** - Rebranded from "LineupAI" to "Peanut Manager" across all user-facing surfaces
+- **Brand Font** - Added Pacifico Google Font for brand name display
+- **Updated Locations:**
+  - Browser tab title
+  - Header logo text
+  - Login page title
+  - Signup page title
+  - Dashboard welcome message
+  - Printed lineup footer
+  - localStorage key prefix (`peanutmgr-` instead of `lineupai-`)
+
+### Files Added
+
+| File | Description |
+|------|-------------|
+| `lib/fonts.ts` | Brand font configuration (Pacifico) |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/layout.tsx` | Updated page title |
+| `components/layout/header.tsx` | Brand name with Pacifico font |
+| `app/(auth)/login/page.tsx` | Brand name with Pacifico font |
+| `app/(auth)/signup/page.tsx` | Brand name with Pacifico font |
+| `app/dashboard/page.tsx` | Updated welcome message |
+| `app/dashboard/[teamId]/games/[gameId]/_components/game-detail-client.tsx` | Updated print footer |
+| `app/dashboard/[teamId]/_components/getting-started.tsx` | Updated localStorage key |
 
 ---
 

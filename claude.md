@@ -1,7 +1,7 @@
-# LineupAI - AI-Powered Baseball Lineup Optimizer
+# Peanut Manager - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (99% Complete)
-**Last Updated:** January 22, 2026 (v1.0.0)
+**Last Updated:** January 23, 2026 (v1.1.0)
 
 ---
 

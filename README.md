@@ -1,4 +1,4 @@
-# LineupAI - Youth Baseball Lineup Optimizer
+# Peanut Manager - Youth Baseball Lineup Optimizer
 
 AI-powered lineup generation for youth baseball and softball coaches using GameChanger statistics, subjective ratings, and team-specific rules.
 

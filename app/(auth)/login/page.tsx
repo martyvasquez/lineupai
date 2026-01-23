@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/lib/hooks/use-toast'
+import { brandFont } from '@/lib/fonts'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -86,7 +87,7 @@ export default function LoginPage() {
   return (
     <Card>
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">
+        <CardTitle className={`text-2xl text-center ${brandFont.className}`}>
           Peanut Manager
         </CardTitle>
         <CardDescription className="text-center">

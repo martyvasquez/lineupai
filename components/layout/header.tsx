@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { User } from 'lucide-react'
 import { TeamSwitcher } from './team-switcher'
+import { brandFont } from '@/lib/fonts'
 
 interface Team {
   id: string
@@ -61,7 +62,7 @@ export function Header({ teams = [], currentTeamId }: HeaderProps) {
   return (
     <header className="border-b bg-white">
       <div className="flex h-16 items-center px-4 md:px-6">
-        <Link href="/dashboard" className="font-bold text-xl">
+        <Link href="/dashboard" className={`text-xl ${brandFont.className}`}>
           Peanut Manager
         </Link>
 
