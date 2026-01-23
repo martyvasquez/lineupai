@@ -56,6 +56,22 @@ function PositionDropdown({
   onClose
 }: PositionDropdownProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const [openUpward, setOpenUpward] = useState(false)
+
+  useEffect(() => {
+    // Calculate if dropdown should open upward based on available space
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect()
+      const viewportHeight = window.innerHeight
+      const spaceBelow = viewportHeight - rect.top
+      const dropdownHeight = ref.current.offsetHeight
+
+      // If not enough space below (less than dropdown height + some padding), open upward
+      if (spaceBelow < dropdownHeight + 20) {
+        setOpenUpward(true)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -84,7 +100,10 @@ function PositionDropdown({
   return (
     <div
       ref={ref}
-      className="absolute z-50 top-full left-0 mt-1 bg-background border rounded-lg shadow-lg p-1 min-w-[80px]"
+      className={cn(
+        "absolute z-50 left-0 bg-background border rounded-lg shadow-lg p-1 min-w-[80px]",
+        openUpward ? "bottom-full mb-1" : "top-full mt-1"
+      )}
       onClick={(e) => e.stopPropagation()}
     >
       {POSITIONS.map((pos) => {
