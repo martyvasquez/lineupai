@@ -116,7 +116,7 @@ function PositionDropdown({
         left: position.left,
         zIndex: 9999,
       }}
-      className="bg-background border rounded-lg shadow-lg p-1 min-w-[80px]"
+      className="bg-background border rounded-lg shadow-lg p-1 w-[80px]"
       onClick={(e) => e.stopPropagation()}
     >
       {POSITIONS.map((pos) => {
