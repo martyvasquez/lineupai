@@ -17,9 +17,15 @@ import {
 import { parseGameChangerCSV, type ParsedPlayerStats } from '@/lib/parsers/gamechanger-csv'
 import { useToast } from '@/lib/hooks/use-toast'
 
+interface ImportedPlayer {
+  id: string
+  name: string
+  jersey_number: number | null
+}
+
 interface RosterImportInlineProps {
   teamId: string
-  onImportComplete?: (playerCount: number) => void
+  onImportComplete?: (players: ImportedPlayer[]) => void
 }
 
 export function RosterImportInline({ teamId, onImportComplete }: RosterImportInlineProps) {
@@ -103,7 +109,7 @@ export function RosterImportInline({ teamId, onImportComplete }: RosterImportInl
         description: `${data.created_count} players added${includeStats ? ' with stats' : ''}.`,
       })
 
-      onImportComplete?.(data.created_count)
+      onImportComplete?.(data.players || [])
     } catch (err) {
       console.error('Import error:', err)
       setError(err instanceof Error ? err.message : 'Failed to import roster')

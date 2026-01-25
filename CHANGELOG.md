@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.7] - 2026-01-25
+
+### Fixed
+
+#### Roster Page State Not Updating After Mutations
+- **Issue:** When adding, updating, or importing players on the roster page, changes didn't appear until page refresh
+- **Cause:** `router.refresh()` was used instead of local state updates, which doesn't reliably trigger re-renders
+- **Fix:** Added immediate local state updates for all mutation operations:
+  - **Add Player:** Constructs full Player object with ratings/eligibility and adds to state with `setPlayers(prev => [...prev, fullPlayer])`
+  - **Update Player:** Maps over existing players and updates the matching player with new data
+  - **Import Players:** Callback now receives imported player objects and adds them to state
+- **Removed:** `router.refresh()` calls and unused `useRouter` import
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/dashboard/[teamId]/roster/_components/roster-client.tsx` | Added `setPlayers()` calls for add/update, updated import callback, removed `useRouter` |
+| `app/dashboard/[teamId]/roster/_components/roster-import-inline.tsx` | Changed callback type from `(count: number)` to `(players: ImportedPlayer[])` |
+
+---
+
 ## [1.2.6] - 2026-01-25
 
 ### Fixed

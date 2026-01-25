@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,7 +42,6 @@ export function RosterClient({ initialPlayers, teamId }: RosterClientProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
-  const router = useRouter()
   const { toast } = useToast()
   const supabase = createClient()
 
@@ -160,6 +158,35 @@ export function RosterClient({ initialPlayers, teamId }: RosterClientProps) {
         })
       }
 
+      // Update local state with the changes
+      const updatedRatingsData = {
+        player_id: editingPlayer.id,
+        season: new Date().getFullYear().toString(),
+        ...Object.fromEntries(
+          Object.entries(playerData.ratings).map(([key, value]) => [key, value === 0 ? null : value])
+        ),
+      } as Database['public']['Tables']['player_ratings']['Row']
+
+      const updatedEligibilityData = {
+        player_id: editingPlayer.id,
+        ...playerData.eligibility,
+      } as Database['public']['Tables']['position_eligibility']['Row']
+
+      setPlayers(prev => prev.map(p =>
+        p.id === editingPlayer.id
+          ? {
+              ...p,
+              name: playerData.name,
+              jersey_number: playerData.jersey_number,
+              active: playerData.active,
+              position_strengths: playerData.position_strengths,
+              notes: playerData.notes,
+              player_ratings: [updatedRatingsData],
+              position_eligibility: updatedEligibilityData,
+            }
+          : p
+      ))
+
       if (!ratingsError && !eligibilityError) {
         toast({
           title: 'Player updated',
@@ -218,6 +245,28 @@ export function RosterClient({ initialPlayers, teamId }: RosterClientProps) {
         console.error('Eligibility save error:', eligibilityError)
       }
 
+      // Add the new player to local state with ratings and eligibility
+      const ratingsData = {
+        player_id: newPlayer.id,
+        season: new Date().getFullYear().toString(),
+        ...Object.fromEntries(
+          Object.entries(playerData.ratings).map(([key, value]) => [key, value === 0 ? null : value])
+        ),
+      } as Database['public']['Tables']['player_ratings']['Row']
+
+      const eligibilityData = {
+        player_id: newPlayer.id,
+        ...playerData.eligibility,
+      } as Database['public']['Tables']['position_eligibility']['Row']
+
+      const fullPlayer: Player = {
+        ...newPlayer,
+        player_ratings: [ratingsData],
+        position_eligibility: eligibilityData,
+      }
+
+      setPlayers(prev => [...prev, fullPlayer])
+
       toast({
         title: 'Player added',
         description: 'The player has been added to your roster.',
@@ -225,7 +274,6 @@ export function RosterClient({ initialPlayers, teamId }: RosterClientProps) {
     }
 
     setDialogOpen(false)
-    router.refresh()
   }
 
   const getRatingsCount = (player: Player) => {
@@ -383,9 +431,24 @@ export function RosterClient({ initialPlayers, teamId }: RosterClientProps) {
           </DialogHeader>
           <RosterImportInline
             teamId={teamId}
-            onImportComplete={() => {
+            onImportComplete={(importedPlayers) => {
+              // Convert imported players to full Player objects and add to state
+              const newPlayers: Player[] = importedPlayers.map(p => ({
+                id: p.id,
+                name: p.name,
+                jersey_number: p.jersey_number,
+                team_id: teamId,
+                active: true,
+                created_at: new Date().toISOString(),
+                notes: null,
+                position_strengths: null,
+                stats_analysis: null,
+                stats_analyzed_at: null,
+                player_ratings: null,
+                position_eligibility: null,
+              }))
+              setPlayers(prev => [...prev, ...newPlayers])
               setImportDialogOpen(false)
-              router.refresh()
             }}
           />
         </DialogContent>

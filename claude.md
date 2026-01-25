@@ -625,7 +625,13 @@ MVP is complete when:
 - **Dismissible Getting Started** - Can hide and restore the onboarding guide
 - **Game creation validation** - Blocks games until player data exists (ratings or GameChanger stats)
 
-**Recent Changes (January 25, 2026 - v1.2.6):**
+**Recent Changes (January 25, 2026 - v1.2.7):**
+- **Fixed Roster Page State Not Updating After Mutations:**
+  - Adding, updating, or importing players now immediately updates the UI
+  - Removed `router.refresh()` in favor of local state updates with `setPlayers()`
+  - Import callback now receives and adds imported player objects to state
+
+**Previous Changes (v1.2.6 - January 25, 2026):**
 - **Fixed Team Switcher 404 on Game Detail Page:**
   - Switching teams while on `/dashboard/[teamId]/games/[gameId]` no longer causes 404
   - Now navigates to `/dashboard/[newTeamId]/games` instead of preserving the game ID
@@ -703,4 +709,4 @@ MVP is complete when:
 ---
 
 **Last Updated:** January 25, 2026
-**Version:** 1.2.6 (Fix team switcher 404 on game detail page)
+**Version:** 1.2.7 (Fix roster page state not updating after mutations)
