@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.3] - 2026-01-25
+
+### Added
+
+#### Auto-scroll to Generation Loading Feedback
+- **GenerationLoading component now scrolls into view on mount** - Ensures users see the loading indicator when clicking "Generate Batting Order" or "Fill Remaining Positions with AI"
+- **Smooth scroll behavior** - Uses `scrollIntoView({ behavior: 'smooth', block: 'center' })` for a polished experience
+- **Improves visibility** - Prevents users from thinking the system is stuck when the loading indicator appears below the viewport
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/dashboard/[teamId]/games/[gameId]/_components/generation-loading.tsx` | Added useRef, useEffect for scroll-into-view on mount |
+
+---
+
 ## [1.2.2] - 2026-01-24
 
 ### Added

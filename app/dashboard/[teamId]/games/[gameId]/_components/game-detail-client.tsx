@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -34,12 +34,14 @@ import {
   MessageSquare,
   Printer,
   Info,
+  RotateCcw,
 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { RosterSetup } from './roster-setup'
 import { LineupGrid } from './lineup-grid'
 import { InGameAdjustments } from './in-game-adjustments'
 import { RuleCompliance } from './rule-compliance'
+import { GenerationLoading } from './generation-loading'
 import type { Database } from '@/types/database'
 import type {
   BattingOrderEntry,
@@ -156,6 +158,9 @@ export function GameDetailClient({
 
   // Generation state
   const [isGenerating, setIsGenerating] = useState(false)
+  const [generationStartTime, setGenerationStartTime] = useState<number | null>(null)
+  const [generationPhase, setGenerationPhase] = useState<'batting' | 'defensive' | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
   const [selectedRuleGroupId, setSelectedRuleGroupId] = useState<string | null>(
     ruleGroups.length > 0 ? ruleGroups[0].id : null
   )
@@ -262,6 +267,18 @@ export function GameDetailClient({
     }
   }
 
+  // Cancel generation handler
+  const handleCancelGeneration = useCallback(() => {
+    abortControllerRef.current?.abort()
+    setIsGenerating(false)
+    setGenerationStartTime(null)
+    setGenerationPhase(null)
+    toast({
+      title: 'Generation Cancelled',
+      description: 'Lineup generation was cancelled.',
+    })
+  }, [toast])
+
   // Generate batting order (Phase 1)
   const handleGenerateBattingOrder = async () => {
     if (availablePlayers.length < 9) {
@@ -274,6 +291,15 @@ export function GameDetailClient({
     }
 
     setIsGenerating(true)
+    setGenerationStartTime(Date.now())
+    setGenerationPhase('batting')
+    abortControllerRef.current = new AbortController()
+
+    // Add timeout (90 seconds)
+    const timeoutId = setTimeout(() => {
+      abortControllerRef.current?.abort()
+    }, 90000)
+
     try {
       const response = await fetch('/api/generate-lineup', {
         method: 'POST',
@@ -286,7 +312,10 @@ export function GameDetailClient({
           additional_notes: battingNotes.trim() || null,
           phase: 'batting_order',
         }),
+        signal: abortControllerRef.current.signal,
       })
+
+      clearTimeout(timeoutId)
 
       const data = await response.json()
 
@@ -311,13 +340,25 @@ export function GameDetailClient({
         description: 'Now you can lock defensive positions before filling the rest.',
       })
     } catch (error) {
-      toast({
-        title: 'Generation Failed',
-        description: error instanceof Error ? error.message : 'Failed to generate batting order',
-        variant: 'destructive',
-      })
+      clearTimeout(timeoutId)
+      if (error instanceof Error && error.name === 'AbortError') {
+        toast({
+          title: 'Generation Timed Out',
+          description: 'The request took too long. Please try again.',
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Generation Failed',
+          description: error instanceof Error ? error.message : 'Failed to generate batting order',
+          variant: 'destructive',
+        })
+      }
     } finally {
       setIsGenerating(false)
+      setGenerationStartTime(null)
+      setGenerationPhase(null)
+      abortControllerRef.current = null
     }
   }
 
@@ -333,6 +374,15 @@ export function GameDetailClient({
     }
 
     setIsGenerating(true)
+    setGenerationStartTime(Date.now())
+    setGenerationPhase('defensive')
+    abortControllerRef.current = new AbortController()
+
+    // Add timeout (90 seconds)
+    const timeoutId = setTimeout(() => {
+      abortControllerRef.current?.abort()
+    }, 90000)
+
     try {
       // Build current grid data to send to API for context
       const currentGrid = grid.length > 0 ? buildCurrentGridForAPI(battingOrder, grid) : null
@@ -353,7 +403,10 @@ export function GameDetailClient({
           current_grid: currentGrid,
           feedback: feedback || null,
         }),
+        signal: abortControllerRef.current.signal,
       })
+
+      clearTimeout(timeoutId)
 
       const data = await response.json()
 
@@ -387,13 +440,25 @@ export function GameDetailClient({
         description: 'Defensive positions have been filled.',
       })
     } catch (error) {
-      toast({
-        title: 'Generation Failed',
-        description: error instanceof Error ? error.message : 'Failed to fill defensive positions',
-        variant: 'destructive',
-      })
+      clearTimeout(timeoutId)
+      if (error instanceof Error && error.name === 'AbortError') {
+        toast({
+          title: 'Generation Timed Out',
+          description: 'The request took too long. Please try again.',
+          variant: 'destructive',
+        })
+      } else {
+        toast({
+          title: 'Generation Failed',
+          description: error instanceof Error ? error.message : 'Failed to fill defensive positions',
+          variant: 'destructive',
+        })
+      }
     } finally {
       setIsGenerating(false)
+      setGenerationStartTime(null)
+      setGenerationPhase(null)
+      abortControllerRef.current = null
     }
   }
 
@@ -516,6 +581,55 @@ export function GameDetailClient({
       )
     }
   }, [grid])
+
+  // Start over handler - clears lineup and resets to setup phase
+  const handleStartOver = async () => {
+    if (!confirm('Are you sure you want to start over? This will delete the current lineup.')) {
+      return
+    }
+
+    try {
+      // Delete lineup from database
+      const { error } = await supabase
+        .from('lineups')
+        .delete()
+        .eq('game_id', game.id)
+
+      if (error) throw error
+
+      // Reset all lineup-related state
+      setPhase('setup')
+      setLineup(null)
+      setRecommendedBattingOrder(null)
+      setBattingOrder(null)
+      setBattingRationale(null)
+      setDefensiveRationale(null)
+      setRulesCheck(null)
+      setWarnings(null)
+      setGrid([])
+      setLockedPositions([])
+      setLockedInnings(new Set())
+      setBattingNotes('')
+      setDefensiveNotes('')
+
+      // Reset UI state
+      setShowBattingRationale(false)
+      setShowGameDetails(true)
+      setShowAvailablePlayers(true)
+      setShowBattingOrderSection(true)
+
+      toast({
+        title: 'Lineup Cleared',
+        description: 'You can now generate a new lineup.',
+      })
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to clear lineup. Please try again.',
+        variant: 'destructive',
+      })
+    }
+  }
 
   // Innings change handler
   const handleInningsChange = useCallback((newInnings: number) => {
@@ -974,6 +1088,14 @@ export function GameDetailClient({
                         <Sparkles className="h-4 w-4 mr-2" />
                         {isGenerating ? 'Generating...' : 'Generate Batting Order'}
                       </Button>
+
+                      {isGenerating && generationPhase === 'batting' && generationStartTime && (
+                        <GenerationLoading
+                          phase="batting"
+                          startTime={generationStartTime}
+                          onCancel={handleCancelGeneration}
+                        />
+                      )}
                     </>
                   )}
 
@@ -1028,16 +1150,27 @@ export function GameDetailClient({
                             </Collapsible>
                           )}
 
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setPhase('setup')
-                              setShowBattingOrderSection(true)
-                            }}
-                            size="sm"
-                          >
-                            Regenerate Batting Order
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                setPhase('setup')
+                                setShowBattingOrderSection(true)
+                              }}
+                              size="sm"
+                            >
+                              Regenerate Batting Order
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              onClick={handleStartOver}
+                              size="sm"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <RotateCcw className="h-4 w-4 mr-1" />
+                              Start Over
+                            </Button>
+                          </div>
                         </div>
                       )}
                 </div>
@@ -1119,7 +1252,15 @@ export function GameDetailClient({
                     {isGenerating ? 'Filling Positions...' : 'Fill Remaining Positions with AI'}
                   </Button>
 
-                  {lockedPositions.length > 0 && (
+                  {isGenerating && generationPhase === 'defensive' && generationStartTime && (
+                    <GenerationLoading
+                      phase="defensive"
+                      startTime={generationStartTime}
+                      onCancel={handleCancelGeneration}
+                    />
+                  )}
+
+                  {lockedPositions.length > 0 && !isGenerating && (
                     <p className="text-xs text-muted-foreground text-center">
                       {lockedPositions.length} position(s) locked — AI will not change these
                     </p>
