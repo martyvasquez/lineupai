@@ -56,15 +56,26 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
   // Check if GameChanger data exists for any of the team's players
   const playerIds = (players || []).map(p => p.id)
   let hasGameChangerData = false
+  let hasCoachRatings = false
 
   if (playerIds.length > 0) {
-    const { count } = await supabase
+    const { count: gcCount } = await supabase
       .from('gamechanger_batting_season')
       .select('*', { count: 'exact', head: true })
       .in('player_id', playerIds)
 
-    hasGameChangerData = (count ?? 0) > 0
+    hasGameChangerData = (gcCount ?? 0) > 0
+
+    const { count: ratingsCount } = await supabase
+      .from('player_ratings')
+      .select('*', { count: 'exact', head: true })
+      .in('player_id', playerIds)
+
+    hasCoachRatings = (ratingsCount ?? 0) > 0
   }
+
+  // Only show data weighting dropdown when both data sources exist
+  const hasBothDataTypes = hasGameChangerData && hasCoachRatings
 
   return (
     <GameDetailClient
@@ -74,7 +85,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
       existingLineup={lineup}
       ruleGroups={ruleGroups || []}
       teamId={teamId}
-      hasGameChangerData={hasGameChangerData}
+      hasBothDataTypes={hasBothDataTypes}
     />
   )
 }

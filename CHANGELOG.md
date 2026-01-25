@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.4] - 2026-01-25
+
+### Fixed
+
+#### Data Weighting Dropdown Visibility Logic
+- **Issue:** Data Weighting dropdown appeared when only GameChanger data existed, but no coach ratings
+- **Cause:** Dropdown visibility only checked for `hasGameChangerData`, ignoring whether coach ratings exist
+- **Fix:** Dropdown now only shows when **both** data sources exist (`hasBothDataTypes = hasGameChangerData && hasCoachRatings`)
+- **Rationale:** Data weighting controls the balance between GameChanger stats and coach ratings — showing it when only one source exists is meaningless
+- **Fallback message updated:** Now mentions both data sources with links to Roster and Stats pages
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/dashboard/[teamId]/games/[gameId]/page.tsx` | Added `hasCoachRatings` query, computed `hasBothDataTypes`, updated prop |
+| `app/dashboard/[teamId]/games/[gameId]/_components/game-detail-client.tsx` | Renamed prop to `hasBothDataTypes`, updated fallback message with links to both pages |
+
+---
+
 ## [1.2.3] - 2026-01-25
 
 ### Added
