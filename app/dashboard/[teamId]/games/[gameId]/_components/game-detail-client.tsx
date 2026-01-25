@@ -955,7 +955,7 @@ export function GameDetailClient({
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="batting-notes">Notes for AI</Label>
+                        <Label htmlFor="batting-notes">Batting Order Notes for AI</Label>
                         <Textarea
                           id="batting-notes"
                           placeholder="e.g., 'Cole should bat leadoff', 'Strong hitters in 3-4-5'..."
