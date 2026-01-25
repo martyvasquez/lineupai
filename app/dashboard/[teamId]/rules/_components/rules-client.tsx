@@ -355,10 +355,6 @@ export function RulesClient({ initialRules, initialRuleGroups, teamId }: RulesCl
                 <span className="text-muted-foreground">•</span>
                 <span>All players must be included in the batting order.</span>
               </li>
-              <li className="flex gap-2">
-                <span className="text-muted-foreground">•</span>
-                <span>Prioritize GameChanger data when generating the batting order.</span>
-              </li>
             </ul>
           </div>
 

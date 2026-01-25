@@ -126,7 +126,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Example rules displayed:**
   - "All players must play an infield position by the end of the 4th inning."
   - "All players must be included in the batting order."
-  - "Prioritize GameChanger data when generating the batting order."
 
 ### Changed
 
