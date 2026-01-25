@@ -825,7 +825,7 @@ export function GameDetailClient({
                   <div className="flex items-center gap-2">
                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-sm font-medium">2</span>
                     <div>
-                      <CardTitle className="text-lg">Batting Order</CardTitle>
+                      <CardTitle className="text-lg">Batting Order & Game Setup</CardTitle>
                       {!showBattingOrderSection && recommendedBattingOrder && (
                         <p className="text-sm text-muted-foreground mt-0.5">
                           {recommendedBattingOrder.length} batters • {selectedRuleGroup?.name || 'No rule group'}
