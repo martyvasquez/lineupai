@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.2] - 2026-01-24
+
+### Added
+
+#### Game Creation Validation Gate
+- **Blocks game creation when no lineup data exists** - Prevents coaches from creating games before setting up player data
+- **Validation criteria:**
+  - **Allow games when:** GameChanger stats imported OR all players have at least 1 rating
+  - **Block games when:** No stats AND not all players rated, or no players on roster
+- **Warning card displayed when blocked:**
+  - Amber alert styling with "Setup Required" title
+  - Clear explanation of requirements
+  - Link to Roster page with progress indicator (e.g., "3/5 rated")
+  - Link to Stats page for GameChanger import
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/dashboard/[teamId]/games/page.tsx` | Added player/stats queries, validation logic, new props to client |
+| `app/dashboard/[teamId]/games/_components/games-client.tsx` | Added warning card UI, updated props interface |
+
+---
+
 ## [1.2.1] - 2026-01-24
 
 ### Changed

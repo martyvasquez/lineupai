@@ -2,11 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/lib/hooks/use-toast'
-import { Plus } from 'lucide-react'
+import { Plus, AlertTriangle, Users, BarChart3 } from 'lucide-react'
 import { GameCard } from './game-card'
 import { GameDialog } from './game-dialog'
 import type { Database } from '@/types/database'
@@ -16,9 +18,20 @@ type Game = Database['public']['Tables']['games']['Row']
 interface GamesClientProps {
   initialGames: Game[]
   teamId: string
+  canCreateGames: boolean
+  hasGameChangerData: boolean
+  playersRatedCount: number
+  totalPlayers: number
 }
 
-export function GamesClient({ initialGames, teamId }: GamesClientProps) {
+export function GamesClient({
+  initialGames,
+  teamId,
+  canCreateGames,
+  hasGameChangerData,
+  playersRatedCount,
+  totalPlayers,
+}: GamesClientProps) {
   const [games, setGames] = useState<Game[]>(initialGames)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingGame, setEditingGame] = useState<Game | null>(null)
@@ -133,6 +146,52 @@ export function GamesClient({ initialGames, teamId }: GamesClientProps) {
 
   const handleViewGame = (gameId: string) => {
     router.push(`/dashboard/${teamId}/games/${gameId}`)
+  }
+
+  // Show warning if no lineup data exists
+  if (!canCreateGames) {
+    return (
+      <Card className="border-amber-300 bg-amber-50/50">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-amber-600" />
+            <CardTitle className="text-lg">Setup Required</CardTitle>
+          </div>
+          <CardDescription>
+            Before creating games, you need player data for lineup generation.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            To generate AI-powered lineups, you need either:
+          </p>
+          <ul className="text-sm text-muted-foreground space-y-2 ml-4">
+            <li>1. Rate all players on your roster (at least one rating per player)</li>
+            <li>2. Import GameChanger statistics for your team</li>
+          </ul>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <Link
+              href={`/dashboard/${teamId}/roster`}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-sm font-medium"
+            >
+              <Users className="h-4 w-4" />
+              Add Player Ratings
+              {totalPlayers > 0 && (
+                <span className="text-xs opacity-80">({playersRatedCount}/{totalPlayers} rated)</span>
+              )}
+            </Link>
+            <Link
+              href={`/dashboard/${teamId}/stats`}
+              className="flex items-center gap-2 px-4 py-2 border border-input rounded-md hover:bg-accent text-sm font-medium"
+            >
+              <BarChart3 className="h-4 w-4" />
+              Import GameChanger Stats
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (

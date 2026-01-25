@@ -1,7 +1,7 @@
 # Peanut Manager - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (99% Complete)
-**Last Updated:** January 24, 2026 (v1.2.1)
+**Last Updated:** January 24, 2026 (v1.2.2)
 
 ---
 
@@ -623,8 +623,16 @@ MVP is complete when:
 - GameChanger CSV import with player matching
 - **Team Insights** - AI-powered team analysis on dashboard
 - **Dismissible Getting Started** - Can hide and restore the onboarding guide
+- **Game creation validation** - Blocks games until player data exists (ratings or GameChanger stats)
 
-**Recent Changes (January 24, 2026 - v1.2.1):**
+**Recent Changes (January 24, 2026 - v1.2.2):**
+- **Game Creation Validation Gate:**
+  - Blocks game creation when no lineup data exists
+  - Requires either: GameChanger stats imported OR all players have at least 1 rating
+  - Shows warning card with links to Roster (with progress) and Stats pages
+  - Prevents coaches from creating games before setting up player data
+
+**Previous Changes (v1.2.1 - January 24, 2026):**
 - **Rule Group Dropdown UX Improvement:**
   - Replaced amber warning with subtle info note when no rule groups exist
   - Uses muted styling with dashed border (matches Data Weighting style)
