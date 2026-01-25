@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.5] - 2026-01-25
+
+### Changed
+
+#### Dynamic Data Weighting Unavailable Message
+- **Issue:** Static message "Add coach ratings and import GameChanger data" didn't indicate which data type was missing
+- **Fix:** Message now dynamically shows what's missing and what action to take:
+  - Neither source: "No player data available. Add coach ratings or import GameChanger data to generate lineups."
+  - Only GameChanger: "Using GameChanger stats. Add coach ratings to enable data weighting options."
+  - Only coach ratings: "Using coach ratings. Import GameChanger data to enable data weighting options."
+- **Benefit:** Users clearly understand why Data Weighting is unavailable and what specific action to take
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/dashboard/[teamId]/games/[gameId]/page.tsx` | Pass both `hasGameChangerData` and `hasCoachRatings` props separately |
+| `app/dashboard/[teamId]/games/[gameId]/_components/game-detail-client.tsx` | Dynamic conditional rendering for fallback message based on which data sources exist |
+
+---
+
 ## [1.2.4] - 2026-01-25
 
 ### Fixed
@@ -16,14 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Cause:** Dropdown visibility only checked for `hasGameChangerData`, ignoring whether coach ratings exist
 - **Fix:** Dropdown now only shows when **both** data sources exist (`hasBothDataTypes = hasGameChangerData && hasCoachRatings`)
 - **Rationale:** Data weighting controls the balance between GameChanger stats and coach ratings — showing it when only one source exists is meaningless
-- **Fallback message updated:** Now mentions both data sources with links to Roster and Stats pages
 
 ### Files Modified
 
 | File | Changes |
 |------|---------|
 | `app/dashboard/[teamId]/games/[gameId]/page.tsx` | Added `hasCoachRatings` query, computed `hasBothDataTypes`, updated prop |
-| `app/dashboard/[teamId]/games/[gameId]/_components/game-detail-client.tsx` | Renamed prop to `hasBothDataTypes`, updated fallback message with links to both pages |
+| `app/dashboard/[teamId]/games/[gameId]/_components/game-detail-client.tsx` | Renamed prop to `hasBothDataTypes`, conditional dropdown visibility |
 
 ---
 

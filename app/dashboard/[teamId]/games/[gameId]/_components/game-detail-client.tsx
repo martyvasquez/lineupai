@@ -88,7 +88,8 @@ interface GameDetailClientProps {
   existingLineup: Lineup | null
   ruleGroups: RuleGroup[]
   teamId: string
-  hasBothDataTypes: boolean
+  hasGameChangerData: boolean
+  hasCoachRatings: boolean
 }
 
 export function GameDetailClient({
@@ -98,8 +99,11 @@ export function GameDetailClient({
   existingLineup: initialLineup,
   ruleGroups,
   teamId,
-  hasBothDataTypes,
+  hasGameChangerData,
+  hasCoachRatings,
 }: GameDetailClientProps) {
+  // Only show data weighting dropdown when both data sources exist
+  const hasBothDataTypes = hasGameChangerData && hasCoachRatings
   const [gameRoster, setGameRoster] = useState<GameRoster[]>(initialGameRoster)
   const [lineup, setLineup] = useState<Lineup | null>(initialLineup)
 
@@ -1057,15 +1061,33 @@ export function GameDetailClient({
                             <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg border border-dashed">
                               <Info className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
                               <p className="text-sm text-muted-foreground">
-                                Using available data.{' '}
-                                <Link href={`/dashboard/${teamId}/roster`} className="text-primary hover:underline">
-                                  Add coach ratings
-                                </Link>{' '}
-                                and{' '}
-                                <Link href={`/dashboard/${teamId}/stats`} className="text-primary hover:underline">
-                                  import GameChanger data
-                                </Link>{' '}
-                                to enable data weighting options.
+                                {hasGameChangerData ? 'Using GameChanger stats. ' : hasCoachRatings ? 'Using coach ratings. ' : 'No player data available. '}
+                                {!hasCoachRatings && !hasGameChangerData ? (
+                                  <>
+                                    <Link href={`/dashboard/${teamId}/roster`} className="text-primary hover:underline">
+                                      Add coach ratings
+                                    </Link>{' '}
+                                    or{' '}
+                                    <Link href={`/dashboard/${teamId}/stats`} className="text-primary hover:underline">
+                                      import GameChanger data
+                                    </Link>{' '}
+                                    to generate lineups.
+                                  </>
+                                ) : !hasCoachRatings ? (
+                                  <>
+                                    <Link href={`/dashboard/${teamId}/roster`} className="text-primary hover:underline">
+                                      Add coach ratings
+                                    </Link>{' '}
+                                    to enable data weighting options.
+                                  </>
+                                ) : (
+                                  <>
+                                    <Link href={`/dashboard/${teamId}/stats`} className="text-primary hover:underline">
+                                      Import GameChanger data
+                                    </Link>{' '}
+                                    to enable data weighting options.
+                                  </>
+                                )}
                               </p>
                             </div>
                           </div>

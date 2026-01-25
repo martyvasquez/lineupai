@@ -74,9 +74,6 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
     hasCoachRatings = (ratingsCount ?? 0) > 0
   }
 
-  // Only show data weighting dropdown when both data sources exist
-  const hasBothDataTypes = hasGameChangerData && hasCoachRatings
-
   return (
     <GameDetailClient
       game={game}
@@ -85,7 +82,8 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
       existingLineup={lineup}
       ruleGroups={ruleGroups || []}
       teamId={teamId}
-      hasBothDataTypes={hasBothDataTypes}
+      hasGameChangerData={hasGameChangerData}
+      hasCoachRatings={hasCoachRatings}
     />
   )
 }

@@ -1,7 +1,7 @@
 # Peanut Manager - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (99% Complete)
-**Last Updated:** January 25, 2026 (v1.2.4)
+**Last Updated:** January 25, 2026 (v1.2.5)
 
 ---
 
@@ -625,11 +625,16 @@ MVP is complete when:
 - **Dismissible Getting Started** - Can hide and restore the onboarding guide
 - **Game creation validation** - Blocks games until player data exists (ratings or GameChanger stats)
 
-**Recent Changes (January 25, 2026 - v1.2.4):**
+**Recent Changes (January 25, 2026 - v1.2.5):**
+- **Dynamic Data Weighting Unavailable Message:**
+  - Message now indicates which specific data type is missing (coach ratings, GameChanger stats, or both)
+  - Neither source: "No player data available. Add coach ratings or import GameChanger data..."
+  - Only GameChanger: "Using GameChanger stats. Add coach ratings to enable data weighting options."
+  - Only coach ratings: "Using coach ratings. Import GameChanger data to enable data weighting options."
+
+**Previous Changes (v1.2.4 - January 25, 2026):**
 - **Fixed Data Weighting Dropdown Visibility:**
   - Dropdown now only appears when BOTH GameChanger data AND coach ratings exist
-  - Previously showed when only GameChanger data existed (meaningless since weighting requires two data sources)
-  - Updated fallback message with links to both Roster and Stats pages
 
 **Previous Changes (v1.2.3 - January 25, 2026):**
 - **Auto-scroll to Generation Loading Feedback:**
@@ -696,4 +701,4 @@ MVP is complete when:
 ---
 
 **Last Updated:** January 25, 2026
-**Version:** 1.2.4 (Fix Data Weighting dropdown visibility)
+**Version:** 1.2.5 (Dynamic Data Weighting unavailable message)
