@@ -48,6 +48,7 @@ import type {
   Position,
   RuleCheck,
   POSITIONS,
+  GamePriority,
 } from '@/types/lineup'
 
 type Game = Database['public']['Tables']['games']['Row']
@@ -57,6 +58,15 @@ type Lineup = Database['public']['Tables']['lineups']['Row']
 type RuleGroup = Database['public']['Tables']['rule_groups']['Row']
 
 type Phase = 'setup' | 'batting' | 'defense' | 'complete'
+
+// Game priority options for the dropdown
+const GAME_PRIORITY_OPTIONS: { value: GamePriority; label: string; description: string }[] = [
+  { value: 'win', label: 'Win', description: 'Maximize chance of winning' },
+  { value: 'win-leaning', label: 'Win-Leaning', description: 'Favor winning, allow some development' },
+  { value: 'balanced', label: 'Balanced', description: 'Equal weight to winning and development' },
+  { value: 'dev-leaning', label: 'Development-Leaning', description: 'Favor development, stay competitive' },
+  { value: 'develop', label: 'Develop', description: 'Maximize player growth' },
+]
 
 interface GameDetailClientProps {
   game: Game
@@ -136,6 +146,7 @@ export function GameDetailClient({
   const [selectedRuleGroupId, setSelectedRuleGroupId] = useState<string | null>(
     ruleGroups.length > 0 ? ruleGroups[0].id : null
   )
+  const [selectedGamePriority, setSelectedGamePriority] = useState<GamePriority>('balanced')
   const [battingNotes, setBattingNotes] = useState('')
   const [defensiveNotes, setDefensiveNotes] = useState('')
   const [innings, setInnings] = useState(game.innings ?? 6)
@@ -254,6 +265,7 @@ export function GameDetailClient({
         body: JSON.stringify({
           game_id: game.id,
           rule_group_id: selectedRuleGroupId,
+          game_priority: selectedGamePriority,
           additional_notes: battingNotes.trim() || null,
           phase: 'batting_order',
         }),
@@ -314,6 +326,7 @@ export function GameDetailClient({
         body: JSON.stringify({
           game_id: game.id,
           rule_group_id: selectedRuleGroupId,
+          game_priority: selectedGamePriority,
           additional_notes: defensiveNotes.trim() || null,
           phase: 'defensive',
           batting_order: battingOrder,
@@ -836,28 +849,52 @@ export function GameDetailClient({
                     <>
                       {phase === 'setup' && (
                         <>
-                          <div className="space-y-2">
-                            <Label>Rule Group</Label>
-                            <Select
-                              value={selectedRuleGroupId || undefined}
-                              onValueChange={(value) => setSelectedRuleGroupId(value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select rule group" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {ruleGroups.map((group) => (
-                                  <SelectItem key={group.id} value={group.id}>
-                                    {group.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            {selectedRuleGroup?.description && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label>Rule Group</Label>
+                              <Select
+                                value={selectedRuleGroupId || undefined}
+                                onValueChange={(value) => setSelectedRuleGroupId(value)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select rule group" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {ruleGroups.map((group) => (
+                                    <SelectItem key={group.id} value={group.id}>
+                                      {group.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              {selectedRuleGroup?.description && (
+                                <p className="text-xs text-muted-foreground">
+                                  {selectedRuleGroup.description}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label>Game Priority</Label>
+                              <Select
+                                value={selectedGamePriority}
+                                onValueChange={(value) => setSelectedGamePriority(value as GamePriority)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {GAME_PRIORITY_OPTIONS.map((option) => (
+                                    <SelectItem key={option.value} value={option.value}>
+                                      {option.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                               <p className="text-xs text-muted-foreground">
-                                {selectedRuleGroup.description}
+                                {GAME_PRIORITY_OPTIONS.find(o => o.value === selectedGamePriority)?.description}
                               </p>
-                            )}
+                            </div>
                           </div>
 
                           <div className="space-y-2">

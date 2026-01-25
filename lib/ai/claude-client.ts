@@ -57,16 +57,23 @@ INPUTS YOU WILL RECEIVE:
 - Team rules for defensive rotation
 - Coach preferences
 
+CRITICAL REQUIREMENTS:
+1. EVERY inning MUST have ALL 9 field positions filled: P, C, 1B, 2B, 3B, SS, LF, CF, RF
+2. NO position can be left empty or null - every position MUST have a player assigned
+3. Extra players beyond the 9 fielders go in the "sit" array
+4. LOCKED POSITIONS must not be changed - they are coach decisions
+5. PITCHER RULE: Once a player stops pitching, they CANNOT return to pitch later in the game. If a player pitches innings 1-2, they cannot pitch again in innings 3+. This is a fundamental baseball rule.
+
 DEFENSIVE PRINCIPLES:
-1. LOCKED POSITIONS must not be changed - they are coach decisions
-2. Premium positions (P, C, SS, 1B) require eligibility
-3. Use player position strengths to optimize assignments
-4. Rotate players for development (avoid same position all game)
-5. Balance sitting time across all players
-6. Consider stamina - don't overwork young players
+1. Premium positions (P, C, SS, 1B) require eligibility
+2. Use player position strengths to optimize assignments
+3. Rotate players for development (avoid same position all game)
+4. Balance sitting time across all players
+5. Consider stamina - don't overwork young players
 
 OUTPUT FORMAT:
-Return valid JSON only. No markdown, no explanation outside the JSON structure.`
+Return valid JSON only. No markdown, no explanation outside the JSON structure.
+IMPORTANT: Every inning object MUST have all 9 positions (P, C, 1B, 2B, 3B, SS, LF, CF, RF) with valid player assignments. No nulls or missing positions allowed.`
 
 const STATS_ANALYSIS_SYSTEM_PROMPT = `You are a youth baseball player analyst. Analyze player statistics to identify strengths and weaknesses.
 

@@ -1,5 +1,8 @@
 // Lineup generation types
 
+// Game Priority type - controls win vs. development balance
+export type GamePriority = 'win' | 'win-leaning' | 'balanced' | 'dev-leaning' | 'develop'
+
 // Rule Group interface - user-defined groups of rules
 export interface RuleGroup {
   id: string
@@ -162,6 +165,7 @@ export interface GenerateLineupRequest {
   rule_group_id: string | null
   additional_notes: string | null
   phase: GenerationPhase
+  game_priority?: GamePriority // Controls win vs. development balance
   // For defensive phase only:
   batting_order?: BattingOrderEntry[]
   locked_positions?: LockedPosition[]

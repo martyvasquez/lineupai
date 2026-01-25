@@ -14,6 +14,7 @@ import type {
   LockedPosition,
   GenerationPhase,
   DefensiveInning,
+  GamePriority,
 } from '@/types/lineup'
 
 export async function POST(request: NextRequest) {
@@ -24,6 +25,7 @@ export async function POST(request: NextRequest) {
       rule_group_id,
       additional_notes,
       phase = 'batting_order', // Default to batting_order for backwards compatibility
+      game_priority,
       batting_order,
       locked_positions,
       start_from_inning,
@@ -34,6 +36,7 @@ export async function POST(request: NextRequest) {
       rule_group_id: string | null
       additional_notes: string | null
       phase?: GenerationPhase
+      game_priority?: GamePriority
       batting_order?: BattingOrderEntry[]
       locked_positions?: LockedPosition[]
       start_from_inning?: number
@@ -239,15 +242,20 @@ export async function POST(request: NextRequest) {
         gamePreferences,
         teamContext,
         additional_notes,
-        scoutingReport
+        scoutingReport,
+        game_priority || null
       )
 
       const response = await claudeClient.generateBattingOrder(prompt)
 
-      // Filter out any empty entries from the AI response
-      const filteredBattingOrder = response.batting_order.filter(
-        entry => entry.player_id && entry.name
-      )
+      // Filter out any empty entries and deduplicate by player_id
+      const seenPlayerIds = new Set<string>()
+      const filteredBattingOrder = response.batting_order.filter(entry => {
+        if (!entry.player_id || !entry.name) return false
+        if (seenPlayerIds.has(entry.player_id)) return false
+        seenPlayerIds.add(entry.player_id)
+        return true
+      })
 
       // Re-number the order to be sequential
       const cleanedBattingOrder = filteredBattingOrder.map((entry, index) => ({
@@ -310,10 +318,138 @@ export async function POST(request: NextRequest) {
         additional_notes,
         scoutingReport,
         current_grid || null,
-        feedback || null
+        feedback || null,
+        game_priority || null
       )
 
       const response = await claudeClient.generateDefensive(prompt)
+
+      // Post-process: Ensure all positions are filled in each inning
+      const POSITIONS: ('P' | 'C' | '1B' | '2B' | '3B' | 'SS' | 'LF' | 'CF' | 'RF')[] = ['P', 'C', '1B', '2B', '3B', 'SS', 'LF', 'CF', 'RF']
+
+      for (const inningData of response.defense) {
+        // Find which positions are missing or have null/undefined players
+        const missingPositions: typeof POSITIONS = []
+        const assignedPlayerIds = new Set<string>()
+
+        for (const pos of POSITIONS) {
+          const player = inningData[pos]
+          if (!player || !player.id || !player.name) {
+            missingPositions.push(pos)
+          } else {
+            assignedPlayerIds.add(player.id)
+          }
+        }
+
+        // Also track players in sit array
+        if (inningData.sit) {
+          for (const player of inningData.sit) {
+            if (player?.id) {
+              assignedPlayerIds.add(player.id)
+            }
+          }
+        }
+
+        // If there are missing positions, fill them with unassigned players
+        if (missingPositions.length > 0) {
+          // Get unassigned players from the batting order
+          const unassignedPlayers = batting_order!.filter(
+            entry => !assignedPlayerIds.has(entry.player_id)
+          )
+
+          for (let i = 0; i < missingPositions.length && i < unassignedPlayers.length; i++) {
+            const pos = missingPositions[i]
+            const player = unassignedPlayers[i]
+            inningData[pos] = {
+              id: player.player_id,
+              name: player.name,
+            }
+          }
+
+          // If we still have missing positions after using all available players,
+          // fill with a placeholder (shouldn't happen if we have enough players)
+          for (const pos of missingPositions) {
+            if (!inningData[pos] || !inningData[pos].id) {
+              // Use the first player from batting order as fallback
+              const fallbackPlayer = batting_order![0]
+              inningData[pos] = {
+                id: fallbackPlayer.player_id,
+                name: fallbackPlayer.name,
+              }
+            }
+          }
+        }
+      }
+
+      // Post-process: Enforce pitcher rule (once pulled, cannot return to pitch)
+      // Track each player's pitching status: 'not_started' | 'pitching' | 'pulled'
+      const pitcherStatus = new Map<string, 'not_started' | 'pitching' | 'pulled'>()
+
+      // Sort innings to process in order
+      const sortedInnings = [...response.defense].sort((a, b) => a.inning - b.inning)
+
+      for (const inningData of sortedInnings) {
+        const currentPitcher = inningData.P
+        if (!currentPitcher?.id) continue
+
+        const currentStatus = pitcherStatus.get(currentPitcher.id) || 'not_started'
+
+        if (currentStatus === 'pulled') {
+          // This player already pitched and was pulled - they can't pitch again
+          // Find a replacement from players who haven't been pulled
+          const eligibleReplacements = batting_order!.filter(entry => {
+            const status = pitcherStatus.get(entry.player_id)
+            return status !== 'pulled' && entry.player_id !== currentPitcher.id
+          })
+
+          if (eligibleReplacements.length > 0) {
+            // Find the player currently at another position who can swap
+            let swapped = false
+            for (const pos of POSITIONS) {
+              if (pos === 'P') continue
+              const playerAtPos = inningData[pos]
+              if (playerAtPos?.id && eligibleReplacements.some(e => e.player_id === playerAtPos.id)) {
+                const replacement = eligibleReplacements.find(e => e.player_id === playerAtPos.id)
+                if (replacement) {
+                  // Swap: move the eligible player to pitcher, move invalid pitcher to their position
+                  inningData.P = { id: replacement.player_id, name: replacement.name }
+                  inningData[pos] = currentPitcher
+                  // Mark the new pitcher as pitching
+                  pitcherStatus.set(replacement.player_id, 'pitching')
+                  swapped = true
+                  break
+                }
+              }
+            }
+
+            if (!swapped) {
+              // Just pick the first eligible replacement and swap with whoever is at their current position
+              const replacement = eligibleReplacements[0]
+              // Find where the replacement currently is
+              for (const pos of POSITIONS) {
+                if (pos === 'P') continue
+                if (inningData[pos]?.id === replacement.player_id) {
+                  inningData.P = { id: replacement.player_id, name: replacement.name }
+                  inningData[pos] = currentPitcher
+                  pitcherStatus.set(replacement.player_id, 'pitching')
+                  break
+                }
+              }
+            }
+          }
+          // If no eligible replacements, we can't fix it - leave as is (shouldn't happen with enough players)
+        } else {
+          // Player is starting or continuing to pitch
+          pitcherStatus.set(currentPitcher.id, 'pitching')
+        }
+
+        // Mark all players who were pitching but aren't now as 'pulled'
+        for (const [playerId, status] of pitcherStatus.entries()) {
+          if (status === 'pitching' && inningData.P?.id !== playerId) {
+            pitcherStatus.set(playerId, 'pulled')
+          }
+        }
+      }
 
       // Update the existing lineup with defensive positions
       const { data: existingLineups } = await supabase

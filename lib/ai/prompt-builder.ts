@@ -6,6 +6,7 @@ import type {
   LockedPosition,
   DefensiveInning,
   Position,
+  GamePriority,
 } from '@/types/lineup'
 import type { Database } from '@/types/database'
 
@@ -21,6 +22,15 @@ type PositionEligibility = Database['public']['Tables']['position_eligibility'][
 type GameRoster = Database['public']['Tables']['game_roster']['Row']
 type BattingStats = Database['public']['Views']['gamechanger_batting_season']['Row']
 type FieldingStats = Database['public']['Views']['gamechanger_fielding_season']['Row']
+
+// Game priority prompts - injected at the top of AI prompts
+export const GAME_PRIORITY_PROMPTS: Record<GamePriority, string> = {
+  'win': 'PRIMARY DIRECTIVE: Winning is the top priority. Always recommend the lineup, plays, and substitutions that maximize the chance of winning, regardless of player development considerations. Prioritize experienced players and proven strategies over giving less experienced players opportunities.',
+  'win-leaning': 'PRIMARY DIRECTIVE: Winning takes priority over player development. Favor decisions that increase win probability, but when the game situation allows (comfortable lead, low-stakes moments), you may suggest development opportunities. Never sacrifice a likely win for development purposes.',
+  'balanced': 'PRIMARY DIRECTIVE: Winning and player development carry equal weight. Seek decisions that advance both goals when possible. In close games, lean toward winning; in comfortable situations, lean toward development. Explicitly acknowledge tradeoffs when they exist.',
+  'dev-leaning': 'PRIMARY DIRECTIVE: Player development takes priority over winning. Favor decisions that maximize learning and growth opportunities, but do not completely abandon competitive play. In critical moments, winning considerations may factor in, but default to development-focused choices.',
+  'develop': 'PRIMARY DIRECTIVE: Player development is the top priority. Always recommend decisions that maximize player growth, learning, and experience—even at the cost of winning. Rotate players, try new strategies, and give all players meaningful opportunities regardless of game situation.',
+}
 
 interface PlayerData {
   player: Player
@@ -214,7 +224,8 @@ export function buildBattingOrderPrompt(
   preferences: GamePreference[],
   teamContext?: TeamContext | null,
   additionalNotes?: string | null,
-  scoutingReport?: string | null
+  scoutingReport?: string | null,
+  gamePriority?: GamePriority | null
 ): string {
   const availablePlayers = players.filter(p => p.available)
 
@@ -246,8 +257,16 @@ Scouting Report: None provided`
 Notes for AI: ${additionalNotes}`
     : ''
 
-  return `You are the highest rated youth baseball coach for ${ageGroup} players.
+  // Build priority directive section
+  const priorityDirective = gamePriority
+    ? `
 
+${GAME_PRIORITY_PROMPTS[gamePriority]}
+`
+    : ''
+
+  return `You are the highest rated youth baseball coach for ${ageGroup} players.
+${priorityDirective}
 You will be coming up with the batting order.
 
 Here are the rules listed in order of priority that you must follow:
@@ -365,7 +384,8 @@ export function buildDefensivePrompt(
   additionalNotes?: string | null,
   scoutingReport?: string | null,
   currentGrid?: DefensiveInning[] | null,
-  feedback?: string | null
+  feedback?: string | null,
+  gamePriority?: GamePriority | null
 ): string {
   const availablePlayers = players.filter(p => p.available)
 
@@ -446,9 +466,21 @@ ${feedback}`
     ? `(Generate for innings ${startFromInning}-${innings})`
     : ''
 
-  return `You are the highest rated youth baseball coach for ${ageGroup} players.
+  // Build priority directive section
+  const priorityDirective = gamePriority
+    ? `
 
+${GAME_PRIORITY_PROMPTS[gamePriority]}
+`
+    : ''
+
+  return `You are the highest rated youth baseball coach for ${ageGroup} players.
+${priorityDirective}
 You will be coming up with defense and positions for ${innings} innings. ${inningsNote}
+
+CRITICAL: You MUST assign a player to EVERY position (P, C, 1B, 2B, 3B, SS, LF, CF, RF) for EVERY inning. No position can be left empty. Players who are not fielding go in the "sit" array.
+
+PITCHER RULE: Once a player is removed from pitching, they CANNOT return to pitch later in the game. For example, if a player pitches innings 1-2 and then plays another position in inning 3, they cannot pitch again in innings 4, 5, 6, etc. Plan pitcher usage carefully.
 
 Here are the rules listed in order of priority that you must follow:
 ${rulesText}

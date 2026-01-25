@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-01-24
+
+### Fixed
+
+#### Duplicate Players in Batting Order
+- **Issue:** AI sometimes returned the same player multiple times in the batting order
+- **Cause:** Filtering logic only checked for empty entries, not duplicates
+- **Fix:** Added deduplication using a `Set<string>` to track seen player IDs, keeping only the first occurrence
+
+#### Empty Defensive Positions
+- **Issue:** AI sometimes left defensive positions unfilled (6 positions empty despite 8 locked)
+- **Cause:** AI didn't always return all 9 field positions for each inning
+- **Fix:**
+  - Added explicit requirements in AI prompts that ALL 9 positions must be filled
+  - Added post-processing validation that fills any missing positions with unassigned players
+
+#### Pitcher Re-entry Rule Violation
+- **Issue:** AI would sometimes assign a player to pitch after they had already been pulled
+- **Cause:** No enforcement of the baseball rule that a pulled pitcher cannot return
+- **Fix:**
+  - Added PITCHER RULE to AI prompts explaining the constraint
+  - Added post-processing validation that tracks pitcher status (not_started → pitching → pulled)
+  - If a pulled pitcher is assigned to pitch, automatically swaps them with an eligible player
+
+### Changed
+
+#### AI Prompt Updates (`lib/ai/claude-client.ts`)
+- Added CRITICAL REQUIREMENTS section to defensive system prompt:
+  - All 9 positions must be filled every inning
+  - No positions can be null or empty
+  - Pitcher rule enforcement (once pulled, cannot return)
+
+#### AI Prompt Builder (`lib/ai/prompt-builder.ts`)
+- Added explicit CRITICAL and PITCHER RULE instructions to defensive prompt text
+- Clearer guidance for AI on mandatory position filling
+
+#### Generate Lineup API (`app/api/generate-lineup/route.ts`)
+- Added batting order deduplication by player_id
+- Added post-processing to fill empty defensive positions
+- Added pitcher rule enforcement with automatic position swapping
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/api/generate-lineup/route.ts` | Deduplication, position filling, pitcher rule enforcement |
+| `lib/ai/claude-client.ts` | Updated defensive system prompt with critical requirements |
+| `lib/ai/prompt-builder.ts` | Added explicit instructions for position filling and pitcher rule |
+
+---
+
 ## [1.1.0] - 2026-01-23
 
 ### Added
