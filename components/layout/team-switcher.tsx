@@ -41,7 +41,7 @@ export function TeamSwitcher({ teams, currentTeamId }: TeamSwitcherProps) {
 
     // Extract the path after /dashboard/[teamId]/ and preserve it
     const pathParts = pathname.split('/')
-    // pathname is like /dashboard/abc123/roster or /dashboard/abc123
+    // pathname is like /dashboard/abc123/roster or /dashboard/abc123/games/xyz789
     // We want to replace abc123 with the new teamId
 
     // Check if we're on a non-team page (like /dashboard/settings/...)
@@ -52,9 +52,18 @@ export function TeamSwitcher({ teams, currentTeamId }: TeamSwitcherProps) {
     }
 
     if (pathParts.length > 3) {
-      // Has sub-path like /roster, /rules, etc.
-      const subPath = pathParts.slice(3).join('/')
-      router.push(`/dashboard/${teamId}/${subPath}`)
+      // Has sub-path like /roster, /rules, /games, /games/[gameId], etc.
+      const section = pathParts[3] // e.g., 'roster', 'rules', 'games', 'stats'
+
+      // If we're on a detail page (e.g., /games/[gameId]), just go to the list page
+      // because the specific ID won't exist for the new team
+      if (pathParts.length > 4) {
+        // Navigate to the section root (e.g., /dashboard/[teamId]/games)
+        router.push(`/dashboard/${teamId}/${section}`)
+      } else {
+        // Just a section page like /roster, /rules - preserve it
+        router.push(`/dashboard/${teamId}/${section}`)
+      }
     } else {
       // Just /dashboard/[teamId]
       router.push(`/dashboard/${teamId}`)

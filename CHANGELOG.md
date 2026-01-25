@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.6] - 2026-01-25
+
+### Fixed
+
+#### Team Switcher 404 on Game Detail Page
+- **Issue:** Switching teams while on an individual game page (`/dashboard/[teamId]/games/[gameId]`) caused a 404
+- **Cause:** Team switcher preserved the full path including the game ID, which doesn't exist for the new team
+- **Fix:** When on a detail page (path has more than 4 segments), navigate to the section root instead of preserving the ID
+- **Example:** Switching teams on `/dashboard/team1/games/abc123` now goes to `/dashboard/team2/games` instead of `/dashboard/team2/games/abc123`
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `components/layout/team-switcher.tsx` | Detect detail pages and navigate to section root when switching teams |
+
+---
+
 ## [1.2.5] - 2026-01-25
 
 ### Changed
