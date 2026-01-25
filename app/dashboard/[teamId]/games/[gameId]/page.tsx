@@ -53,6 +53,19 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
     .eq('team_id', teamId)
     .order('created_at', { ascending: true })
 
+  // Check if GameChanger data exists for any of the team's players
+  const playerIds = (players || []).map(p => p.id)
+  let hasGameChangerData = false
+
+  if (playerIds.length > 0) {
+    const { count } = await supabase
+      .from('gamechanger_batting_season')
+      .select('*', { count: 'exact', head: true })
+      .in('player_id', playerIds)
+
+    hasGameChangerData = (count ?? 0) > 0
+  }
+
   return (
     <GameDetailClient
       game={game}
@@ -61,6 +74,7 @@ export default async function GameDetailPage({ params }: GameDetailPageProps) {
       existingLineup={lineup}
       ruleGroups={ruleGroups || []}
       teamId={teamId}
+      hasGameChangerData={hasGameChangerData}
     />
   )
 }

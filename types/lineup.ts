@@ -3,6 +3,9 @@
 // Game Priority type - controls win vs. development balance
 export type GamePriority = 'win' | 'win-leaning' | 'balanced' | 'dev-leaning' | 'develop'
 
+// Data Weighting type - controls how much weight to give GameChanger stats vs coach ratings
+export type DataWeighting = 'gc-only' | 'gc-heavy' | 'equal' | 'coach-heavy' | 'coach-only'
+
 // Rule Group interface - user-defined groups of rules
 export interface RuleGroup {
   id: string
@@ -166,6 +169,7 @@ export interface GenerateLineupRequest {
   additional_notes: string | null
   phase: GenerationPhase
   game_priority?: GamePriority // Controls win vs. development balance
+  data_weighting?: DataWeighting // Controls GameChanger stats vs coach ratings balance
   // For defensive phase only:
   batting_order?: BattingOrderEntry[]
   locked_positions?: LockedPosition[]

@@ -1,7 +1,7 @@
 # Peanut Manager - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (99% Complete)
-**Last Updated:** January 23, 2026 (v1.1.0)
+**Last Updated:** January 24, 2026 (v1.2.1)
 
 ---
 
@@ -624,24 +624,36 @@ MVP is complete when:
 - **Team Insights** - AI-powered team analysis on dashboard
 - **Dismissible Getting Started** - Can hide and restore the onboarding guide
 
-**Recent Changes (January 22, 2026 - v1.0.0):**
-- **Team Dashboard Overhaul:**
-  - New Team Insights card with AI-powered team analysis
-  - Shows team strengths, weaknesses, and practice recommendations
-  - Displays data import date and analysis generation date
-  - Three states: no stats, ready to analyze, analysis complete
-- **Dashboard Navigation:**
-  - Added "Dashboard" link to header nav (Dashboard → Roster → Rules → Games → Stats)
-- **Dismissible Getting Started:**
-  - "Don't show again" button hides the onboarding card
-  - "Show getting started guide" link to bring it back
-  - Preference saved to localStorage
-- **Stats Page Enhancement:**
-  - Shows when AI player analysis was last generated
-- **Team Settings UX:**
-  - Team cards are now clickable to navigate to team dashboard
-- **Bug Fix:**
-  - Fixed blank positions after lineup generation (added name fallback matching)
+**Recent Changes (January 24, 2026 - v1.2.1):**
+- **Rule Group Dropdown UX Improvement:**
+  - Replaced amber warning with subtle info note when no rule groups exist
+  - Uses muted styling with dashed border (matches Data Weighting style)
+  - Inline link to create rule groups instead of button
+  - Generate button now enabled even without rule groups
+
+**Previous Changes (v1.2.0 - January 24, 2026):**
+- **Fixed Duplicate Players in Batting Order:**
+  - AI sometimes returned the same player multiple times
+  - Added deduplication logic using Set<string> to track seen player IDs
+- **Fixed Empty Defensive Positions:**
+  - AI sometimes left positions unfilled (e.g., 6 empty despite 8 locked)
+  - Added explicit requirements in AI prompts that ALL 9 positions must be filled
+  - Added post-processing validation to fill missing positions with unassigned players
+- **Enforced Pitcher Re-entry Rule:**
+  - Baseball rule: once a pitcher is pulled, they cannot return to pitch
+  - Added PITCHER RULE to AI prompts explaining the constraint
+  - Added post-processing validation that tracks pitcher status and auto-swaps if violated
+
+**Previous Changes (v1.1.0 - January 23, 2026):**
+- Mobile hamburger menu for navigation
+- Rebrand to "Peanut Manager" with Pacifico font
+- Example rules section on Rules page
+
+**Previous Changes (v1.0.0 - January 22, 2026):**
+- Team Dashboard with AI-powered team insights
+- Dismissible Getting Started guide
+- Stats page shows when AI analysis was last generated
+- Fixed blank positions after lineup generation (name fallback matching)
 
 **Previous Changes (v0.99.0):**
 - **Regeneration Feedback System:**
@@ -663,5 +675,5 @@ MVP is complete when:
 
 ---
 
-**Last Updated:** January 22, 2026
-**Version:** 0.99.0 (Regeneration Feedback & Multi-Inning Selection)
+**Last Updated:** January 24, 2026
+**Version:** 1.2.1 (Rule Group UX: Info note instead of warning when none exist)

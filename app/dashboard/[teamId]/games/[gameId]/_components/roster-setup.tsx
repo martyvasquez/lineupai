@@ -135,7 +135,7 @@ export function RosterSetup({ players, gameRoster, onUpdate }: RosterSetupProps)
                       notes ? 'text-foreground' : 'text-muted-foreground'
                     )}
                   >
-                    {notes || 'Add notes...'}
+                    {notes || 'Game Specific Notes'}
                   </button>
                 )}
               </div>

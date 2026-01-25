@@ -7,6 +7,7 @@ import type {
   DefensiveInning,
   Position,
   GamePriority,
+  DataWeighting,
 } from '@/types/lineup'
 import type { Database } from '@/types/database'
 
@@ -30,6 +31,15 @@ export const GAME_PRIORITY_PROMPTS: Record<GamePriority, string> = {
   'balanced': 'PRIMARY DIRECTIVE: Winning and player development carry equal weight. Seek decisions that advance both goals when possible. In close games, lean toward winning; in comfortable situations, lean toward development. Explicitly acknowledge tradeoffs when they exist.',
   'dev-leaning': 'PRIMARY DIRECTIVE: Player development takes priority over winning. Favor decisions that maximize learning and growth opportunities, but do not completely abandon competitive play. In critical moments, winning considerations may factor in, but default to development-focused choices.',
   'develop': 'PRIMARY DIRECTIVE: Player development is the top priority. Always recommend decisions that maximize player growth, learning, and experience—even at the cost of winning. Rotate players, try new strategies, and give all players meaningful opportunities regardless of game situation.',
+}
+
+// Data weighting prompts - controls how to balance GameChanger stats vs coach ratings
+export const DATA_WEIGHTING_PROMPTS: Record<DataWeighting, string> = {
+  'gc-only': 'DATA DIRECTIVE: Base all player evaluations solely on the GameChanger statistics provided. Ignore coach ratings.',
+  'gc-heavy': 'DATA DIRECTIVE: Prioritize GameChanger data (75%) over coach ratings (25%). Use stats as primary evidence, coach ratings as secondary input.',
+  'equal': 'DATA DIRECTIVE: Weight GameChanger data and coach ratings equally. Consider both objective stats and subjective coach observations.',
+  'coach-heavy': 'DATA DIRECTIVE: Prioritize coach ratings (75%) over GameChanger data (25%). Use coach observations as primary evidence, stats as secondary input.',
+  'coach-only': 'DATA DIRECTIVE: Base all player evaluations solely on the coach ratings provided. Ignore GameChanger statistics.',
 }
 
 interface PlayerData {
@@ -192,14 +202,19 @@ GameChanger Stats:
 }
 
 // Build simplified player text for batting order prompt
-function buildBattingPlayerText(player: PlayerForLineup): string {
+function buildBattingPlayerText(player: PlayerForLineup, dataWeighting: DataWeighting = 'equal'): string {
   let text = `---
 Name: ${player.name}
-ID: ${player.id}
-Subjective Ratings: Plate Discipline: ${player.ratings.plate_discipline ?? 3}, Contact Ability: ${player.ratings.contact_ability ?? 3}, Power: ${player.ratings.batting_power ?? 3}, Run Speed: ${player.ratings.run_speed ?? 3}`
+ID: ${player.id}`
 
-  // Add GameChanger stats if available
-  if (player.stats && player.stats.pa > 0) {
+  // Include coach ratings unless gc-only
+  if (dataWeighting !== 'gc-only') {
+    text += `
+Subjective Ratings: Plate Discipline: ${player.ratings.plate_discipline ?? 3}, Contact Ability: ${player.ratings.contact_ability ?? 3}, Power: ${player.ratings.batting_power ?? 3}, Run Speed: ${player.ratings.run_speed ?? 3}`
+  }
+
+  // Include GameChanger stats unless coach-only
+  if (dataWeighting !== 'coach-only' && player.stats && player.stats.pa > 0) {
     // Calculate SB% (stolen base percentage)
     const sbAttempts = player.stats.sb + player.stats.cs
     const sbPct = sbAttempts > 0 ? (player.stats.sb / sbAttempts * 100).toFixed(0) : 'N/A'
@@ -225,15 +240,17 @@ export function buildBattingOrderPrompt(
   teamContext?: TeamContext | null,
   additionalNotes?: string | null,
   scoutingReport?: string | null,
-  gamePriority?: GamePriority | null
+  gamePriority?: GamePriority | null,
+  dataWeighting?: DataWeighting | null
 ): string {
   const availablePlayers = players.filter(p => p.available)
 
   // Get age group for persona
   const ageGroup = teamContext?.age_group || 'youth'
 
-  // Build players section
-  const playersText = availablePlayers.map(buildBattingPlayerText).join('\n')
+  // Build players section with data weighting
+  const weighting = dataWeighting || 'equal'
+  const playersText = availablePlayers.map(p => buildBattingPlayerText(p, weighting)).join('\n')
 
   // Build rules section - these are the rules coaches define
   const activeRules = rules.filter(r => r.active)
@@ -265,8 +282,16 @@ ${GAME_PRIORITY_PROMPTS[gamePriority]}
 `
     : ''
 
+  // Build data weighting directive section
+  const dataDirective = dataWeighting
+    ? `
+
+${DATA_WEIGHTING_PROMPTS[dataWeighting]}
+`
+    : ''
+
   return `You are the highest rated youth baseball coach for ${ageGroup} players.
-${priorityDirective}
+${priorityDirective}${dataDirective}
 You will be coming up with the batting order.
 
 Here are the rules listed in order of priority that you must follow:
@@ -288,43 +313,48 @@ Return JSON only:
 }
 
 // Build simplified player text for defensive prompt
-function buildDefensivePlayerText(player: PlayerForLineup): string {
+function buildDefensivePlayerText(player: PlayerForLineup, dataWeighting: DataWeighting = 'equal'): string {
   const positionStrengthsText = player.position_strengths.length > 0
     ? player.position_strengths.join(' > ')
     : 'Not specified'
 
-  // Build subjective ratings - base fielding ratings for all players
-  const baseRatings = [
-    `Speed: ${player.ratings.run_speed ?? 3}`,
-    `Baseball IQ: ${player.ratings.baseball_iq ?? 3}`,
-    `Attention: ${player.ratings.attention ?? 3}`,
-    `Fielding Hands: ${player.ratings.fielding_hands ?? 3}`,
-    `Throw Accuracy: ${player.ratings.fielding_throw_accuracy ?? 3}`,
-    `Arm Strength: ${player.ratings.fielding_arm_strength ?? 3}`,
-    `Fly Ball Ability: ${player.ratings.fly_ball_ability ?? 3}`,
-  ]
-
-  // Add pitching ratings only if eligible to pitch
-  if (player.eligibility.can_pitch) {
-    baseRatings.push(
-      `Pitch Control: ${player.ratings.pitch_control ?? 3}`,
-      `Pitch Velocity: ${player.ratings.pitch_velocity ?? 3}`,
-      `Pitch Composure: ${player.ratings.pitch_composure ?? 3}`
-    )
-  }
-
-  // Add catching rating only if eligible to catch
-  if (player.eligibility.can_catch) {
-    baseRatings.push(`Catcher Ability: ${player.ratings.catcher_ability ?? 3}`)
-  }
-
   let text = `---
 Name: ${player.name}
-ID: ${player.id}
-Subjective Ratings: ${baseRatings.join(', ')}`
+ID: ${player.id}`
 
-  // Add GameChanger stats if available (defensive stats only)
-  if (player.stats && player.stats.tc > 0) {
+  // Include coach ratings unless gc-only
+  if (dataWeighting !== 'gc-only') {
+    // Build subjective ratings - base fielding ratings for all players
+    const baseRatings = [
+      `Speed: ${player.ratings.run_speed ?? 3}`,
+      `Baseball IQ: ${player.ratings.baseball_iq ?? 3}`,
+      `Attention: ${player.ratings.attention ?? 3}`,
+      `Fielding Hands: ${player.ratings.fielding_hands ?? 3}`,
+      `Throw Accuracy: ${player.ratings.fielding_throw_accuracy ?? 3}`,
+      `Arm Strength: ${player.ratings.fielding_arm_strength ?? 3}`,
+      `Fly Ball Ability: ${player.ratings.fly_ball_ability ?? 3}`,
+    ]
+
+    // Add pitching ratings only if eligible to pitch
+    if (player.eligibility.can_pitch) {
+      baseRatings.push(
+        `Pitch Control: ${player.ratings.pitch_control ?? 3}`,
+        `Pitch Velocity: ${player.ratings.pitch_velocity ?? 3}`,
+        `Pitch Composure: ${player.ratings.pitch_composure ?? 3}`
+      )
+    }
+
+    // Add catching rating only if eligible to catch
+    if (player.eligibility.can_catch) {
+      baseRatings.push(`Catcher Ability: ${player.ratings.catcher_ability ?? 3}`)
+    }
+
+    text += `
+Subjective Ratings: ${baseRatings.join(', ')}`
+  }
+
+  // Include GameChanger stats unless coach-only (defensive stats only)
+  if (dataWeighting !== 'coach-only' && player.stats && player.stats.tc > 0) {
     text += `
 GameChanger Stats: FPCT: ${player.stats.fpct.toFixed(3)}, Errors: ${player.stats.errors}, TC: ${player.stats.tc}`
   }
@@ -385,15 +415,17 @@ export function buildDefensivePrompt(
   scoutingReport?: string | null,
   currentGrid?: DefensiveInning[] | null,
   feedback?: string | null,
-  gamePriority?: GamePriority | null
+  gamePriority?: GamePriority | null,
+  dataWeighting?: DataWeighting | null
 ): string {
   const availablePlayers = players.filter(p => p.available)
 
   // Get age group for persona
   const ageGroup = teamContext?.age_group || 'youth'
 
-  // Build players section
-  const playersText = availablePlayers.map(buildDefensivePlayerText).join('\n')
+  // Build players section with data weighting
+  const weighting = dataWeighting || 'equal'
+  const playersText = availablePlayers.map(p => buildDefensivePlayerText(p, weighting)).join('\n')
 
   // Build batting order section
   const battingOrderText = battingOrder
@@ -474,8 +506,16 @@ ${GAME_PRIORITY_PROMPTS[gamePriority]}
 `
     : ''
 
+  // Build data weighting directive section
+  const dataDirective = dataWeighting
+    ? `
+
+${DATA_WEIGHTING_PROMPTS[dataWeighting]}
+`
+    : ''
+
   return `You are the highest rated youth baseball coach for ${ageGroup} players.
-${priorityDirective}
+${priorityDirective}${dataDirective}
 You will be coming up with defense and positions for ${innings} innings. ${inningsNote}
 
 CRITICAL: You MUST assign a player to EVERY position (P, C, 1B, 2B, 3B, SS, LF, CF, RF) for EVERY inning. No position can be left empty. Players who are not fielding go in the "sit" array.

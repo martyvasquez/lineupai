@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.1] - 2026-01-24
+
+### Changed
+
+#### Rule Group Dropdown UX Improvement
+- **Issue:** When no rule groups exist, an amber warning box blocked lineup generation
+- **Before:** Prominent warning with AlertCircle icon required creating rule groups first
+- **After:** Subtle info note with muted styling allows generation without rule groups
+- **UI Changes:**
+  - Uses Info icon instead of AlertCircle
+  - Muted background with dashed border (matches Data Weighting style)
+  - Inline link to create rule groups instead of button
+  - Text: "Using default lineup generation. Create rule groups to define league lineup rules..."
+- **Functional Change:** Generate button now enabled when no rule groups exist (previously disabled)
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/dashboard/[teamId]/games/[gameId]/_components/game-detail-client.tsx` | Replaced amber warning with info note, restructured JSX, updated button disabled condition |
+
+---
+
 ## [1.2.0] - 2026-01-24
 
 ### Fixed

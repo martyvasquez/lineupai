@@ -15,6 +15,7 @@ import type {
   GenerationPhase,
   DefensiveInning,
   GamePriority,
+  DataWeighting,
 } from '@/types/lineup'
 
 export async function POST(request: NextRequest) {
@@ -26,6 +27,7 @@ export async function POST(request: NextRequest) {
       additional_notes,
       phase = 'batting_order', // Default to batting_order for backwards compatibility
       game_priority,
+      data_weighting,
       batting_order,
       locked_positions,
       start_from_inning,
@@ -37,6 +39,7 @@ export async function POST(request: NextRequest) {
       additional_notes: string | null
       phase?: GenerationPhase
       game_priority?: GamePriority
+      data_weighting?: DataWeighting
       batting_order?: BattingOrderEntry[]
       locked_positions?: LockedPosition[]
       start_from_inning?: number
@@ -243,7 +246,8 @@ export async function POST(request: NextRequest) {
         teamContext,
         additional_notes,
         scoutingReport,
-        game_priority || null
+        game_priority || null,
+        data_weighting || null
       )
 
       const response = await claudeClient.generateBattingOrder(prompt)
@@ -319,7 +323,8 @@ export async function POST(request: NextRequest) {
         scoutingReport,
         current_grid || null,
         feedback || null,
-        game_priority || null
+        game_priority || null,
+        data_weighting || null
       )
 
       const response = await claudeClient.generateDefensive(prompt)

@@ -33,6 +33,7 @@ import {
   CheckCircle2,
   MessageSquare,
   Printer,
+  Info,
 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { RosterSetup } from './roster-setup'
@@ -49,6 +50,7 @@ import type {
   RuleCheck,
   POSITIONS,
   GamePriority,
+  DataWeighting,
 } from '@/types/lineup'
 
 type Game = Database['public']['Tables']['games']['Row']
@@ -68,6 +70,15 @@ const GAME_PRIORITY_OPTIONS: { value: GamePriority; label: string; description: 
   { value: 'develop', label: 'Develop', description: 'Maximize player growth' },
 ]
 
+// Data weighting options for the dropdown
+const DATA_WEIGHTING_OPTIONS: { value: DataWeighting; label: string; description: string }[] = [
+  { value: 'gc-only', label: 'GameChanger Only', description: 'Use only GameChanger statistics' },
+  { value: 'gc-heavy', label: 'GameChanger-Heavy', description: 'Prioritize GameChanger (75%), supplement with coach ratings' },
+  { value: 'equal', label: 'Weight Equally', description: 'Consider both data sources equally' },
+  { value: 'coach-heavy', label: 'Coach-Heavy', description: 'Prioritize coach ratings (75%), supplement with GameChanger' },
+  { value: 'coach-only', label: 'Coach Only', description: 'Use only coach ratings' },
+]
+
 interface GameDetailClientProps {
   game: Game
   players: Player[]
@@ -75,6 +86,7 @@ interface GameDetailClientProps {
   existingLineup: Lineup | null
   ruleGroups: RuleGroup[]
   teamId: string
+  hasGameChangerData: boolean
 }
 
 export function GameDetailClient({
@@ -84,6 +96,7 @@ export function GameDetailClient({
   existingLineup: initialLineup,
   ruleGroups,
   teamId,
+  hasGameChangerData,
 }: GameDetailClientProps) {
   const [gameRoster, setGameRoster] = useState<GameRoster[]>(initialGameRoster)
   const [lineup, setLineup] = useState<Lineup | null>(initialLineup)
@@ -147,6 +160,9 @@ export function GameDetailClient({
     ruleGroups.length > 0 ? ruleGroups[0].id : null
   )
   const [selectedGamePriority, setSelectedGamePriority] = useState<GamePriority>('balanced')
+  const [selectedDataWeighting, setSelectedDataWeighting] = useState<DataWeighting>(
+    hasGameChangerData ? 'equal' : 'coach-only'
+  )
   const [battingNotes, setBattingNotes] = useState('')
   const [defensiveNotes, setDefensiveNotes] = useState('')
   const [innings, setInnings] = useState(game.innings ?? 6)
@@ -266,6 +282,7 @@ export function GameDetailClient({
           game_id: game.id,
           rule_group_id: selectedRuleGroupId,
           game_priority: selectedGamePriority,
+          data_weighting: selectedDataWeighting,
           additional_notes: battingNotes.trim() || null,
           phase: 'batting_order',
         }),
@@ -327,6 +344,7 @@ export function GameDetailClient({
           game_id: game.id,
           rule_group_id: selectedRuleGroupId,
           game_priority: selectedGamePriority,
+          data_weighting: selectedDataWeighting,
           additional_notes: defensiveNotes.trim() || null,
           phase: 'defensive',
           batting_order: battingOrder,
@@ -831,96 +849,135 @@ export function GameDetailClient({
             <CollapsibleContent>
               <CardContent className="pt-0">
                 <div className="space-y-4">
-                  {/* Rule Group Selection */}
-                  {ruleGroups.length === 0 ? (
-                    <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                      <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-medium text-amber-800">No Rule Groups</p>
-                        <p className="text-sm text-amber-700 mt-1">
-                          Create a rule group first to define how the AI should generate lineups.
-                        </p>
-                        <Button variant="outline" size="sm" className="mt-2" asChild>
-                          <Link href={`/dashboard/${teamId}/rules`}>Create Rule Group</Link>
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
+                  {phase === 'setup' && (
                     <>
-                      {phase === 'setup' && (
-                        <>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label>Rule Group</Label>
-                              <Select
-                                value={selectedRuleGroupId || undefined}
-                                onValueChange={(value) => setSelectedRuleGroupId(value)}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select rule group" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {ruleGroups.map((group) => (
-                                    <SelectItem key={group.id} value={group.id}>
-                                      {group.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              {selectedRuleGroup?.description && (
-                                <p className="text-xs text-muted-foreground">
-                                  {selectedRuleGroup.description}
-                                </p>
-                              )}
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label>Game Priority</Label>
-                              <Select
-                                value={selectedGamePriority}
-                                onValueChange={(value) => setSelectedGamePriority(value as GamePriority)}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {GAME_PRIORITY_OPTIONS.map((option) => (
-                                    <SelectItem key={option.value} value={option.value}>
-                                      {option.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <p className="text-xs text-muted-foreground">
-                                {GAME_PRIORITY_OPTIONS.find(o => o.value === selectedGamePriority)?.description}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Rule Group - info note or dropdown */}
+                        {ruleGroups.length === 0 ? (
+                          <div className="space-y-2">
+                            <Label className="text-muted-foreground">Rule Group</Label>
+                            <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg border border-dashed">
+                              <Info className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                              <p className="text-sm text-muted-foreground">
+                                Using default lineup generation.{' '}
+                                <Link href={`/dashboard/${teamId}/rules`} className="text-primary hover:underline">
+                                  Create rule groups
+                                </Link>{' '}
+                                to define league lineup rules or team-specific constraints.
                               </p>
                             </div>
                           </div>
-
+                        ) : (
                           <div className="space-y-2">
-                            <Label htmlFor="batting-notes">Notes for AI</Label>
-                            <Textarea
-                              id="batting-notes"
-                              placeholder="e.g., 'Cole should bat leadoff', 'Strong hitters in 3-4-5'..."
-                              value={battingNotes}
-                              onChange={(e) => setBattingNotes(e.target.value)}
-                              rows={2}
-                              className="resize-none"
-                            />
+                            <Label>Rule Group</Label>
+                            <Select
+                              value={selectedRuleGroupId || undefined}
+                              onValueChange={(value) => setSelectedRuleGroupId(value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select rule group" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {ruleGroups.map((group) => (
+                                  <SelectItem key={group.id} value={group.id}>
+                                    {group.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            {selectedRuleGroup?.description && (
+                              <p className="text-xs text-muted-foreground">
+                                {selectedRuleGroup.description}
+                              </p>
+                            )}
                           </div>
+                        )}
 
-                          <Button
-                            onClick={handleGenerateBattingOrder}
-                            disabled={isGenerating || availablePlayers.length < 9 || !selectedRuleGroupId}
-                            className="w-full"
+                        <div className="space-y-2">
+                          <Label>Game Priority</Label>
+                          <Select
+                            value={selectedGamePriority}
+                            onValueChange={(value) => setSelectedGamePriority(value as GamePriority)}
                           >
-                            <Sparkles className="h-4 w-4 mr-2" />
-                            {isGenerating ? 'Generating...' : 'Generate Batting Order'}
-                          </Button>
-                        </>
-                      )}
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {GAME_PRIORITY_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-muted-foreground">
+                            {GAME_PRIORITY_OPTIONS.find(o => o.value === selectedGamePriority)?.description}
+                          </p>
+                        </div>
 
-                      {recommendedBattingOrder && phase !== 'setup' && (
+                        {hasGameChangerData ? (
+                          <div className="space-y-2">
+                            <Label>Data Weighting</Label>
+                            <Select
+                              value={selectedDataWeighting}
+                              onValueChange={(value) => setSelectedDataWeighting(value as DataWeighting)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {DATA_WEIGHTING_OPTIONS.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground">
+                              {DATA_WEIGHTING_OPTIONS.find(o => o.value === selectedDataWeighting)?.description}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <Label className="text-muted-foreground">Data Weighting</Label>
+                            <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg border border-dashed">
+                              <Info className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
+                              <p className="text-sm text-muted-foreground">
+                                Using coach ratings only.{' '}
+                                <Link href={`/dashboard/${teamId}/stats`} className="text-primary hover:underline">
+                                  Import GameChanger data
+                                </Link>{' '}
+                                to enable stat-based lineup generation.
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="batting-notes">Notes for AI</Label>
+                        <Textarea
+                          id="batting-notes"
+                          placeholder="e.g., 'Cole should bat leadoff', 'Strong hitters in 3-4-5'..."
+                          value={battingNotes}
+                          onChange={(e) => setBattingNotes(e.target.value)}
+                          rows={2}
+                          className="resize-none"
+                        />
+                      </div>
+
+                      <Button
+                        onClick={handleGenerateBattingOrder}
+                        disabled={isGenerating || availablePlayers.length < 9 || (ruleGroups.length > 0 && !selectedRuleGroupId)}
+                        className="w-full"
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        {isGenerating ? 'Generating...' : 'Generate Batting Order'}
+                      </Button>
+                    </>
+                  )}
+
+                  {recommendedBattingOrder && phase !== 'setup' && (
                         <div className="space-y-3">
                           {/* Recommended batting order with insights */}
                           <div className="space-y-2">
@@ -983,8 +1040,6 @@ export function GameDetailClient({
                           </Button>
                         </div>
                       )}
-                    </>
-                  )}
                 </div>
               </CardContent>
             </CollapsibleContent>
