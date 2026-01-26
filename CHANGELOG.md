@@ -7,6 +7,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2026-01-26
+
+### Added
+
+#### Marketing Page Feature Showcase
+- **"See It In Action" Section** - Interactive tabbed showcase demonstrating app features with mock data
+- **6 Example Components** showcasing different aspects of the app:
+  - **Lineup Grid** - Interactive defensive grid with locked positions and position auto-swap
+  - **Batting Order** - AI-generated batting order with rationale for each position
+  - **Defense** - Baseball field layout showing defensive positioning by inning
+  - **Player Insights** - Individual player analysis with strengths/weaknesses and recommendations
+  - **Team Insights** - Team-level analysis with practice recommendations
+  - **Roster Setup** - Player setup modal mockup with Info/Ratings/Positions tabs
+
+#### "You Set the Strategy" Control Section
+- **Interactive Game Setup Mockup** - Shows the actual dropdowns coaches use:
+  - Rule Group selector (League Rules, Tournament Mode, Practice Game)
+  - Game Priority spectrum (Win ↔ Balanced ↔ Develop)
+  - Data Weighting options (GameChanger Only ↔ Equal ↔ Coach Ratings Only)
+- **Explanation Cards** - Describes each dropdown's purpose
+- **Lock Feature Callout** - Emphasizes coaches always have final say
+
+### Changed
+
+#### Hero Section
+- **New headline:** "Your Lineup Assistant for Youth Baseball & Softball"
+- **Added value prop badges:** "Lineups in seconds, not hours", "Data-driven advantage", "Ridiculously easy to use"
+- **Updated tagline:** "Let AI handle the busywork, or take full control—your choice"
+
+#### Features Section → "Data-Driven Lineups, Powered by AI"
+- Complete rewrite focusing on AI power and data integration:
+  - **GameChanger Stats** - Import real batting, fielding, pitching stats
+  - **Coach Ratings** - Rate players on 14 observable skills
+  - **AI-Powered Analysis** - Combines ratings + stats for true player understanding
+  - **Optimized Batting Orders** - Maximizes run production
+  - **Smart Defensive Rotations** - Respects strengths, ensures fair time
+  - **Rule Compliance Built-In** - 100% compliant lineups every time
+
+#### How It Works Section → "Ready in Minutes, Not Hours"
+- Added time estimates to each step (~1 min, ~5 sec, Your call)
+- Added connector lines between steps
+- New tagline: "That's it. Seriously."
+
+#### CTA Section
+- Added benefit checkmarks: "Lineups in seconds", "Data-driven competitive edge", "Stay in control"
+
+### Files Added
+
+| File | Description |
+|------|-------------|
+| `app/(marketing)/_components/showcase-section.tsx` | Tabbed container for all example components |
+| `app/(marketing)/_components/control-section.tsx` | Game setup dropdowns mockup |
+| `app/(marketing)/_components/examples/mock-data.ts` | Sample data for all examples |
+| `app/(marketing)/_components/examples/example-lineup-grid.tsx` | Interactive lineup grid showcase |
+| `app/(marketing)/_components/examples/example-lineup.tsx` | Batting order with AI rationale |
+| `app/(marketing)/_components/examples/example-defensive.tsx` | Baseball field defensive layout |
+| `app/(marketing)/_components/examples/example-player-insights.tsx` | Player analysis display |
+| `app/(marketing)/_components/examples/example-team-insights.tsx` | Team analysis with practice recs |
+| `app/(marketing)/_components/examples/example-roster.tsx` | Player setup modal mockup |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/(marketing)/page.tsx` | Added ShowcaseSection and ControlSection |
+| `app/(marketing)/_components/hero-section.tsx` | New headline, value props, updated messaging |
+| `app/(marketing)/_components/features-section.tsx` | Complete rewrite for AI/data focus |
+| `app/(marketing)/_components/how-it-works-section.tsx` | Time estimates, connector lines, new tagline |
+| `app/(marketing)/_components/cta-section.tsx` | Added benefit checkmarks |
+
+---
+
 ## [1.3.0] - 2026-01-26
 
 ### Added

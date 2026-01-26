@@ -1,7 +1,7 @@
 # Peanut Manager - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (99% Complete)
-**Last Updated:** January 26, 2026 (v1.3.0)
+**Last Updated:** January 26, 2026 (v1.4.0)
 
 ---
 
@@ -85,11 +85,21 @@ baseball-lineups/
 │   │   ├── page.tsx                    ✅ Landing page at "/"
 │   │   └── _components/
 │   │       ├── marketing-header.tsx    ✅ Sticky header with branding
-│   │       ├── hero-section.tsx        ✅ Hero with headline + CTAs
-│   │       ├── features-section.tsx    ✅ 4 feature cards
-│   │       ├── how-it-works-section.tsx ✅ 3-step process
-│   │       ├── cta-section.tsx         ✅ Conversion CTA
-│   │       └── footer.tsx              ✅ Page footer
+│   │       ├── hero-section.tsx        ✅ Hero with value props + CTAs
+│   │       ├── features-section.tsx    ✅ 6 AI/data-focused feature cards
+│   │       ├── control-section.tsx     ✅ Game setup dropdowns mockup
+│   │       ├── showcase-section.tsx    ✅ Tabbed feature showcase
+│   │       ├── how-it-works-section.tsx ✅ 3-step process with times
+│   │       ├── cta-section.tsx         ✅ Conversion CTA with benefits
+│   │       ├── footer.tsx              ✅ Page footer
+│   │       └── examples/               ✅ Feature showcase components
+│   │           ├── mock-data.ts        ✅ Sample data for examples
+│   │           ├── example-lineup-grid.tsx ✅ Interactive lineup grid
+│   │           ├── example-lineup.tsx  ✅ Batting order with rationale
+│   │           ├── example-defensive.tsx ✅ Field position layout
+│   │           ├── example-player-insights.tsx ✅ Player analysis
+│   │           ├── example-team-insights.tsx ✅ Team analysis
+│   │           └── example-roster.tsx  ✅ Player setup modal
 │   ├── (auth)/
 │   │   ├── login/page.tsx              ✅ Login form
 │   │   ├── signup/page.tsx             ✅ Signup form
@@ -636,13 +646,27 @@ MVP is complete when:
 - **Dismissible Getting Started** - Can hide and restore the onboarding guide
 - **Game creation validation** - Blocks games until player data exists (ratings or GameChanger stats)
 
-**Recent Changes (January 26, 2026 - v1.3.0):**
+**Recent Changes (January 26, 2026 - v1.4.0):**
+- **Marketing Page Feature Showcase:**
+  - New "See It In Action" section with 6 interactive example tabs
+  - Example components: Lineup Grid, Batting Order, Defense, Player Insights, Team Insights, Roster Setup
+  - All examples use mock data to demonstrate app features
+- **"You Set the Strategy" Control Section:**
+  - Interactive mockup of game setup dropdowns (Rule Group, Game Priority, Data Weighting)
+  - Shows coaches exactly how they configure AI lineup generation
+  - Lock feature callout emphasizing coach control
+- **Updated Marketing Messaging:**
+  - Hero: "Your Lineup Assistant" with value prop badges
+  - Features: Now focused on AI power and data integration (6 cards)
+  - How It Works: Added time estimates (~1 min, ~5 sec)
+  - CTA: Added benefit checkmarks
+
+**Previous Changes (v1.3.0 - January 26, 2026):**
 - **Marketing Landing Page:**
   - New public landing page at `/` with hero, features, how-it-works, and CTA sections
   - `(marketing)` route group keeps marketing pages separate from app
   - Responsive design with mobile-first layout
   - Sticky header with Peanut Manager branding
-  - Both logged-in and logged-out users can view the landing page
 
 **Previous Changes (v1.2.7 - January 25, 2026):**
 - **Fixed Roster Page State Not Updating After Mutations:**
