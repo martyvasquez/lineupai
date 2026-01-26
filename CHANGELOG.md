@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-01-26
+
+### Added
+
+#### Marketing Landing Page (New Public Website)
+- **Single-page marketing website** - Public landing page at `/` for new visitors
+- **Route group architecture** - `app/(marketing)/` route group keeps marketing pages separate from app
+- **Responsive design** - Mobile-first layout with proper stacking on small screens
+
+#### Marketing Page Sections
+- **Hero Section** - "AI-Powered Lineups for Youth Baseball & Softball" headline with dual CTAs
+- **Features Section** - 4 feature cards highlighting key value props:
+  - Smart Lineup Generation
+  - 100% Rule Compliant
+  - GameChanger Integration
+  - Mid-Game Adjustments
+- **How It Works Section** - 3-step process (Build Roster → Define Rules → Generate & Go)
+- **CTA Section** - Dark blue conversion section with "Ready to Simplify Game Day?"
+- **Footer** - Branding, nav links, copyright
+
+#### Marketing Components
+- **MarketingHeader** - Sticky header with Peanut Manager branding (Pacifico font), Log In/Get Started buttons
+- **MarketingLayout** - Clean white background layout without auth checks
+
+### Changed
+
+#### Routing
+- **Root page behavior** - `/` now serves landing page for all users (logged in or out)
+- **Removed redirect** - Deleted `app/page.tsx` that previously redirected to `/login` or `/dashboard`
+- **Auth pages unchanged** - `/login` and `/signup` still redirect authenticated users to `/dashboard`
+
+### Files Added
+
+| File | Description |
+|------|-------------|
+| `app/(marketing)/layout.tsx` | Marketing layout wrapper |
+| `app/(marketing)/page.tsx` | Landing page composing all sections |
+| `app/(marketing)/_components/marketing-header.tsx` | Sticky navigation header |
+| `app/(marketing)/_components/hero-section.tsx` | Above-fold hero content |
+| `app/(marketing)/_components/features-section.tsx` | 4-card feature grid |
+| `app/(marketing)/_components/how-it-works-section.tsx` | 3-step process section |
+| `app/(marketing)/_components/cta-section.tsx` | Conversion CTA section |
+| `app/(marketing)/_components/footer.tsx` | Page footer |
+
+### Files Removed
+
+| File | Reason |
+|------|--------|
+| `app/page.tsx` | Replaced by `(marketing)/page.tsx` for landing page |
+
+---
+
 ## [1.2.7] - 2026-01-25
 
 ### Fixed

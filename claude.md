@@ -1,7 +1,7 @@
 # Peanut Manager - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (99% Complete)
-**Last Updated:** January 25, 2026 (v1.2.6)
+**Last Updated:** January 26, 2026 (v1.3.0)
 
 ---
 
@@ -80,6 +80,16 @@ Build a **mobile-first web application** that generates optimized youth baseball
 ```
 baseball-lineups/
 ├── app/
+│   ├── (marketing)/                    ✅ Public marketing pages
+│   │   ├── layout.tsx                  ✅ Marketing layout (no auth)
+│   │   ├── page.tsx                    ✅ Landing page at "/"
+│   │   └── _components/
+│   │       ├── marketing-header.tsx    ✅ Sticky header with branding
+│   │       ├── hero-section.tsx        ✅ Hero with headline + CTAs
+│   │       ├── features-section.tsx    ✅ 4 feature cards
+│   │       ├── how-it-works-section.tsx ✅ 3-step process
+│   │       ├── cta-section.tsx         ✅ Conversion CTA
+│   │       └── footer.tsx              ✅ Page footer
 │   ├── (auth)/
 │   │   ├── login/page.tsx              ✅ Login form
 │   │   ├── signup/page.tsx             ✅ Signup form
@@ -608,6 +618,7 @@ MVP is complete when:
 - Access app at http://localhost:3000
 
 **What's Working:**
+- **Marketing landing page** at `/` for new visitors
 - Full authentication flow (login/signup/password reset/email change)
 - **Multi-team support** with team switcher and management
 - **Roster import from CSV** during team creation or on roster page
@@ -625,7 +636,15 @@ MVP is complete when:
 - **Dismissible Getting Started** - Can hide and restore the onboarding guide
 - **Game creation validation** - Blocks games until player data exists (ratings or GameChanger stats)
 
-**Recent Changes (January 25, 2026 - v1.2.7):**
+**Recent Changes (January 26, 2026 - v1.3.0):**
+- **Marketing Landing Page:**
+  - New public landing page at `/` with hero, features, how-it-works, and CTA sections
+  - `(marketing)` route group keeps marketing pages separate from app
+  - Responsive design with mobile-first layout
+  - Sticky header with Peanut Manager branding
+  - Both logged-in and logged-out users can view the landing page
+
+**Previous Changes (v1.2.7 - January 25, 2026):**
 - **Fixed Roster Page State Not Updating After Mutations:**
   - Adding, updating, or importing players now immediately updates the UI
   - Removed `router.refresh()` in favor of local state updates with `setPlayers()`
@@ -708,5 +727,5 @@ MVP is complete when:
 
 ---
 
-**Last Updated:** January 25, 2026
-**Version:** 1.2.7 (Fix roster page state not updating after mutations)
+**Last Updated:** January 26, 2026
+**Version:** 1.3.0 (Marketing landing page)
