@@ -11,11 +11,11 @@ import { UserCog, LayoutGrid, ListOrdered, Shield, User, Users } from 'lucide-re
 
 const tabs = [
   {
-    value: 'lineup-grid',
-    label: 'Lineup Grid',
-    shortLabel: 'Grid',
-    icon: LayoutGrid,
-    component: ExampleLineupGrid,
+    value: 'defense',
+    label: 'Defense',
+    shortLabel: 'Defense',
+    icon: Shield,
+    component: ExampleDefensive,
   },
   {
     value: 'batting-order',
@@ -25,11 +25,11 @@ const tabs = [
     component: ExampleLineup,
   },
   {
-    value: 'defense',
-    label: 'Defense',
-    shortLabel: 'Defense',
-    icon: Shield,
-    component: ExampleDefensive,
+    value: 'lineup-grid',
+    label: 'Lineup Grid',
+    shortLabel: 'Grid',
+    icon: LayoutGrid,
+    component: ExampleLineupGrid,
   },
   {
     value: 'player-insights',
@@ -68,7 +68,7 @@ export function ShowcaseSection() {
           </p>
         </div>
 
-        <Tabs defaultValue="lineup-grid" className="w-full">
+        <Tabs defaultValue="defense" className="w-full">
           {/* Desktop Tabs */}
           <TabsList className="hidden md:inline-flex w-full justify-center mb-8 h-auto p-1.5 bg-anthropic-slate border border-white/10 rounded-xl">
             {tabs.map((tab) => (
