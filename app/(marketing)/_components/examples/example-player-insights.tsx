@@ -1,5 +1,4 @@
 import { TrendingUp, TrendingDown, Target, Sparkles } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { MOCK_PLAYERS, MOCK_PLAYER_ANALYSIS } from './mock-data'
 
 export function ExamplePlayerInsights() {
@@ -19,20 +18,20 @@ export function ExamplePlayerInsights() {
   ]
 
   return (
-    <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+    <div className="bg-anthropic-slate-elevated rounded-lg border border-white/10 shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b bg-muted/30">
+      <div className="p-4 border-b border-white/10 bg-anthropic-cream-subtle">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary text-primary-foreground font-bold">
+            <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-anthropic-terracotta text-white font-bold">
               #{player.jersey}
             </span>
             <div>
-              <h3 className="font-semibold text-lg">{player.name}</h3>
-              <p className="text-sm text-muted-foreground">Season Analysis</p>
+              <h3 className="font-semibold text-lg text-anthropic-cream">{player.name}</h3>
+              <p className="text-sm text-anthropic-cream-muted">Season Analysis</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+          <div className="flex items-center gap-1.5 text-xs bg-anthropic-terracotta/10 text-anthropic-terracotta px-2 py-1 rounded-full">
             <Sparkles className="h-3 w-3" />
             AI Analyzed
           </div>
@@ -40,14 +39,14 @@ export function ExamplePlayerInsights() {
       </div>
 
       {/* Stats Grid */}
-      <div className="p-4 border-b">
+      <div className="p-4 border-b border-white/10">
         <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
-              <div className="text-xs text-muted-foreground uppercase tracking-wide">
+              <div className="text-xs text-anthropic-cream-muted uppercase tracking-wide">
                 {stat.label}
               </div>
-              <div className="text-lg font-semibold text-foreground mt-0.5">
+              <div className="text-lg font-semibold text-anthropic-cream mt-0.5">
                 {stat.value}
               </div>
             </div>
@@ -60,19 +59,19 @@ export function ExamplePlayerInsights() {
         {/* Strengths */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="h-4 w-4 text-green-600" />
-            <span className="font-medium text-foreground">Strengths</span>
+            <TrendingUp className="h-4 w-4 text-emerald-500" />
+            <span className="font-medium text-anthropic-cream">Strengths</span>
           </div>
           <div className="space-y-2">
             {MOCK_PLAYER_ANALYSIS.strengths.map((strength, index) => (
               <div
                 key={index}
-                className="p-3 rounded-lg bg-green-50 border border-green-100"
+                className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20"
               >
-                <div className="font-medium text-green-800 text-sm">
+                <div className="font-medium text-emerald-400 text-sm">
                   {strength.title}
                 </div>
-                <div className="text-green-700 text-sm mt-0.5">
+                <div className="text-emerald-300/70 text-sm mt-0.5">
                   {strength.description}
                 </div>
               </div>
@@ -83,19 +82,19 @@ export function ExamplePlayerInsights() {
         {/* Areas to Develop */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <TrendingDown className="h-4 w-4 text-amber-600" />
-            <span className="font-medium text-foreground">Areas to Develop</span>
+            <TrendingDown className="h-4 w-4 text-amber-500" />
+            <span className="font-medium text-anthropic-cream">Areas to Develop</span>
           </div>
           <div className="space-y-2">
             {MOCK_PLAYER_ANALYSIS.weaknesses.map((weakness, index) => (
               <div
                 key={index}
-                className="p-3 rounded-lg bg-amber-50 border border-amber-100"
+                className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20"
               >
-                <div className="font-medium text-amber-800 text-sm">
+                <div className="font-medium text-amber-400 text-sm">
                   {weakness.title}
                 </div>
-                <div className="text-amber-700 text-sm mt-0.5">
+                <div className="text-amber-300/70 text-sm mt-0.5">
                   {weakness.description}
                 </div>
               </div>
@@ -105,19 +104,19 @@ export function ExamplePlayerInsights() {
       </div>
 
       {/* Recommendations Footer */}
-      <div className="p-4 border-t bg-muted/20">
-        <div className="flex items-center gap-2">
-          <Target className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium text-foreground">Recommended:</span>
-          <Badge variant="secondary" className="text-xs">
+      <div className="p-4 border-t border-white/10 bg-anthropic-cream-subtle">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Target className="h-4 w-4 text-anthropic-terracotta" />
+          <span className="text-sm font-medium text-anthropic-cream">Recommended:</span>
+          <span className="px-2 py-0.5 rounded bg-white/10 text-anthropic-cream text-xs">
             {MOCK_PLAYER_ANALYSIS.recommendations.batting}
-          </Badge>
-          <span className="text-muted-foreground text-sm">|</span>
-          <span className="text-sm text-muted-foreground">Defense:</span>
+          </span>
+          <span className="text-anthropic-cream-muted text-sm">|</span>
+          <span className="text-sm text-anthropic-cream-muted">Defense:</span>
           {MOCK_PLAYER_ANALYSIS.recommendations.defense.map((pos) => (
-            <Badge key={pos} variant="outline" className="text-xs">
+            <span key={pos} className="px-2 py-0.5 rounded border border-white/20 text-anthropic-cream text-xs">
               {pos}
-            </Badge>
+            </span>
           ))}
         </div>
       </div>

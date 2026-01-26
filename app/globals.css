@@ -57,3 +57,89 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Marketing page styles - Anthropic design system */
+@layer components {
+  /* Glow effects */
+  .glow-terracotta {
+    box-shadow: 0 0 40px rgba(217, 119, 87, 0.3);
+  }
+
+  .glow-terracotta-sm {
+    box-shadow: 0 0 20px rgba(217, 119, 87, 0.2);
+  }
+
+  /* Text gradient */
+  .text-gradient-terracotta {
+    background: linear-gradient(135deg, #d97757 0%, #e09070 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Card styles for marketing */
+  .marketing-card {
+    @apply bg-anthropic-cream-subtle border border-white/10 rounded-xl;
+    @apply transition-all duration-300;
+  }
+
+  .marketing-card:hover {
+    @apply border-white/20 scale-[1.02];
+  }
+
+  /* Button styles for marketing */
+  .btn-terracotta {
+    @apply bg-anthropic-terracotta text-white font-medium;
+    @apply hover:bg-anthropic-terracotta-light;
+    @apply transition-all duration-200;
+  }
+
+  .btn-terracotta-glow {
+    @apply btn-terracotta;
+    box-shadow: 0 0 30px rgba(217, 119, 87, 0.3);
+  }
+
+  .btn-terracotta-glow:hover {
+    box-shadow: 0 0 40px rgba(217, 119, 87, 0.4);
+  }
+
+  .btn-ghost-cream {
+    @apply border border-anthropic-cream/30 text-anthropic-cream;
+    @apply hover:bg-white/5 hover:border-anthropic-cream/50;
+    @apply transition-all duration-200;
+  }
+
+  /* Staggered animation delays */
+  .animate-delay-100 {
+    animation-delay: 100ms;
+  }
+  .animate-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animate-delay-300 {
+    animation-delay: 300ms;
+  }
+  .animate-delay-400 {
+    animation-delay: 400ms;
+  }
+  .animate-delay-500 {
+    animation-delay: 500ms;
+  }
+  .animate-delay-600 {
+    animation-delay: 600ms;
+  }
+
+  /* Subtle gradient backgrounds */
+  .bg-gradient-slate {
+    background: linear-gradient(180deg, #131314 0%, #1a1a1b 100%);
+  }
+
+  .bg-gradient-terracotta {
+    background: linear-gradient(135deg, #c96747 0%, #d97757 50%, #e09070 100%);
+  }
+
+  /* Section divider */
+  .section-divider {
+    @apply border-t border-white/10;
+  }
+}

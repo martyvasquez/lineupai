@@ -1,7 +1,7 @@
 # Peanut Manager - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (99% Complete)
-**Last Updated:** January 26, 2026 (v1.4.0)
+**Last Updated:** January 26, 2026 (v1.5.0)
 
 ---
 
@@ -646,7 +646,17 @@ MVP is complete when:
 - **Dismissible Getting Started** - Can hide and restore the onboarding guide
 - **Game creation validation** - Blocks games until player data exists (ratings or GameChanger stats)
 
-**Recent Changes (January 26, 2026 - v1.4.0):**
+**Recent Changes (January 26, 2026 - v1.5.0):**
+- **Marketing Site Redesign - Anthropic Design Language:**
+  - Complete visual overhaul with dark, minimalist, tech-centric aesthetic
+  - New color palette: Dark slate backgrounds, cream text, terracotta accents
+  - Fluid typography with responsive `clamp()`-based sizing
+  - New animations: `fade-in-up`, `text-reveal`, `scale-in`, `glow-pulse`
+  - Hero section: Dot grid texture, vignette effect, glowing CTAs
+  - All sections updated: Header, Features, Control, Showcase, How It Works, CTA, Footer
+  - All 6 example components restyled for dark theme
+
+**Previous Changes (v1.4.0 - January 26, 2026):**
 - **Marketing Page Feature Showcase:**
   - New "See It In Action" section with 6 interactive example tabs
   - Example components: Lineup Grid, Batting Order, Defense, Player Insights, Team Insights, Roster Setup

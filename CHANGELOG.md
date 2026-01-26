@@ -7,6 +7,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] - 2026-01-26
+
+### Changed
+
+#### Marketing Site Redesign - Anthropic Design Language
+Complete visual overhaul of the marketing site using Anthropic's design language: dark, minimalist, tech-centric yet approachable.
+
+**Design System Updates:**
+- **New color palette**: Dark slate backgrounds (`#131314`, `#1a1a1b`), cream text (`rgba(250, 249, 240, 0.95)`), terracotta accent (`#d97757`)
+- **Fluid typography**: Responsive `clamp()`-based font sizes from `text-fluid-xs` to `text-fluid-5xl`
+- **New animations**: `fade-in-up`, `text-reveal`, `scale-in`, `glow-pulse` with cubic-bezier easing
+- **Marketing utilities**: `.glow-terracotta`, `.marketing-card`, `.btn-terracotta`, animation delay classes
+
+**Section-by-Section Updates:**
+- **Layout**: Dark `bg-anthropic-slate` wrapper for entire marketing site
+- **Header**: Dark with cream text, terracotta "Get Started" button
+- **Hero**:
+  - Dot grid texture background for visual depth
+  - Vignette effect to frame content
+  - Terracotta glow accent
+  - Staggered animation on value props
+  - Glowing CTA buttons
+- **Features**: Dark cards with terracotta icons, hover scale effect
+- **Control Section**: Dark dropdowns, elevated surface styling
+- **Showcase**: Dark tabs with terracotta active state
+- **How It Works**: Terracotta step circles with connector lines
+- **CTA**: Terracotta gradient background with radial overlay
+- **Footer**: Dark with subtle borders
+
+**Example Components (6 total):**
+All example components updated with dark theme styling:
+- Lineup Grid, Batting Order, Defense, Player Insights, Team Insights, Roster Setup
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `tailwind.config.ts` | Added anthropic colors, fluid typography, new animations |
+| `app/globals.css` | Marketing utilities, glow effects, animation delays |
+| `app/(marketing)/layout.tsx` | Dark theme wrapper |
+| `app/(marketing)/_components/marketing-header.tsx` | Dark header, terracotta CTA |
+| `app/(marketing)/_components/hero-section.tsx` | Dot grid texture, vignette, animations |
+| `app/(marketing)/_components/features-section.tsx` | Dark cards, terracotta icons |
+| `app/(marketing)/_components/control-section.tsx` | Dark dropdowns |
+| `app/(marketing)/_components/showcase-section.tsx` | Dark tabs |
+| `app/(marketing)/_components/how-it-works-section.tsx` | Terracotta steps |
+| `app/(marketing)/_components/cta-section.tsx` | Terracotta gradient |
+| `app/(marketing)/_components/footer.tsx` | Dark footer |
+| `app/(marketing)/_components/examples/*.tsx` | All 6 example components |
+
+---
+
 ## [1.4.0] - 2026-01-26
 
 ### Added

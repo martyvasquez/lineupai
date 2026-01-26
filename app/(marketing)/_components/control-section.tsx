@@ -40,18 +40,18 @@ function MockDropdown({ label, options, selectedIndex, onSelect, highlightMiddle
 
   return (
     <div className="space-y-1.5">
-      <label className="text-sm font-medium text-foreground">{label}</label>
+      <label className="text-sm font-medium text-anthropic-cream/80">{label}</label>
       <div className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="w-full flex items-center justify-between px-3 py-2.5 bg-white border rounded-lg text-left hover:border-primary/50 transition-colors"
+          className="w-full flex items-center justify-between px-3 py-2.5 bg-anthropic-slate-elevated border border-white/10 rounded-lg text-left hover:border-anthropic-terracotta/50 transition-colors"
         >
-          <span className="font-medium text-foreground">{selected.label}</span>
-          <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          <span className="font-medium text-anthropic-cream">{selected.label}</span>
+          <ChevronDown className={`h-4 w-4 text-anthropic-cream-muted transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {isOpen && (
-          <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg overflow-hidden">
+          <div className="absolute z-10 w-full mt-1 bg-anthropic-slate-elevated border border-white/10 rounded-lg shadow-xl overflow-hidden">
             {options.map((option, index) => {
               const isSelected = index === selectedIndex
               const isMiddle = highlightMiddle && index === Math.floor(options.length / 2)
@@ -65,24 +65,24 @@ function MockDropdown({ label, options, selectedIndex, onSelect, highlightMiddle
                   }}
                   className={`
                     w-full flex items-center justify-between px-3 py-2 text-left transition-colors
-                    ${isSelected ? 'bg-primary/10' : 'hover:bg-muted/50'}
-                    ${isMiddle && !isSelected ? 'bg-amber-50' : ''}
+                    ${isSelected ? 'bg-anthropic-terracotta/20' : 'hover:bg-white/5'}
+                    ${isMiddle && !isSelected ? 'bg-anthropic-terracotta/10' : ''}
                   `}
                 >
                   <div>
-                    <div className={`font-medium ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                    <div className={`font-medium ${isSelected ? 'text-anthropic-terracotta' : 'text-anthropic-cream'}`}>
                       {option.label}
                     </div>
-                    <div className="text-xs text-muted-foreground">{option.description}</div>
+                    <div className="text-xs text-anthropic-cream-muted">{option.description}</div>
                   </div>
-                  {isSelected && <Check className="h-4 w-4 text-primary flex-shrink-0" />}
+                  {isSelected && <Check className="h-4 w-4 text-anthropic-terracotta flex-shrink-0" />}
                 </button>
               )
             })}
           </div>
         )}
       </div>
-      <p className="text-xs text-muted-foreground">{selected.description}</p>
+      <p className="text-xs text-anthropic-cream-muted">{selected.description}</p>
     </div>
   )
 }
@@ -93,27 +93,27 @@ export function ControlSection() {
   const [weighting, setWeighting] = useState(2) // Equal
 
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-20 md:py-28 bg-anthropic-slate">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+        <div className="text-center mb-14">
+          <h2 className="text-fluid-3xl md:text-fluid-4xl font-semibold tracking-tight text-anthropic-cream">
             You Set the Strategy
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-4 text-fluid-base text-anthropic-cream-muted max-w-2xl mx-auto">
             Every game is different. Configure exactly how you want AI to build your lineup—then adjust anything you want.
           </p>
         </div>
 
         <div className="max-w-4xl mx-auto">
           {/* Mock Game Setup UI */}
-          <div className="bg-gray-50 rounded-2xl p-6 md:p-8 border">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <Sparkles className="h-4 w-4 text-primary" />
+          <div className="bg-anthropic-slate-light rounded-2xl p-6 md:p-8 border border-white/10">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-anthropic-terracotta/10 flex items-center justify-center">
+                <Sparkles className="h-5 w-5 text-anthropic-terracotta" />
               </div>
               <div>
-                <h3 className="font-semibold text-foreground">Game Setup</h3>
-                <p className="text-sm text-muted-foreground">Configure your lineup preferences</p>
+                <h3 className="font-semibold text-anthropic-cream">Game Setup</h3>
+                <p className="text-sm text-anthropic-cream-muted">Configure your lineup preferences</p>
               </div>
             </div>
 
@@ -146,12 +146,12 @@ export function ControlSection() {
             </div>
 
             {/* Generate Button */}
-            <div className="mt-6 pt-6 border-t">
-              <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors">
+            <div className="mt-6 pt-6 border-t border-white/10">
+              <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-anthropic-terracotta text-white rounded-lg font-medium hover:bg-anthropic-terracotta-light transition-colors">
                 <Sparkles className="h-4 w-4" />
                 Generate Lineup
               </button>
-              <p className="text-xs text-center text-muted-foreground mt-2">
+              <p className="text-xs text-center text-anthropic-cream-muted mt-2">
                 AI generates a complete lineup based on your settings
               </p>
             </div>
@@ -159,40 +159,40 @@ export function ControlSection() {
 
           {/* Explanation Cards */}
           <div className="grid md:grid-cols-3 gap-4 mt-8">
-            <div className="p-4 rounded-xl bg-white border">
-              <h4 className="font-semibold text-foreground mb-2">Rule Groups</h4>
-              <p className="text-sm text-muted-foreground">
+            <div className="p-5 rounded-xl bg-anthropic-cream-subtle border border-white/10">
+              <h4 className="font-semibold text-anthropic-cream mb-2">Rule Groups</h4>
+              <p className="text-sm text-anthropic-cream-muted">
                 Create different rule sets for league games, tournaments, or practice. AI enforces them automatically.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-white border">
-              <h4 className="font-semibold text-foreground mb-2">Game Priority</h4>
-              <p className="text-sm text-muted-foreground">
+            <div className="p-5 rounded-xl bg-anthropic-cream-subtle border border-white/10">
+              <h4 className="font-semibold text-anthropic-cream mb-2">Game Priority</h4>
+              <p className="text-sm text-anthropic-cream-muted">
                 Slide between "Win" and "Develop" for each game. Big tournament? Go competitive. Early season? Focus on growth.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-white border">
-              <h4 className="font-semibold text-foreground mb-2">Data Weighting</h4>
-              <p className="text-sm text-muted-foreground">
+            <div className="p-5 rounded-xl bg-anthropic-cream-subtle border border-white/10">
+              <h4 className="font-semibold text-anthropic-cream mb-2">Data Weighting</h4>
+              <p className="text-sm text-anthropic-cream-muted">
                 Trust the stats, your own ratings, or both. You know things about your players that numbers can't show.
               </p>
             </div>
           </div>
 
           {/* Lock Feature Callout */}
-          <div className="mt-8 p-6 rounded-xl bg-primary/5 border border-primary/20">
+          <div className="mt-8 p-6 rounded-xl bg-anthropic-terracotta/10 border border-anthropic-terracotta/30">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Lock className="h-5 w-5 text-primary" />
+              <div className="w-10 h-10 rounded-lg bg-anthropic-terracotta/20 flex items-center justify-center flex-shrink-0">
+                <Lock className="h-5 w-5 text-anthropic-terracotta" />
               </div>
               <div>
-                <h4 className="font-semibold text-foreground mb-1">Lock Any Position</h4>
-                <p className="text-sm text-muted-foreground">
+                <h4 className="font-semibold text-anthropic-cream mb-1">Lock Any Position</h4>
+                <p className="text-sm text-anthropic-cream-muted">
                   After AI generates your lineup, you can lock specific players in specific positions for any inning.
                   Want Cole to pitch innings 1-2? Lock it. AI fills around your decisions—never overrides them.
-                  <span className="text-primary font-medium"> You always have final say.</span>
+                  <span className="text-anthropic-terracotta font-medium"> You always have final say.</span>
                 </p>
               </div>
             </div>

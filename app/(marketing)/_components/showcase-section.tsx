@@ -56,13 +56,13 @@ const tabs = [
 
 export function ShowcaseSection() {
   return (
-    <section className="py-16 md:py-24 bg-white">
+    <section className="py-20 md:py-28 bg-anthropic-slate-light">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+        <div className="text-center mb-12">
+          <h2 className="text-fluid-3xl md:text-fluid-4xl font-semibold tracking-tight text-anthropic-cream">
             See It In Action
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-4 text-fluid-base text-anthropic-cream-muted max-w-2xl mx-auto">
             Explore how Peanut Manager transforms game-day preparation with
             AI-powered insights and smart lineup optimization.
           </p>
@@ -70,12 +70,12 @@ export function ShowcaseSection() {
 
         <Tabs defaultValue="lineup-grid" className="w-full">
           {/* Desktop Tabs */}
-          <TabsList className="hidden md:inline-flex w-full justify-center mb-6 h-auto p-1 bg-muted/50">
+          <TabsList className="hidden md:inline-flex w-full justify-center mb-8 h-auto p-1.5 bg-anthropic-slate border border-white/10 rounded-xl">
             {tabs.map((tab) => (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="flex items-center gap-2 px-3 py-2.5 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                className="flex items-center gap-2 px-4 py-2.5 text-anthropic-cream/70 rounded-lg data-[state=active]:bg-anthropic-terracotta data-[state=active]:text-white data-[state=active]:shadow-sm transition-all"
               >
                 <tab.icon className="h-4 w-4" />
                 <span>{tab.label}</span>
@@ -84,12 +84,12 @@ export function ShowcaseSection() {
           </TabsList>
 
           {/* Mobile Tabs (shorter labels) */}
-          <TabsList className="md:hidden grid grid-cols-6 w-full mb-6 h-auto p-1 bg-muted/50">
+          <TabsList className="md:hidden grid grid-cols-6 w-full mb-6 h-auto p-1 bg-anthropic-slate border border-white/10 rounded-xl">
             {tabs.map((tab) => (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="flex flex-col items-center gap-1 px-1 py-2 text-[10px] data-[state=active]:bg-white data-[state=active]:shadow-sm"
+                className="flex flex-col items-center gap-1 px-1 py-2 text-[10px] text-anthropic-cream/70 rounded-lg data-[state=active]:bg-anthropic-terracotta data-[state=active]:text-white"
               >
                 <tab.icon className="h-4 w-4" />
                 <span>{tab.shortLabel}</span>

@@ -1,4 +1,3 @@
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { BarChart3, Brain, Star, Shield, Zap, ListOrdered } from 'lucide-react'
 
 const features = [
@@ -42,30 +41,33 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section className="py-16 md:py-24 bg-gray-50">
+    <section className="py-20 md:py-28 bg-anthropic-slate-light">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+        <div className="text-center mb-14">
+          <h2 className="text-fluid-3xl md:text-fluid-4xl font-semibold tracking-tight text-anthropic-cream">
             Data-Driven Lineups, Powered by AI
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="mt-4 text-fluid-base text-anthropic-cream-muted max-w-2xl mx-auto">
             Combine real GameChanger statistics with your coaching insights.
             AI does the analysis—you get optimized lineups in seconds.
           </p>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
-            <Card key={feature.title} className="bg-white">
-              <CardHeader>
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                  <feature.icon className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle className="text-xl">{feature.title}</CardTitle>
-                <CardDescription className="text-base">
-                  {feature.description}
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <div
+              key={feature.title}
+              className="group p-6 rounded-xl bg-anthropic-cream-subtle border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-[1.02]"
+            >
+              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-anthropic-terracotta/10">
+                <feature.icon className="h-6 w-6 text-anthropic-terracotta" />
+              </div>
+              <h3 className="text-xl font-semibold text-anthropic-cream mb-2">
+                {feature.title}
+              </h3>
+              <p className="text-anthropic-cream-muted leading-relaxed">
+                {feature.description}
+              </p>
+            </div>
           ))}
         </div>
       </div>
