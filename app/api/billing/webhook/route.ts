@@ -84,8 +84,10 @@ export async function POST(request: Request) {
         }
 
         // Get period end date (next billing date for active, last access date for canceled)
-        const periodEnd = subscription.current_period_end
-          ? new Date(subscription.current_period_end * 1000).toISOString()
+        // Access via items.data since current_period_end may be on line items
+        const subscriptionData = subscription as Stripe.Subscription & { current_period_end?: number }
+        const periodEnd = subscriptionData.current_period_end
+          ? new Date(subscriptionData.current_period_end * 1000).toISOString()
           : null
 
         // Update profile by Stripe customer ID
@@ -109,8 +111,9 @@ export async function POST(request: Request) {
         const customerId = subscription.customer as string
 
         // Get the final access date
-        const periodEnd = subscription.current_period_end
-          ? new Date(subscription.current_period_end * 1000).toISOString()
+        const subscriptionData = subscription as Stripe.Subscription & { current_period_end?: number }
+        const periodEnd = subscriptionData.current_period_end
+          ? new Date(subscriptionData.current_period_end * 1000).toISOString()
           : null
 
         // Set status to canceled with final access date
