@@ -1,7 +1,7 @@
 # Peanut Manager - AI-Powered Baseball Lineup Optimizer
 
-**Status:** 🚧 In Development (99% Complete)
-**Last Updated:** January 26, 2026 (v1.6.0)
+**Status:** 🚧 In Development (100% Complete)
+**Last Updated:** January 27, 2026 (v1.7.0)
 
 ---
 
@@ -103,6 +103,7 @@ baseball-lineups/
 │   ├── (auth)/
 │   │   ├── login/page.tsx              ✅ Login form
 │   │   ├── signup/page.tsx             ✅ Signup form
+│   │   ├── subscribe/page.tsx          ✅ Subscription page
 │   │   ├── forgot-password/page.tsx    ✅ Password reset request
 │   │   ├── reset-password/page.tsx     ✅ New password form
 │   │   └── layout.tsx                  ✅ Auth layout
@@ -151,6 +152,10 @@ baseball-lineups/
 │   │       ├── page.tsx                ✅ Settings navigation
 │   │       ├── teams/page.tsx          ✅ Team management
 │   │       ├── account/page.tsx        ✅ Profile settings
+│   │       ├── billing/
+│   │       │   ├── page.tsx            ✅ Billing management
+│   │       │   └── _components/
+│   │       │       └── billing-settings.tsx ✅ Billing status & actions
 │   │       └── _components/
 │   │           ├── settings-client.tsx ✅ Team CRUD client
 │   │           ├── team-dialog.tsx     ✅ Create/edit team + import step
@@ -158,6 +163,10 @@ baseball-lineups/
 │   │           └── roster-import.tsx   ✅ CSV import component
 │   ├── api/
 │   │   ├── generate-lineup/route.ts    ✅ AI lineup generation endpoint
+│   │   ├── billing/
+│   │   │   ├── create-checkout/route.ts ✅ Stripe Checkout session
+│   │   │   ├── create-portal/route.ts  ✅ Stripe Portal session
+│   │   │   └── webhook/route.ts        ✅ Stripe webhook handler
 │   │   ├── stats/
 │   │   │   └── analyze/route.ts        ✅ AI stats analysis endpoint
 │   │   └── import/
@@ -198,7 +207,10 @@ baseball-lineups/
 │   │   ├── 20260121000001_add_position_strengths.sql ✅ Position strengths
 │   │   ├── 20260121000002_add_player_notes.sql ✅ Coach notes
 │   │   ├── 20260121000004_add_stats_analysis.sql ✅ Stats analysis JSONB
-│   │   └── 20260122000000_add_multi_team_support.sql ✅ Team description + index
+│   │   ├── 20260122000000_add_multi_team_support.sql ✅ Team description + index
+│   │   ├── 20260127000000_add_billing.sql ✅ Profiles table + billing fields
+│   │   ├── 20260127000001_fix_billing_trigger.sql ✅ Fix trigger schema
+│   │   └── 20260127000002_add_subscription_period_end.sql ✅ Period end date
 │   └── config.toml                     ✅ Supabase config
 ├── middleware.ts                       ✅ Auth middleware
 ├── .env.example                        ✅ Environment template
@@ -240,6 +252,7 @@ Even without credentials configured, you can test:
 - @dnd-kit/core@6.3.1, @dnd-kit/sortable@10.0.0, @dnd-kit/utilities@3.2.2
 - papaparse@5.5.3 (CSV parsing)
 - date-fns@4.1.0 (date utilities)
+- stripe (payment processing)
 
 ---
 
@@ -646,7 +659,19 @@ MVP is complete when:
 - **Dismissible Getting Started** - Can hide and restore the onboarding guide
 - **Game creation validation** - Blocks games until player data exists (ratings or GameChanger stats)
 
-**Recent Changes (January 26, 2026 - v1.6.0):**
+**Recent Changes (January 27, 2026 - v1.7.0):**
+- **Stripe Billing Integration:**
+  - $10/month subscription with 14-day free trial (no credit card required)
+  - Profiles table with billing fields (stripe_customer_id, subscription_status, trial_ends_at)
+  - Middleware billing access check (redirects expired trials to /subscribe)
+  - Stripe customer creation on signup via auth callback
+  - Subscribe page with trial status and feature list
+  - Billing APIs: create-checkout, create-portal, webhook handler
+  - Billing settings page showing subscription status and next billing/access date
+  - Feature flag: BILLING_ENABLED=true/false for instant rollback
+  - Webhook updates subscription_status and subscription_period_end
+
+**Previous Changes (v1.6.0 - January 26, 2026):**
 - **Dashboard - Anthropic Light Mode:**
   - Applied warm Anthropic aesthetic to the dashboard (light mode variant)
   - New CSS variables: cream background (#faf9f6), terracotta primary (#d97757)
@@ -770,5 +795,5 @@ MVP is complete when:
 
 ---
 
-**Last Updated:** January 26, 2026
-**Version:** 1.3.0 (Marketing landing page)
+**Last Updated:** January 27, 2026
+**Version:** 1.7.0 (Stripe billing integration)

@@ -7,6 +7,91 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.0] - 2026-01-27
+
+### Added
+
+#### Stripe Billing Integration (Major Feature)
+- **$10/month subscription** with 14-day free trial (no credit card required)
+- **Profiles table** - New database table linking users to billing data:
+  - `stripe_customer_id` - Links to Stripe Customer
+  - `subscription_status` - trialing, active, past_due, canceled
+  - `trial_ends_at` - When free trial expires
+  - `subscription_period_end` - Next billing date or last access date
+  - `is_lifetime_free` - Override for beta testers
+- **Auto-create profile on signup** - Database trigger creates profile with 14-day trial
+- **Stripe customer creation** - Creates Stripe customer on auth callback
+- **Feature flag** - `BILLING_ENABLED=true/false` for instant rollback
+
+#### Subscribe Page (`/subscribe`)
+- Trial status display (days remaining or expired)
+- Feature list showing what's included
+- "Subscribe - $10/month" button redirects to Stripe Checkout
+- Sign out option for switching accounts
+
+#### Billing APIs
+- **`POST /api/billing/create-checkout`** - Creates Stripe Checkout session
+- **`POST /api/billing/create-portal`** - Creates Stripe Billing Portal session
+- **`POST /api/billing/webhook`** - Handles Stripe webhook events:
+  - `customer.subscription.created/updated` - Updates status and period end
+  - `customer.subscription.deleted` - Sets status to canceled
+  - `invoice.payment_failed` - Sets status to past_due
+
+#### Billing Settings Page (`/dashboard/settings/billing`)
+- Shows current subscription status with appropriate icon
+- **Trialing**: Days remaining, Subscribe Now button
+- **Active**: Next billing date, Manage Billing button (opens Stripe Portal)
+- **Canceled**: Access until date, Resubscribe button
+- **Past Due**: Warning with Manage Billing button
+
+#### Middleware Billing Check
+- Checks subscription status on all dashboard routes
+- Redirects expired trials to `/subscribe`
+- Allows access for: lifetime free users, active subscriptions, valid trials
+
+### Changed
+
+#### Settings Page
+- Added Billing card to settings navigation
+- Updated grid to 3 columns on large screens
+
+#### Environment Variables
+- Added to `.env.example`:
+  - `BILLING_ENABLED`
+  - `STRIPE_SECRET_KEY`
+  - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+  - `STRIPE_PRICE_ID`
+  - `STRIPE_WEBHOOK_SECRET`
+
+### Files Added
+
+| File | Description |
+|------|-------------|
+| `supabase/migrations/20260127000000_add_billing.sql` | Profiles table, trigger, backfill |
+| `supabase/migrations/20260127000001_fix_billing_trigger.sql` | Fix trigger schema reference |
+| `supabase/migrations/20260127000002_add_subscription_period_end.sql` | Period end date column |
+| `app/(auth)/subscribe/page.tsx` | Subscription page UI |
+| `app/api/billing/create-checkout/route.ts` | Stripe Checkout session API |
+| `app/api/billing/create-portal/route.ts` | Stripe Portal session API |
+| `app/api/billing/webhook/route.ts` | Stripe webhook handler |
+| `app/dashboard/settings/billing/page.tsx` | Billing settings page |
+| `app/dashboard/settings/billing/_components/billing-settings.tsx` | Billing status component |
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `middleware.ts` | Added billing access check |
+| `app/auth/callback/route.ts` | Create Stripe customer on signup |
+| `app/dashboard/settings/page.tsx` | Added billing card |
+| `.env.example` | Added Stripe environment variables |
+| `.gitignore` | Added monetization-plan.md |
+
+### Dependencies Added
+- `stripe` - Stripe Node.js SDK
+
+---
+
 ## [1.6.0] - 2026-01-26
 
 ### Changed
@@ -1174,6 +1259,9 @@ ALTER TABLE lineups ADD COLUMN rule_group_id UUID REFERENCES rule_groups(id) ON 
 | `20260121000004_add_stats_analysis.sql` | Stats analysis JSONB column | 2026-01-21 |
 | `20260122000000_add_multi_team_support.sql` | Team description and index | 2026-01-22 |
 | `20260122100000_add_team_analysis.sql` | Team analysis and stats timestamps | 2026-01-22 |
+| `20260127000000_add_billing.sql` | Profiles table with billing fields | 2026-01-27 |
+| `20260127000001_fix_billing_trigger.sql` | Fix trigger schema reference | 2026-01-27 |
+| `20260127000002_add_subscription_period_end.sql` | Subscription period end date | 2026-01-27 |
 
 ---
 

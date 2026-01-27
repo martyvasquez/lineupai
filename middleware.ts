@@ -32,18 +32,46 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  const pathname = request.nextUrl.pathname
+
   // Protect dashboard routes
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+  if (!user && pathname.startsWith('/dashboard')) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  // Redirect authenticated users away from auth pages
-  if (user && (request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup'))) {
+  // Redirect authenticated users away from auth pages (except subscribe)
+  if (user && (pathname.startsWith('/login') || pathname.startsWith('/signup'))) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
+  }
+
+  // Billing access check (only when billing is enabled)
+  if (process.env.BILLING_ENABLED === 'true' && user && pathname.startsWith('/dashboard')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('subscription_status, trial_ends_at, is_lifetime_free')
+      .eq('id', user.id)
+      .single()
+
+    // Allow access if:
+    // 1. Lifetime free user
+    // 2. Active subscription
+    // 3. Still in trial period
+    const hasAccess =
+      profile?.is_lifetime_free ||
+      profile?.subscription_status === 'active' ||
+      (profile?.subscription_status === 'trialing' &&
+       profile?.trial_ends_at &&
+       new Date(profile.trial_ends_at) > new Date())
+
+    if (!hasAccess) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/subscribe'
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse

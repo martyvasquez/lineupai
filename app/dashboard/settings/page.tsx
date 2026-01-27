@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Users, User } from 'lucide-react'
+import { Users, User, CreditCard } from 'lucide-react'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -28,7 +28,7 @@ export default async function SettingsPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Link href="/dashboard/settings/teams">
           <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
             <CardHeader>
@@ -70,6 +70,28 @@ export default async function SettingsPage() {
               </p>
               <span className="text-sm text-primary hover:underline">
                 Manage profile →
+              </span>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/dashboard/settings/billing">
+          <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Billing
+              </CardTitle>
+              <CardDescription>
+                Manage your subscription
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                View and update billing
+              </p>
+              <span className="text-sm text-primary hover:underline">
+                Manage billing →
               </span>
             </CardContent>
           </Card>
