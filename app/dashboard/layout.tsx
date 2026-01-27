@@ -23,7 +23,7 @@ export default async function DashboardLayout({
     .order('created_at', { ascending: true })
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Header teams={teams || []} />
       <main className="container mx-auto py-6 px-4 md:px-6">
         {children}

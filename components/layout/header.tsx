@@ -73,7 +73,7 @@ export function Header({ teams = [], currentTeamId }: HeaderProps) {
     : []
 
   return (
-    <header className="border-b bg-white">
+    <header className="border-b border-border bg-card">
       <div className="flex h-16 items-center px-4 md:px-6">
         <Link href="/dashboard" className={`text-xl ${brandFont.className}`}>
           Peanut Manager
@@ -92,7 +92,9 @@ export function Header({ teams = [], currentTeamId }: HeaderProps) {
               key={link.href}
               href={link.href}
               className={`text-sm font-medium transition-colors hover:text-primary hidden md:inline-block ${
-                pathname === link.href ? 'text-primary' : ''
+                pathname === link.href
+                  ? 'text-primary font-semibold'
+                  : 'text-muted-foreground'
               }`}
             >
               {link.label}
@@ -151,8 +153,10 @@ export function Header({ teams = [], currentTeamId }: HeaderProps) {
                       <Link
                         key={link.href}
                         href={link.href}
-                        className={`text-sm font-medium py-2 px-3 rounded-md transition-colors hover:bg-muted ${
-                          pathname === link.href ? 'bg-muted text-primary' : ''
+                        className={`text-sm font-medium py-2 px-3 rounded-md transition-colors hover:bg-accent ${
+                          pathname === link.href
+                            ? 'bg-accent text-primary font-semibold'
+                            : 'text-muted-foreground'
                         }`}
                       >
                         {link.label}
@@ -161,16 +165,16 @@ export function Header({ teams = [], currentTeamId }: HeaderProps) {
                   </nav>
 
                   {/* Settings & Sign Out */}
-                  <div className="pt-4 border-t flex flex-col gap-2">
+                  <div className="pt-4 border-t border-border flex flex-col gap-2">
                     <Link
                       href="/dashboard/settings"
-                      className="text-sm font-medium py-2 px-3 rounded-md transition-colors hover:bg-muted"
+                      className="text-sm font-medium py-2 px-3 rounded-md transition-colors hover:bg-accent text-muted-foreground"
                     >
                       Settings
                     </Link>
                     <button
                       onClick={handleSignOut}
-                      className="text-sm font-medium py-2 px-3 rounded-md transition-colors hover:bg-muted text-left text-red-600"
+                      className="text-sm font-medium py-2 px-3 rounded-md transition-colors hover:bg-destructive/10 text-left text-destructive"
                     >
                       Sign out
                     </button>
