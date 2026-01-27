@@ -1,7 +1,7 @@
 # Peanut Manager - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (99% Complete)
-**Last Updated:** January 26, 2026 (v1.5.0)
+**Last Updated:** January 26, 2026 (v1.6.0)
 
 ---
 
@@ -646,7 +646,16 @@ MVP is complete when:
 - **Dismissible Getting Started** - Can hide and restore the onboarding guide
 - **Game creation validation** - Blocks games until player data exists (ratings or GameChanger stats)
 
-**Recent Changes (January 26, 2026 - v1.5.0):**
+**Recent Changes (January 26, 2026 - v1.6.0):**
+- **Dashboard - Anthropic Light Mode:**
+  - Applied warm Anthropic aesthetic to the dashboard (light mode variant)
+  - New CSS variables: cream background (#faf9f6), terracotta primary (#d97757)
+  - Warm charcoal text, warm gray borders and muted text
+  - Header uses card background with terracotta active nav states
+  - Mobile menu updated with matching hover/active styles
+  - All shadcn/ui components automatically inherit new palette
+
+**Previous Changes (v1.5.0 - January 26, 2026):**
 - **Marketing Site Redesign - Anthropic Design Language:**
   - Complete visual overhaul with dark, minimalist, tech-centric aesthetic
   - New color palette: Dark slate backgrounds, cream text, terracotta accents

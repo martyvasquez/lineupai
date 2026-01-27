@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2026-01-26
+
+### Changed
+
+#### Dashboard - Anthropic Light Mode
+Applied the polished Anthropic design language to the main dashboard app using a warm light mode variant. This brings the refined, tech-forward aesthetic from the marketing site while maintaining an approachable feel.
+
+**Design System Updates (CSS Variables):**
+- **Background**: Warm cream `#faf9f6` (was pure white)
+- **Card surfaces**: Slightly lighter cream `#fdfcfa`
+- **Primary accent**: Terracotta `#d97757` (was dark navy)
+- **Text**: Warm charcoal `#1a1a1b`
+- **Muted text**: Warm gray `#6b6966`
+- **Borders**: Warm gray `#e8e6e3`
+- **Focus rings**: Terracotta accent
+
+**Component Updates:**
+- **Dashboard layout**: Uses `bg-background` CSS variable
+- **Header**: Uses `bg-card` with warm border
+- **Active nav states**: Terracotta color with `font-semibold`
+- **Inactive nav links**: Muted foreground color
+- **Mobile menu**: Terracotta accent on hover/active states
+- **Sign out button**: Destructive red with hover effect
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/globals.css` | Updated `:root` CSS variables for warm Anthropic palette |
+| `app/dashboard/layout.tsx` | Changed `bg-gray-50` to `bg-background` |
+| `components/layout/header.tsx` | Updated to `bg-card`, terracotta active states, improved mobile menu styling |
+
+---
+
 ## [1.5.0] - 2026-01-26
 
 ### Changed
