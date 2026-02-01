@@ -6,14 +6,16 @@ import { HowItWorksSection } from './_components/how-it-works-section'
 import { CTASection } from './_components/cta-section'
 
 export default function LandingPage() {
+  const billingEnabled = process.env.BILLING_ENABLED === 'true'
+
   return (
     <>
-      <HeroSection />
+      <HeroSection billingEnabled={billingEnabled} />
       <FeaturesSection />
       <ControlSection />
       <ShowcaseSection />
       <HowItWorksSection />
-      <CTASection />
+      <CTASection billingEnabled={billingEnabled} />
     </>
   )
 }

@@ -7,7 +7,7 @@ const benefits = [
   'Stay in control, always',
 ]
 
-export function CTASection() {
+export function CTASection({ billingEnabled }: { billingEnabled: boolean }) {
   return (
     <section className="py-20 md:py-28 bg-gradient-terracotta relative overflow-hidden">
       {/* Subtle pattern overlay */}
@@ -45,7 +45,9 @@ export function CTASection() {
             </Link>
           </div>
           <p className="mt-5 text-sm text-white/60">
-            Free during beta. No credit card required.
+            {billingEnabled
+              ? '14-Day Free Trial. No Credit Card Needed. $10/month after. Unlimited Teams.'
+              : 'Free during beta. No credit card required.'}
           </p>
         </div>
       </div>

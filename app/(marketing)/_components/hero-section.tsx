@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight, Clock, Trophy, Sparkles } from 'lucide-react'
 
-export function HeroSection() {
+export function HeroSection({ billingEnabled }: { billingEnabled: boolean }) {
   return (
     <section className="py-24 md:py-36 relative overflow-hidden">
       {/* Subtle gradient overlay */}
@@ -69,7 +69,9 @@ export function HeroSection() {
           </div>
 
           <p className="mt-5 text-sm text-anthropic-cream/50 opacity-0 animate-fade-in animate-delay-600">
-            Free during beta. No credit card required.
+            {billingEnabled
+              ? '14-Day Free Trial. No Credit Card Needed. $10/month after. Unlimited Teams.'
+              : 'Free during beta. No credit card required.'}
           </p>
         </div>
       </div>

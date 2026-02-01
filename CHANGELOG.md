@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.2] - 2026-02-01
+
+### Changed
+
+#### Conditional Marketing Site Pricing Text
+- **Dynamic pricing/beta messaging** - Marketing site hero and CTA sections now show different text based on `BILLING_ENABLED` environment variable
+  - `BILLING_ENABLED=true`: "14-Day Free Trial. No Credit Card Needed. $10/month after. Unlimited Teams."
+  - `BILLING_ENABLED=false` or unset: "Free during beta. No credit card required."
+- **Props threading** - `billingEnabled` prop passed from `page.tsx` (which already read the env var) to `HeroSection` and `CTASection` components
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/(marketing)/_components/hero-section.tsx` | Added `billingEnabled` prop, conditional pricing text |
+| `app/(marketing)/_components/cta-section.tsx` | Added `billingEnabled` prop, conditional pricing text |
+
+---
+
 ## [1.7.1] - 2026-02-01
 
 ### Fixed

@@ -1,7 +1,7 @@
 # Peanut Manager - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (100% Complete)
-**Last Updated:** January 27, 2026 (v1.7.0)
+**Last Updated:** February 1, 2026 (v1.7.2)
 
 ---
 
@@ -659,7 +659,18 @@ MVP is complete when:
 - **Dismissible Getting Started** - Can hide and restore the onboarding guide
 - **Game creation validation** - Blocks games until player data exists (ratings or GameChanger stats)
 
-**Recent Changes (January 27, 2026 - v1.7.0):**
+**Recent Changes (February 1, 2026 - v1.7.2):**
+- **Conditional Marketing Site Pricing Text:**
+  - Hero and CTA sections show dynamic text based on `BILLING_ENABLED` env var
+  - Billing enabled: "14-Day Free Trial. No Credit Card Needed. $10/month after. Unlimited Teams."
+  - Billing disabled/unset: "Free during beta. No credit card required."
+  - `billingEnabled` prop added to `HeroSection` and `CTASection` components
+
+**Previous Changes (v1.7.1 - February 1, 2026):**
+- Stripe Billing Production Fixes (webhook redirect, current_period_end, cancellation detection, resubscription via Portal)
+- Email Confirmation Flow (success message on login, token_hash verification, Suspense boundary)
+
+**Previous Changes (v1.7.0 - January 27, 2026):**
 - **Stripe Billing Integration:**
   - $10/month subscription with 14-day free trial (no credit card required)
   - Profiles table with billing fields (stripe_customer_id, subscription_status, trial_ends_at)
@@ -795,5 +806,5 @@ MVP is complete when:
 
 ---
 
-**Last Updated:** January 27, 2026
-**Version:** 1.7.0 (Stripe billing integration)
+**Last Updated:** February 1, 2026
+**Version:** 1.7.2 (Conditional marketing pricing text)
