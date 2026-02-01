@@ -52,7 +52,7 @@ export async function middleware(request: NextRequest) {
   if (process.env.BILLING_ENABLED === 'true' && user && pathname.startsWith('/dashboard')) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('subscription_status, trial_ends_at, is_lifetime_free')
+      .select('subscription_status, trial_ends_at, is_lifetime_free, subscription_period_end')
       .eq('id', user.id)
       .single()
 
@@ -60,12 +60,16 @@ export async function middleware(request: NextRequest) {
     // 1. Lifetime free user
     // 2. Active subscription
     // 3. Still in trial period
+    // 4. Canceled but still within paid period
     const hasAccess =
       profile?.is_lifetime_free ||
       profile?.subscription_status === 'active' ||
       (profile?.subscription_status === 'trialing' &&
        profile?.trial_ends_at &&
-       new Date(profile.trial_ends_at) > new Date())
+       new Date(profile.trial_ends_at) > new Date()) ||
+      (profile?.subscription_status === 'canceled' &&
+       profile?.subscription_period_end &&
+       new Date(profile.subscription_period_end) > new Date())
 
     if (!hasAccess) {
       const url = request.nextUrl.clone()

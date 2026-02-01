@@ -63,33 +63,41 @@ export async function POST(request: Request) {
         const subscription = event.data.object as Stripe.Subscription
         const customerId = subscription.customer as string
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const subAny = subscription as any
+
         // Map Stripe status to our status
+        // If cancel_at is set, Stripe keeps status "active" but user has canceled
+        const isCanceling = subAny.cancel_at || subscription.cancel_at_period_end
         let subscriptionStatus: string
-        switch (subscription.status) {
-          case 'active':
-            subscriptionStatus = 'active'
-            break
-          case 'trialing':
-            subscriptionStatus = 'trialing'
-            break
-          case 'past_due':
-            subscriptionStatus = 'past_due'
-            break
-          case 'canceled':
-          case 'unpaid':
-            subscriptionStatus = 'canceled'
-            break
-          default:
-            subscriptionStatus = subscription.status
+        if (isCanceling) {
+          subscriptionStatus = 'canceled'
+        } else {
+          switch (subscription.status) {
+            case 'active':
+              subscriptionStatus = 'active'
+              break
+            case 'trialing':
+              subscriptionStatus = 'trialing'
+              break
+            case 'past_due':
+              subscriptionStatus = 'past_due'
+              break
+            case 'canceled':
+            case 'unpaid':
+              subscriptionStatus = 'canceled'
+              break
+            default:
+              subscriptionStatus = subscription.status
+          }
         }
 
         // Get period end date from subscription items (Stripe API 2025+)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const subAny = subscription as any
-        const periodEndTimestamp =
-          subAny.current_period_end ??
-          subAny.items?.data?.[0]?.current_period_end ??
-          null
+        // For canceled: use cancel_at as last access date
+        // For active: use current_period_end as next billing date
+        const periodEndTimestamp = isCanceling
+          ? subAny.cancel_at
+          : (subAny.current_period_end ?? subAny.items?.data?.[0]?.current_period_end ?? null)
         const periodEnd = periodEndTimestamp
           ? new Date(periodEndTimestamp * 1000).toISOString()
           : null
