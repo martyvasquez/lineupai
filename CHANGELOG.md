@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.1] - 2026-02-01
+
+### Fixed
+
+#### Stripe Billing Production Issues
+- **Webhook 307 redirect** - Stripe webhook was hitting `peanutmgr.com` which redirected to `www.peanutmgr.com`. Stripe doesn't follow redirects, so webhooks silently failed. Fixed by using `www` URL for the Stripe webhook endpoint.
+- **`current_period_end` not populating** - Stripe API 2025+ moved `current_period_end` from the subscription object to `items.data[0]`. Updated webhook to check both locations.
+- **Cancellation not detected** - When a user cancels, Stripe keeps `status: "active"` but sets `cancel_at`. Updated webhook to detect `cancel_at` and `cancel_at_period_end` and correctly mark as canceled with last access date.
+- **Canceled users locked out immediately** - Middleware now allows canceled users to access dashboard until `subscription_period_end` passes.
+- **Resubscription sent to new checkout** - Canceled users with payment info on file are now sent to Stripe Billing Portal (which has their saved payment method) instead of a fresh checkout session. Updated both the billing settings page and the subscribe page.
+- **`useSearchParams` Suspense boundary** - Login page using `useSearchParams()` caused Next.js static generation to fail. Wrapped in `<Suspense>` boundary.
+
+### Added
+
+#### Email Confirmation Flow
+- **Confirmation success message** - After confirming email via signup link, users are redirected to `/login?confirmed=true` and see a green success alert: "Email confirmed! You can now sign in."
+- **`token_hash` verification** - Auth callback now handles `token_hash` based email verification (used by Supabase email templates) in addition to the existing `code` (PKCE) flow.
+
+### Changed
+
+#### Subscribe Page
+- Detects canceled users and shows "Your subscription has been canceled" instead of "trial expired"
+- "Resubscribe" button for canceled users (goes to Stripe Portal)
+
+#### Billing Settings Page
+- Canceled users see "Resubscribe" button (goes to Stripe Portal) instead of "Subscribe Now" (checkout)
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/api/billing/webhook/route.ts` | Read `current_period_end` from items, detect `cancel_at` |
+| `middleware.ts` | Allow canceled users access until period end |
+| `app/(auth)/subscribe/page.tsx` | Canceled user detection, portal redirect |
+| `app/dashboard/settings/billing/_components/billing-settings.tsx` | Resubscribe via portal |
+| `app/(auth)/login/page.tsx` | Email confirmed alert with Suspense boundary |
+| `app/auth/callback/route.ts` | Handle `token_hash` verification |
+
+---
+
 ## [1.7.0] - 2026-01-27
 
 ### Added
