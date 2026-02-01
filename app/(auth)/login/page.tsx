@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -24,8 +24,10 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useToast } from '@/lib/hooks/use-toast'
 import { brandFont } from '@/lib/fonts'
+import { CheckCircle } from 'lucide-react'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -36,9 +38,11 @@ type LoginFormData = z.infer<typeof loginSchema>
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
+  const confirmed = searchParams.get('confirmed') === 'true'
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -95,6 +99,14 @@ export default function LoginPage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {confirmed && (
+          <Alert className="mb-4 border-green-200 bg-green-50 text-green-800">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription>
+              Email confirmed! You can now sign in.
+            </AlertDescription>
+          </Alert>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
