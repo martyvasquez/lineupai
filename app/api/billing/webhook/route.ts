@@ -83,11 +83,15 @@ export async function POST(request: Request) {
             subscriptionStatus = subscription.status
         }
 
-        // Get period end date (next billing date for active, last access date for canceled)
-        // Access via items.data since current_period_end may be on line items
-        const subscriptionData = subscription as Stripe.Subscription & { current_period_end?: number }
-        const periodEnd = subscriptionData.current_period_end
-          ? new Date(subscriptionData.current_period_end * 1000).toISOString()
+        // Get period end date from subscription items (Stripe API 2025+)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const subAny = subscription as any
+        const periodEndTimestamp =
+          subAny.current_period_end ??
+          subAny.items?.data?.[0]?.current_period_end ??
+          null
+        const periodEnd = periodEndTimestamp
+          ? new Date(periodEndTimestamp * 1000).toISOString()
           : null
 
         // Update profile by Stripe customer ID
@@ -110,10 +114,15 @@ export async function POST(request: Request) {
         const subscription = event.data.object as Stripe.Subscription
         const customerId = subscription.customer as string
 
-        // Get the final access date
-        const subscriptionData = subscription as Stripe.Subscription & { current_period_end?: number }
-        const periodEnd = subscriptionData.current_period_end
-          ? new Date(subscriptionData.current_period_end * 1000).toISOString()
+        // Get the final access date from subscription items (Stripe API 2025+)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const subAny = subscription as any
+        const periodEndTimestamp =
+          subAny.current_period_end ??
+          subAny.items?.data?.[0]?.current_period_end ??
+          null
+        const periodEnd = periodEndTimestamp
+          ? new Date(periodEndTimestamp * 1000).toISOString()
           : null
 
         // Set status to canceled with final access date
