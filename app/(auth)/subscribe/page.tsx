@@ -18,6 +18,7 @@ import { Check, Clock, Zap, Users, BarChart3, Shield } from 'lucide-react'
 interface TrialStatus {
   isExpired: boolean
   daysRemaining: number
+  isCanceled: boolean
 }
 
 export default function SubscribePage() {
@@ -49,7 +50,8 @@ export default function SubscribePage() {
 
         setTrialStatus({
           isExpired: daysRemaining <= 0,
-          daysRemaining: Math.max(0, daysRemaining)
+          daysRemaining: Math.max(0, daysRemaining),
+          isCanceled: profile.subscription_status === 'canceled',
         })
       }
     }
@@ -61,7 +63,12 @@ export default function SubscribePage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/billing/create-checkout', {
+      // Canceled users go to portal to resubscribe (has payment info on file)
+      const endpoint = trialStatus?.isCanceled
+        ? '/api/billing/create-portal'
+        : '/api/billing/create-checkout'
+
+      const response = await fetch(endpoint, {
         method: 'POST',
       })
 
@@ -71,7 +78,6 @@ export default function SubscribePage() {
         throw new Error(data.error || 'Failed to create checkout session')
       }
 
-      // Redirect to Stripe Checkout
       window.location.href = data.url
     } catch (error) {
       toast({
@@ -103,7 +109,11 @@ export default function SubscribePage() {
           Peanut Manager
         </CardTitle>
         <CardDescription>
-          {trialStatus?.isExpired ? (
+          {trialStatus?.isCanceled ? (
+            <span className="text-destructive font-medium">
+              Your subscription has been canceled
+            </span>
+          ) : trialStatus?.isExpired ? (
             <span className="text-destructive font-medium">
               Your free trial has expired
             </span>
@@ -141,7 +151,7 @@ export default function SubscribePage() {
           size="lg"
           disabled={isLoading}
         >
-          {isLoading ? 'Loading...' : 'Subscribe - $10/month'}
+          {isLoading ? 'Loading...' : trialStatus?.isCanceled ? 'Resubscribe' : 'Subscribe - $10/month'}
         </Button>
 
         <div className="text-center">

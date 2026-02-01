@@ -215,11 +215,15 @@ export function BillingSettings({
         </div>
 
         <div className="flex flex-col sm:flex-row gap-2">
-          {config.showSubscribe && (
+          {config.showSubscribe && subscriptionStatus === 'canceled' ? (
+            <Button onClick={handleManageBilling} disabled={isLoading}>
+              {isLoading ? 'Loading...' : 'Resubscribe'}
+            </Button>
+          ) : config.showSubscribe ? (
             <Button onClick={handleSubscribe} disabled={isLoading}>
               {isLoading ? 'Loading...' : 'Subscribe Now'}
             </Button>
-          )}
+          ) : null}
 
           {(subscriptionStatus === 'active' || subscriptionStatus === 'past_due') && (
             <Button
