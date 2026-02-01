@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.3] - 2026-02-01
+
+### Changed
+
+#### Upgrade AI Model to Sonnet 4.5
+- **Replaced `claude-sonnet-4-20250514` with `claude-sonnet-4-5-20250929`** across all 5 API calls in `lib/ai/claude-client.ts`
+  - `generateLineup()` - Full lineup generation
+  - `generateBattingOrder()` - Phase 1 batting order
+  - `generateDefensive()` - Phase 2 defensive positions
+  - `generateStatsAnalysis()` - Player stats analysis
+  - `generateTeamAnalysis()` - Team-level analysis
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `lib/ai/claude-client.ts` | Updated model ID in all 5 API calls |
+| `CLAUDE.md` | Updated tech stack and API references |
+
+---
+
 ## [1.7.2] - 2026-02-01
 
 ### Changed

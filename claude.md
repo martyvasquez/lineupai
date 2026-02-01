@@ -1,7 +1,7 @@
 # Peanut Manager - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (100% Complete)
-**Last Updated:** February 1, 2026 (v1.7.2)
+**Last Updated:** February 1, 2026 (v1.7.3)
 
 ---
 
@@ -20,7 +20,7 @@ Build a **mobile-first web application** that generates optimized youth baseball
 
 - **Frontend:** Next.js 14 (App Router), React 19, Tailwind CSS, shadcn/ui
 - **Backend:** Supabase (PostgreSQL + Auth)
-- **AI:** Claude API (Anthropic Sonnet 4.5)
+- **AI:** Claude API (Anthropic claude-sonnet-4-5-20250929)
 - **Deployment:** Vercel
 - **MVP Scope:** P0 features + GameChanger CSV import + Multi-team support
 - **Timeline:** ~5 weeks total
@@ -364,7 +364,7 @@ Even without credentials configured, you can test:
 - [x] `app/api/generate-lineup/route.ts` - Main generation endpoint
   - Two-phase generation support
   - Accepts `{ game_id, rule_group_id, phase, batting_order, locked_positions }`
-  - Calls Claude API (claude-sonnet-4-20250514)
+  - Calls Claude API (claude-sonnet-4-5-20250929)
   - Parses JSON response, validates structure
   - Saves to `lineups` table with `rule_group_id` reference
 
@@ -659,7 +659,12 @@ MVP is complete when:
 - **Dismissible Getting Started** - Can hide and restore the onboarding guide
 - **Game creation validation** - Blocks games until player data exists (ratings or GameChanger stats)
 
-**Recent Changes (February 1, 2026 - v1.7.2):**
+**Recent Changes (February 1, 2026 - v1.7.3):**
+- **Upgraded AI Model:**
+  - Replaced `claude-sonnet-4-20250514` with `claude-sonnet-4-5-20250929` across all 5 API calls
+  - Affects: lineup generation, batting order, defensive positions, stats analysis, team analysis
+
+**Previous Changes (v1.7.2 - February 1, 2026):**
 - **Conditional Marketing Site Pricing Text:**
   - Hero and CTA sections show dynamic text based on `BILLING_ENABLED` env var
   - Billing enabled: "14-Day Free Trial. No Credit Card Needed. $10/month after. Unlimited Teams."
@@ -807,4 +812,4 @@ MVP is complete when:
 ---
 
 **Last Updated:** February 1, 2026
-**Version:** 1.7.2 (Conditional marketing pricing text)
+**Version:** 1.7.3 (Upgrade AI model to claude-sonnet-4-5-20250929)

@@ -149,7 +149,7 @@ export class ClaudeClient {
   // Legacy method for full lineup generation
   async generateLineup(prompt: string): Promise<LineupResponse> {
     const response = await this.client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 8000,
       system: SYSTEM_PROMPT,
       messages: [
@@ -176,7 +176,7 @@ export class ClaudeClient {
   // Phase 1: Generate batting order only
   async generateBattingOrder(prompt: string): Promise<BattingOrderResponse> {
     const response = await this.client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 4000,
       system: BATTING_ORDER_SYSTEM_PROMPT,
       messages: [
@@ -203,7 +203,7 @@ export class ClaudeClient {
   // Phase 2: Generate defensive positions
   async generateDefensive(prompt: string): Promise<DefensiveResponse> {
     const response = await this.client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 8000,
       system: DEFENSIVE_SYSTEM_PROMPT,
       messages: [
@@ -230,7 +230,7 @@ export class ClaudeClient {
   // Generate stats analysis for players
   async generateStatsAnalysis(prompt: string): Promise<StatsAnalysisResponse> {
     const response = await this.client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 8000,
       system: STATS_ANALYSIS_SYSTEM_PROMPT,
       messages: [
@@ -257,7 +257,7 @@ export class ClaudeClient {
   // Generate team-level analysis
   async generateTeamAnalysis(prompt: string): Promise<TeamAnalysis> {
     const response = await this.client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 4000,
       system: TEAM_ANALYSIS_SYSTEM_PROMPT,
       messages: [
