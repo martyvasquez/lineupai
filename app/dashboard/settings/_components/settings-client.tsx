@@ -233,6 +233,11 @@ export function SettingsClient({ initialTeams, userId }: SettingsClientProps) {
         }}
         team={editingTeam}
         onSave={handleSaveTeam}
+        onImportComplete={(teamId, playerCount) => {
+          setTeams(prev => prev.map(t =>
+            t.id === teamId ? { ...t, player_count: playerCount } : t
+          ))
+        }}
         isSaving={isSaving}
       />
 

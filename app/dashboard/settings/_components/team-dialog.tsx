@@ -39,6 +39,7 @@ interface TeamDialogProps {
   onOpenChange: (open: boolean) => void
   team?: Team | null
   onSave: (data: TeamFormValues) => Promise<Team | null>
+  onImportComplete?: (teamId: string, playerCount: number) => void
   isSaving?: boolean
 }
 
@@ -47,6 +48,7 @@ export function TeamDialog({
   onOpenChange,
   team,
   onSave,
+  onImportComplete,
   isSaving,
 }: TeamDialogProps) {
   const isEditing = !!team
@@ -84,7 +86,10 @@ export function TeamDialog({
     }
   }
 
-  function handleImportComplete() {
+  function handleImportComplete(playerCount: number) {
+    if (createdTeam) {
+      onImportComplete?.(createdTeam.id, playerCount)
+    }
     onOpenChange(false)
   }
 
