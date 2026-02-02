@@ -1,7 +1,7 @@
 # Peanut Manager - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (100% Complete)
-**Last Updated:** February 1, 2026 (v1.7.4)
+**Last Updated:** February 1, 2026 (v1.7.5)
 
 ---
 
@@ -659,7 +659,14 @@ MVP is complete when:
 - **Dismissible Getting Started** - Can hide and restore the onboarding guide
 - **Game creation validation** - Blocks games until player data exists (ratings or GameChanger stats)
 
-**Recent Changes (February 1, 2026 - v1.7.4):**
+**Recent Changes (February 1, 2026 - v1.7.5):**
+- **Simplified Regeneration Modal:**
+  - Removed inning selection checkboxes — all unlocked positions are now regenerated every time
+  - Updated dialog description to clarify behavior
+  - Simplified Regenerate button (no inning count display)
+  - Added `GenerationLoading` feedback during regeneration in the complete phase (rotating messages, elapsed timer, cancel button)
+
+**Previous Changes (v1.7.4 - February 1, 2026):**
 - **Removed Coach Ratings from Stats & Team Analysis Prompts:**
   - Stats analysis now based purely on GameChanger statistics (no subjective coach ratings)
   - Removed `player_ratings` DB query and `ratings` field from player data in `/api/stats/analyze`
@@ -821,4 +828,4 @@ MVP is complete when:
 ---
 
 **Last Updated:** February 1, 2026
-**Version:** 1.7.4 (Remove coach ratings from stats & team analysis prompts)
+**Version:** 1.7.5 (Simplify regeneration modal, add regeneration loading feedback)

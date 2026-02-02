@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.5] - 2026-02-01
+
+### Changed
+
+#### Simplify Regeneration Modal — Remove Inning Selection
+- **Removed inning checkboxes** from the "Regenerate Defensive Positions" modal — all unlocked positions are now regenerated every time
+- **Updated dialog description** to: "All positions that are not locked will be regenerated. Use the feedback field to guide the AI."
+- **Simplified Regenerate button** — no longer shows inning count or disables when no innings selected
+- **Added loading feedback during regeneration** — the `GenerationLoading` component (with rotating status messages, elapsed timer, and cancel button) now appears in the complete phase after clicking Regenerate
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/dashboard/[teamId]/games/[gameId]/_components/in-game-adjustments.tsx` | Removed inning selection state/UI, simplified callback signature to `(feedback: string) => void` |
+| `app/dashboard/[teamId]/games/[gameId]/_components/game-detail-client.tsx` | Simplified `handleRegenerateInnings` to always start from inning 1, added `GenerationLoading` to complete phase |
+
+---
+
 ## [1.7.4] - 2026-02-01
 
 ### Changed

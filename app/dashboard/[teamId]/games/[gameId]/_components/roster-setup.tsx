@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { Pencil } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Database } from '@/types/database'
 
@@ -88,34 +89,76 @@ export function RosterSetup({ players, gameRoster, onUpdate }: RosterSetupProps)
             <div
               key={player.id}
               className={cn(
-                'flex items-center gap-3 p-3 rounded-lg border',
+                'rounded-lg border p-3',
                 !available && 'bg-muted/50 opacity-75'
               )}
             >
-              <Checkbox
-                id={`available-${player.id}`}
-                checked={available}
-                onCheckedChange={(checked) =>
-                  handleAvailabilityChange(player.id, checked === true)
-                }
-              />
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  id={`available-${player.id}`}
+                  checked={available}
+                  onCheckedChange={(checked) =>
+                    handleAvailabilityChange(player.id, checked === true)
+                  }
+                />
 
-              <div className="flex-1 min-w-0 flex items-center gap-2">
-                {player.jersey_number && (
-                  <span className="text-xs font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
-                    #{player.jersey_number}
+                <div className="flex-1 min-w-0 flex items-center gap-2">
+                  {player.jersey_number && (
+                    <span className="text-xs font-medium text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
+                      #{player.jersey_number}
+                    </span>
+                  )}
+                  <span className={cn(
+                    'font-medium truncate',
+                    !available && 'line-through text-muted-foreground'
+                  )}>
+                    {player.name}
                   </span>
-                )}
-                <span className={cn(
-                  'font-medium truncate',
-                  !available && 'line-through text-muted-foreground'
-                )}>
-                  {player.name}
-                </span>
+                </div>
+
+                {/* Desktop notes — hidden on mobile */}
+                <div className="hidden sm:block w-64">
+                  {isEditing ? (
+                    <Input
+                      value={notes}
+                      onChange={(e) => handleNotesChange(player.id, e.target.value)}
+                      onBlur={() => setEditingNotes(null)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') setEditingNotes(null)
+                      }}
+                      placeholder="Notes..."
+                      className="h-8 text-sm"
+                      autoFocus
+                    />
+                  ) : (
+                    <button
+                      onClick={() => setEditingNotes(player.id)}
+                      className={cn(
+                        'w-full h-8 px-2 text-left text-sm rounded border border-transparent hover:border-border truncate',
+                        notes ? 'text-foreground' : 'text-muted-foreground'
+                      )}
+                    >
+                      {notes || 'Game Specific Notes'}
+                    </button>
+                  )}
+                </div>
+
+                {/* Mobile pencil icon — hidden on sm+ */}
+                <button
+                  className={cn(
+                    'sm:hidden shrink-0 p-1.5 rounded hover:bg-muted',
+                    notes ? 'text-primary' : 'text-muted-foreground'
+                  )}
+                  onClick={() => setEditingNotes(isEditing ? null : player.id)}
+                  aria-label="Edit notes"
+                >
+                  <Pencil size={14} />
+                </button>
               </div>
 
-              <div className="w-48 sm:w-64">
-                {isEditing ? (
+              {/* Mobile notes accordion — hidden on sm+ */}
+              {isEditing && (
+                <div className="sm:hidden mt-2 ml-7">
                   <Input
                     value={notes}
                     onChange={(e) => handleNotesChange(player.id, e.target.value)}
@@ -123,22 +166,12 @@ export function RosterSetup({ players, gameRoster, onUpdate }: RosterSetupProps)
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') setEditingNotes(null)
                     }}
-                    placeholder="Notes..."
+                    placeholder="Game specific notes..."
                     className="h-8 text-sm"
                     autoFocus
                   />
-                ) : (
-                  <button
-                    onClick={() => setEditingNotes(player.id)}
-                    className={cn(
-                      'w-full h-8 px-2 text-left text-sm rounded border border-transparent hover:border-border truncate',
-                      notes ? 'text-foreground' : 'text-muted-foreground'
-                    )}
-                  >
-                    {notes || 'Game Specific Notes'}
-                  </button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           )
         })}

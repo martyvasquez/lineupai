@@ -655,12 +655,9 @@ export function GameDetailClient({
   }, [battingOrder, grid])
 
 
-  // Regenerate selected innings with optional feedback
-  const handleRegenerateInnings = useCallback((innings: number[], feedback: string) => {
-    // For now, use the minimum selected inning as the start point
-    // The AI will regenerate from that point forward, respecting locked positions
-    const startInning = Math.min(...innings)
-    handleFillDefensive(startInning, feedback)
+  // Regenerate all unlocked positions with optional feedback
+  const handleRegenerateInnings = useCallback((feedback: string) => {
+    handleFillDefensive(1, feedback)
   }, [handleFillDefensive])
 
   // Batting order change handler (drag and drop reorder)
@@ -1296,13 +1293,21 @@ export function GameDetailClient({
 
               {/* In-game adjustments for complete phase - Always visible */}
               {phase === 'complete' && (
-                <div className="pt-4 border-t">
+                <div className="pt-4 border-t space-y-4">
                   <InGameAdjustments
                     currentInnings={innings}
                     onInningsChange={handleInningsChange}
                     onRegenerateInnings={handleRegenerateInnings}
                     isGenerating={isGenerating}
                   />
+
+                  {isGenerating && generationPhase === 'defensive' && generationStartTime && (
+                    <GenerationLoading
+                      phase="defensive"
+                      startTime={generationStartTime}
+                      onCancel={handleCancelGeneration}
+                    />
+                  )}
                 </div>
               )}
             </div>
