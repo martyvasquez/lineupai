@@ -66,12 +66,6 @@ export async function POST(request: NextRequest) {
 
     const playerIds = players.map(p => p.id)
 
-    // Fetch player ratings
-    const { data: ratings } = await supabase
-      .from('player_ratings')
-      .select('*')
-      .in('player_id', playerIds)
-
     // Fetch batting stats
     const { data: battingStats } = await supabase
       .from('gamechanger_batting_season')
@@ -85,7 +79,6 @@ export async function POST(request: NextRequest) {
       .in('player_id', playerIds)
 
     // Create lookup maps
-    const ratingsMap = new Map(ratings?.map(r => [r.player_id, r]) ?? [])
     const battingMap = new Map(battingStats?.map(s => [s.player_id, s]) ?? [])
     const fieldingMap = new Map(fieldingStats?.map(s => [s.player_id, s]) ?? [])
 
@@ -103,7 +96,6 @@ export async function POST(request: NextRequest) {
 
     // Build prompt for analysis
     const playersData = playersWithStats.map(player => {
-      const playerRatings = ratingsMap.get(player.id)
       const batting = battingMap.get(player.id)
       const fielding = fieldingMap.get(player.id)
 
@@ -112,22 +104,6 @@ export async function POST(request: NextRequest) {
         name: player.name,
         jersey_number: player.jersey_number,
         position_strengths: player.position_strengths || [],
-        ratings: playerRatings ? {
-          plate_discipline: playerRatings.plate_discipline,
-          contact_ability: playerRatings.contact_ability,
-          run_speed: playerRatings.run_speed,
-          batting_power: playerRatings.batting_power,
-          fielding_hands: playerRatings.fielding_hands,
-          fielding_throw_accuracy: playerRatings.fielding_throw_accuracy,
-          fielding_arm_strength: playerRatings.fielding_arm_strength,
-          fly_ball_ability: playerRatings.fly_ball_ability,
-          baseball_iq: playerRatings.baseball_iq,
-          attention: playerRatings.attention,
-          pitch_control: playerRatings.pitch_control,
-          pitch_velocity: playerRatings.pitch_velocity,
-          pitch_composure: playerRatings.pitch_composure,
-          catcher_ability: playerRatings.catcher_ability,
-        } : null,
         batting_stats: batting ? {
           games_played: batting.gp,
           plate_appearances: batting.pa,
@@ -160,7 +136,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    const prompt = `Analyze the following youth baseball players based on their statistics and coach ratings.
+    const prompt = `Analyze the following youth baseball players based on their GameChanger statistics.
 
 PLAYERS TO ANALYZE:
 ${JSON.stringify(playersData, null, 2)}

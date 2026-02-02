@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.4] - 2026-02-01
+
+### Changed
+
+#### Remove Coach Ratings from Stats & Team Analysis Prompts
+- **Stats analysis now based purely on GameChanger statistics** — coach subjective ratings are no longer included in the data sent to the AI for player or team analysis
+- **Removed from `app/api/stats/analyze/route.ts`:**
+  - Deleted `player_ratings` database query (no longer fetched)
+  - Deleted `ratingsMap` lookup
+  - Deleted `ratings` field from `playersData` objects sent to AI
+  - Updated prompt text: `"based on their GameChanger statistics"` (was `"based on their statistics and coach ratings"`)
+- **Updated `STATS_ANALYSIS_SYSTEM_PROMPT` in `lib/ai/claude-client.ts`:**
+  - Removed `"Coach subjective ratings (1-5 scale)"` from INPUTS section
+  - Removed `"Mental: Baseball IQ, Focus, Composure"` from CATEGORIES (no GameChanger stat equivalent)
+- **What stays the same:**
+  - Team analysis prompt — already receives aggregate stats + player summaries, not raw ratings
+  - `position_strengths` — structural data, not a subjective rating
+  - Batting order and defensive prompts — use data weighting to control included data
+
+### Files Modified
+
+| File | Changes |
+|------|---------|
+| `app/api/stats/analyze/route.ts` | Removed ratings query, ratingsMap, ratings field from player data, updated prompt text |
+| `lib/ai/claude-client.ts` | Removed coach ratings from STATS_ANALYSIS_SYSTEM_PROMPT inputs and categories |
+
+---
+
 ## [1.7.3] - 2026-02-01
 
 ### Changed

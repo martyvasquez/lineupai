@@ -1,7 +1,7 @@
 # Peanut Manager - AI-Powered Baseball Lineup Optimizer
 
 **Status:** 🚧 In Development (100% Complete)
-**Last Updated:** February 1, 2026 (v1.7.3)
+**Last Updated:** February 1, 2026 (v1.7.4)
 
 ---
 
@@ -659,7 +659,16 @@ MVP is complete when:
 - **Dismissible Getting Started** - Can hide and restore the onboarding guide
 - **Game creation validation** - Blocks games until player data exists (ratings or GameChanger stats)
 
-**Recent Changes (February 1, 2026 - v1.7.3):**
+**Recent Changes (February 1, 2026 - v1.7.4):**
+- **Removed Coach Ratings from Stats & Team Analysis Prompts:**
+  - Stats analysis now based purely on GameChanger statistics (no subjective coach ratings)
+  - Removed `player_ratings` DB query and `ratings` field from player data in `/api/stats/analyze`
+  - Updated prompt text: "based on their GameChanger statistics" (was "based on their statistics and coach ratings")
+  - Removed "Coach subjective ratings (1-5 scale)" from `STATS_ANALYSIS_SYSTEM_PROMPT` inputs
+  - Removed "Mental: Baseball IQ, Focus, Composure" category (purely coach-rated, no GameChanger equivalent)
+  - Team analysis unaffected — already receives aggregate stats + player summaries from player analysis
+
+**Previous Changes (v1.7.3 - February 1, 2026):**
 - **Upgraded AI Model:**
   - Replaced `claude-sonnet-4-20250514` with `claude-sonnet-4-5-20250929` across all 5 API calls
   - Affects: lineup generation, batting order, defensive positions, stats analysis, team analysis
@@ -812,4 +821,4 @@ MVP is complete when:
 ---
 
 **Last Updated:** February 1, 2026
-**Version:** 1.7.3 (Upgrade AI model to claude-sonnet-4-5-20250929)
+**Version:** 1.7.4 (Remove coach ratings from stats & team analysis prompts)
